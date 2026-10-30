@@ -5,6 +5,8 @@ import { CYLINDER_ART, cylinderColor } from './library.js';
 import { PIECES, pieceById, composerById } from '../data.js';
 import { parsePiece } from '../music.js';
 import { playPiece, setGramophone, audioState } from '../audio.js';
+import { drawCornerPicture, CORNER_SIZE } from '../corner.js';
+import { skyAt, currentHour } from '../sky.js';
 
 export function gramophoneView(ui, { pieceId } = {}) {
   const { el, body } = frame(ui, {
@@ -16,7 +18,7 @@ export function gramophoneView(ui, { pieceId } = {}) {
   body.appendChild(h(`
     <div class="gramo-grid">
       <div class="gramo-scene">
-        <img src="public/art/closeups/gramophone-corner.webp" alt="De luisterhoek met de grammofoon">
+        <canvas class="room" width="${CORNER_SIZE.w}" height="${CORNER_SIZE.h}" aria-label="De luisterhoek met de grammofoon"></canvas>
         <figure class="cover" hidden>
           <img class="cover-cyl" alt="">
           <figcaption><b class="cover-title"></b><span class="cover-comp"></span></figcaption>
@@ -42,6 +44,12 @@ export function gramophoneView(ui, { pieceId } = {}) {
 
   const $ = s => body.querySelector(s);
   const list = $('.cylinders');
+  // the same room as the listening corner, with the window and lamps following the clock
+  const room = $('.room').getContext('2d');
+  const t0Room = performance.now();
+  const drawRoom = () => drawCornerPicture(room, skyAt(currentHour()), (performance.now() - t0Room) / 1000);
+  drawRoom();
+  const roomTimer = setInterval(drawRoom, 100);
   let player = null, raf = 0, noteTimer = 0;
 
   const stop = () => {
@@ -118,7 +126,7 @@ export function gramophoneView(ui, { pieceId } = {}) {
   return {
     el,
     onHide: stop,
-    destroy: stop,
+    destroy() { stop(); clearInterval(roomTimer); },
     onKey(e) { if (e.code === 'Space') { e.preventDefault(); player ? stop() : null; } },
   };
 }

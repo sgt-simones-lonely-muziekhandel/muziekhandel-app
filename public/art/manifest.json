@@ -71,7 +71,7 @@
   },
   "shop/gramophone": {
     "file": "art/shop/gramophone.webp",
-    "width": 631,
+    "width": 594,
     "height": 1024
   },
   "shop/frames/oval-large": {
@@ -557,6 +557,62 @@
     "width": 430,
     "height": 512
   },
+  "items/cylinder/cream-open": {
+    "file": "art/items/cylinder/cream-open.webp",
+    "width": 251,
+    "height": 550,
+    "sheetX": 85,
+    "sheetY": 23
+  },
+  "items/cylinder/red-open": {
+    "file": "art/items/cylinder/red-open.webp",
+    "width": 251,
+    "height": 551,
+    "sheetX": 383,
+    "sheetY": 23
+  },
+  "items/cylinder/blue-open": {
+    "file": "art/items/cylinder/blue-open.webp",
+    "width": 249,
+    "height": 553,
+    "sheetX": 690,
+    "sheetY": 22
+  },
+  "items/cylinder/green-open": {
+    "file": "art/items/cylinder/green-open.webp",
+    "width": 249,
+    "height": 550,
+    "sheetX": 998,
+    "sheetY": 23
+  },
+  "items/cylinder/cream-lid": {
+    "file": "art/items/cylinder/cream-lid.webp",
+    "width": 248,
+    "height": 291,
+    "sheetX": 87,
+    "sheetY": 578
+  },
+  "items/cylinder/red-lid": {
+    "file": "art/items/cylinder/red-lid.webp",
+    "width": 246,
+    "height": 289,
+    "sheetX": 386,
+    "sheetY": 577
+  },
+  "items/cylinder/blue-lid": {
+    "file": "art/items/cylinder/blue-lid.webp",
+    "width": 240,
+    "height": 288,
+    "sheetX": 689,
+    "sheetY": 578
+  },
+  "items/cylinder/green-lid": {
+    "file": "art/items/cylinder/green-lid.webp",
+    "width": 247,
+    "height": 289,
+    "sheetX": 1005,
+    "sheetY": 576
+  },
   "items/sheet-music/cover-1": {
     "file": "art/items/sheet-music/cover-1.webp",
     "width": 356,
@@ -696,6 +752,136 @@
     "file": "art/fx/note.webp",
     "width": 119,
     "height": 164
+  },
+  "intro/future-street": {
+    "file": "art/intro/future-street.webp",
+    "width": 1672,
+    "height": 941
+  },
+  "intro/future-frame": {
+    "file": "art/intro/future-frame.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  "intro/kid-back/future": {
+    "file": "art/intro/kid-back/future.webp",
+    "width": 317,
+    "height": 768
+  },
+  "intro/kid-back/past": {
+    "file": "art/intro/kid-back/past.webp",
+    "width": 330,
+    "height": 768
+  },
+  "intro/crate-closed": {
+    "file": "art/intro/crate-closed.webp",
+    "width": 1672,
+    "height": 941
+  },
+  "intro/crate-open": {
+    "file": "art/intro/crate-open.webp",
+    "width": 1672,
+    "height": 941
+  },
+  "intro/tube-background": {
+    "file": "art/intro/tube-background.webp",
+    "width": 1672,
+    "height": 941
+  },
+  "intro/hands-tube": {
+    "file": "art/intro/hands-tube.webp",
+    "width": 1024,
+    "height": 823
+  },
+  "intro/tube-lid": {
+    "file": "art/intro/tube-lid.webp",
+    "width": 365,
+    "height": 253
+  },
+  "intro/light-burst": {
+    "file": "art/intro/light-burst.webp",
+    "width": 957,
+    "height": 1024
+  },
+  "intro/swirl": {
+    "file": "art/intro/swirl.webp",
+    "width": 657,
+    "height": 1024
+  },
+  "intro/flying/paper-1": {
+    "file": "art/intro/flying/paper-1.webp",
+    "width": 384,
+    "height": 327
+  },
+  "intro/flying/note-1": {
+    "file": "art/intro/flying/note-1.webp",
+    "width": 143,
+    "height": 166
+  },
+  "intro/flying/paper-2": {
+    "file": "art/intro/flying/paper-2.webp",
+    "width": 384,
+    "height": 290
+  },
+  "intro/flying/note-2": {
+    "file": "art/intro/flying/note-2.webp",
+    "width": 100,
+    "height": 174
+  },
+  "intro/flying/paper-3": {
+    "file": "art/intro/flying/paper-3.webp",
+    "width": 292,
+    "height": 261
+  },
+  "intro/flying/paper-4": {
+    "file": "art/intro/flying/paper-4.webp",
+    "width": 384,
+    "height": 295
+  },
+  "intro/flying/note-3": {
+    "file": "art/intro/flying/note-3.webp",
+    "width": 97,
+    "height": 165
+  },
+  "intro/flying/paper-5": {
+    "file": "art/intro/flying/paper-5.webp",
+    "width": 384,
+    "height": 314
+  },
+  "intro/flying/note-4": {
+    "file": "art/intro/flying/note-4.webp",
+    "width": 113,
+    "height": 254
+  },
+  "intro/flying/paper-6": {
+    "file": "art/intro/flying/paper-6.webp",
+    "width": 384,
+    "height": 302
+  },
+  "intro/flying/paper-7": {
+    "file": "art/intro/flying/paper-7.webp",
+    "width": 384,
+    "height": 263
+  },
+  "intro/flying/note-5": {
+    "file": "art/intro/flying/note-5.webp",
+    "width": 81,
+    "height": 179
+  },
+  "intro/flying/note-6": {
+    "file": "art/intro/flying/note-6.webp",
+    "width": 189,
+    "height": 199
+  },
+  "intro/past-street": {
+    "file": "art/intro/past-street.webp",
+    "width": 1672,
+    "height": 941
+  },
+  "intro/shop-front": {
+    "file": "art/intro/shop-front.webp",
+    "width": 1672,
+    "height": 941
   },
   "portraits/team-1": {
     "file": "art/portraits/team-1.webp",

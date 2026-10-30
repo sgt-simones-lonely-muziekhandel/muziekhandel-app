@@ -25,19 +25,26 @@ const RIGS = {
     },
     order: ['wheels', 'legB', 'bicycle', 'crank', 'legF', 'torso', 'head'],
   },
+  // The lady's long skirt can't be built from pieces convincingly, so her whole body (hat, head,
+  // arms, skirt down to the hem) is cut straight out of full.webp (`body.outline`); only her boots
+  // and stockings move under the hem, on the pedals. The bicycle is lined up on the drawing's hubs.
   woman: {
     dir: 'cyclist-woman', H: 549,
-    bicycle: { at: [222, 482], pivot: [162, 242], s: 1.1, r: 0, rearHub: [47, 219], frontHub: [324, 235] },
-    wheels: [{ s: 1.15, pivot: [73, 71] }, { s: 1.0, pivot: [84, 84] }], wheelR: 83,
-    crank: { pivot: [80, 34], s: 1.0, r: 55 },
-    torso: { img: 'upper-body', at: [78, 10], pivot: [0, 0], s: 1.1, r: 0.04, patch: [[46, 160, 10, [62, 172]]] },
-    skirt: { at: [178, 292], pivot: [105, 12], s: 0.95, r: -0.4, patch: [[84, 14, 10, [118, 16]], [153, 14, 10, [118, 16]]] },
+    bicycle: { at: [86, 447], pivot: [47, 219], s: 1.12, r: -0.048, rearHub: [47, 219], frontHub: [324, 235], bb: [162, 242] },
+    wheels: [{ s: 1.17, pivot: [73, 71] }, { s: 1.0, pivot: [84, 84] }], wheelR: 84,
+    crank: { pivot: [80, 34], s: 1.12, r: 60 },
+    body: {
+      outline: [[121, 66], [148, 14], [279, 21], [269, 48], [266, 103], [231, 128], [248, 172], [297, 217], [338, 228],
+        [331, 259], [297, 272], [303, 324], [307, 414], [228, 429], [166, 433], [114, 431], [117, 324], [128, 238],
+        [155, 207], [155, 138], [141, 103]],
+      patch: [[172, 145, 9, [184, 166]]],
+    },
     legs: {
-      hip: [178, 322], thigh: 100, shin: 124,
+      hip: [176, 328], thigh: 104, shin: 100,
       lower: [{ img: 'lower-leg-1', pivot: [36, 12], foot: [40, 105], s: 1.1, patch: [[36, 14, 11, [36, 34]]] },
         { img: 'lower-leg-2', pivot: [19, 12], foot: [45, 105], s: 1.1, patch: [[19, 14, 11, [19, 34]]] }],
     },
-    order: ['wheels', 'legB', 'bicycle', 'crank', 'legF', 'skirt', 'torso'],
+    order: ['wheels', 'legB', 'bicycle', 'crank', 'legF', 'body'],
   },
 };
 
@@ -51,6 +58,29 @@ function patched(img, patches) {
     g.drawImage(img, 0, 0);
     g.globalCompositeOperation = 'source-atop';
     for (const [x, y, r, [sx, sy]] of patches) {
+      const [R, G, B] = g.getImageData(sx, sy, 1, 1).data;
+      g.fillStyle = `rgb(${R},${G},${B})`;
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    }
+    c.ready = true;
+  };
+  if (ready(img)) paint(); else img.addEventListener('load', paint);
+  return c;
+}
+
+// A piece of full.webp inside `outline`, with `patch` marks covered.
+function cutOut(img, outline, patches) {
+  const c = document.createElement('canvas');
+  const paint = () => {
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.beginPath();
+    outline.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+    g.closePath();
+    g.clip();
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-atop';
+    for (const [x, y, r, [sx, sy]] of patches || []) {
       const [R, G, B] = g.getImageData(sx, sy, 1, 1).data;
       g.fillStyle = `rgb(${R},${G},${B})`;
       g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
@@ -79,7 +109,8 @@ for (const rig of Object.values(RIGS)) {
   [...(rig.legs.upper || []), ...rig.legs.lower].forEach(p => { p.image = p.patch ? patched(L(p.img), p.patch) : L(p.img); });
   rig.rear = onBike(rig.bicycle, rig.bicycle.rearHub);
   rig.front = onBike(rig.bicycle, rig.bicycle.frontHub);
-  rig.bb = rig.bicycle.at;
+  rig.bb = onBike(rig.bicycle, rig.bicycle.bb || rig.bicycle.pivot);
+  if (rig.body) rig.body.image = cutOut(rig.img.full, rig.body.outline, rig.body.patch);
   rig.ground = Math.max(rig.rear[1], rig.front[1]) + rig.wheelR;
 }
 export const CYCLIST_RIGS = RIGS;
@@ -169,7 +200,7 @@ export function drawRig(ctx, rig, crank, wheel) {
     else if (part === 'legF') leg(0, 1, false);
     else if (part === 'torso') piece(ctx, rig.torso.image, rig.torso, bob);
     else if (part === 'head') piece(ctx, rig.head.image, rig.head, bob);
-    else if (part === 'skirt') piece(ctx, rig.skirt.image, rig.skirt, bob);
+    else if (part === 'body' && ready(rig.body.image)) ctx.drawImage(rig.body.image, 0, bob);
   }
 }
 

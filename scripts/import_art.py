@@ -31,6 +31,7 @@ MAGENTA = np.array([248.0, 4.0, 249.0])  # measured average of the generated bac
 #   sheet   magenta removed, cut into parts (names listed left-to-right, top-to-bottom;
 #           "row": True for a single row, so uneven heights don't change the order)
 #   glow    black background turned into transparency, cut into parts
+#   light   black background turned into transparency, kept as one image (sparkles stay with it)
 # max: longest side in px (None = keep). scale: fixed factor for all parts of a sheet.
 CHAR_SCALE = 0.7  # same for every character, so they keep their relative sizes
 ARM_LEG = ["upper-arm-1", "torso", "upper-arm-2", "lower-arm-1", "lower-arm-2", "upper-leg-1", "upper-leg-2"]
@@ -53,14 +54,14 @@ ASSETS = [
     ("music_store_internal/Sleeping Cat on an Ornate Piano.png", "object", "shop/piano", {"max": 1024}),
     ("music_store_internal/Vintage Shop Counter on Magenta.png", "object", "shop/counter", {"max": 1024}),
     ("music_store_internal/Antique Music Cabinet with Sheet Music.png", "object", "shop/cabinet", {"max": 1024}),
-    ("music_store_internal/Antique Gramophone on Ornate Cabinet.png", "object", "shop/gramophone", {"max": 1024}),
+    ("music_store_internal/Antique Gramophone on Wooden Stand.png", "object", "shop/gramophone", {"max": 1024}),
     ("music_store_internal/Ornate Golden Frames on Magenta.png", "sheet", "shop/frames",
      {"max": 768, "dilate": 6, "row": True, "names": ["oval-large", "rect-large", "oval-small", "rect-medium", "rect-small"]}),
     # Close-ups
-    ("past/Antique Piano with Blank Sheet Music.png", "opaque", "closeups/piano", {}),
-    ("past/Antique Wooden Display Cabinet Interior.png", "opaque", "closeups/cabinet", {}),
+    ("music_store_internal/Antique Piano with Blank Sheet Music.png", "opaque", "closeups/piano", {}),
+    ("music_store_internal/Antique Wooden Display Cabinet Interior.png", "opaque", "closeups/cabinet", {}),
     ("music_store_internal/Vintage Green Damask Gallery Wall.png", "opaque", "closeups/gallery-wall", {}),
-    ("past/Edwardian Canal-Side Music Nook.png", "opaque", "closeups/gramophone-corner", {}),
+    ("music_store_internal/Antique Phonograph Chest in Sunlit Music Room.png", "opaque", "closeups/gramophone-corner", {}),
     # Characters (cut-out puppets; "1" is the part on the left of the sheet)
     ("characters/Vintage Boy Character Sprite Sheet.png", "sheet", "characters/kid-past",
      {"scale": CHAR_SCALE, "names": ["head", "full", *ARM_LEG, "lower-leg-1", "lower-leg-2"]}),
@@ -81,6 +82,10 @@ ASSETS = [
     # Items
     ("music_store_internal/Vintage Phonograph Cylinder Collection.png", "sheet", "items/cylinder",
      {"max": 512, "dilate": 6, "row": True, "names": ["cream", "red", "blue", "green", "open"]}),
+    # The same four tubes opened, with their lids separate (lift the lid off a closed tube, then swap in the open one)
+    ("music_store_internal/Antique Phonograph Cylinder Collection.png", "sheet", "items/cylinder",
+     {"scale": 0.868, "dilate": 6, "names": ["cream-open", "red-open", "blue-open", "green-open",
+                                        "cream-lid", "red-lid", "blue-lid", "green-lid"]}),
     # Sheet music: placeholder covers, and the pieces for the opening animation
     ("details/Vintage Art Nouveau Music Covers.png", "sheet", "items/sheet-music",
      {"max": 512, "dilate": 6, "row": True, "names": ["cover-1", "cover-2", "cover-3", "cover-4", "cover-5", "cover-6"]}),
@@ -96,6 +101,23 @@ ASSETS = [
      {"max": 256, "dilate": 6, "row": True, "threshold": 0.1, "names": ["glow-yellow", "glow-orange", "fog", "rain", "ash"]}),
     ("details/Magenta Overlay Effects Sprite Sheet.png", "sheet", "fx",
      {"max": 256, "dilate": 6, "row": True, "names": [None, None, None, None, None, "sheet-music", "note"]}),
+    # Opening cutscene (shots in order; future-street and past-street line up for the time-travel wipe)
+    ("opening_scene/1_Rain-Soaked Ruins at Sunset.png", "opaque", "intro/future-street", {}),
+    ("opening_scene/1_Overgrown Ruin Frame on Magenta.png", "layer", "intro/future-frame", {}),
+    ("opening_scene/1_Twin Newsboys_ Worn and Refined.png", "sheet", "intro/kid-back",
+     {"max": 768, "dilate": 6, "row": True, "names": ["future", "past"]}),
+    ("opening_scene/2_Rain-Soaked Glowing Chest in Ruins.png", "opaque", "intro/crate-closed", {}),
+    ("opening_scene/2_Rain-Soaked Ivy Chest of Relics.png", "opaque", "intro/crate-open", {}),
+    ("opening_scene/2_Rainy Ruins and Glowing Crate.png", "opaque", "intro/tube-background", {}),
+    ("opening_scene/2_Weathered Brass Canister and Lid.png", "sheet", "intro",
+     {"max": 1024, "dilate": 6, "row": True, "names": ["hands-tube", "tube-lid"]}),
+    ("opening_scene/2_Golden Light Burst on Black.png", "light", "intro/light-burst", {"max": 1024}),
+    ("opening_scene/3_Golden Spiral of Light.png", "light", "intro/swirl", {"max": 1024}),
+    ("opening_scene/3_Floating Vintage Sheet Music Collage.png", "sheet", "intro/flying",
+     {"max": 384, "dilate": 6, "names": ["paper-1", "note-1", "paper-2", "note-2", "paper-3", "paper-4", "note-3",
+                                         "paper-5", "note-4", "paper-6", "paper-7", "note-5", "note-6"]}),
+    ("opening_scene/3_Golden-Hour Canal Music Shop.png", "opaque", "intro/past-street", {}),
+    ("opening_scene/4_Golden-Hour Canal Music Shop.png", "opaque", "intro/shop-front", {}),
     # Easter egg: the team on the gallery wall
     ("paintings/Gemini_Generated_Image_duczd5duczd5ducz.jpeg", "opaque", "portraits/team-1", {"max": 768}),
     ("paintings/Gemini_Generated_Image_pal7k1pal7k1pal7.jpeg", "opaque", "portraits/team-2", {"max": 768}),
@@ -190,6 +212,8 @@ def main(src_dir):
             save(fit(to_image(remove_magenta(img)), opt.get("max")), key, manifest)
         elif kind == "object":
             save(fit(to_image(trim(remove_magenta(img))), opt.get("max")), key, manifest)
+        elif kind == "light":
+            save(fit(to_image(trim(black_to_alpha(img))), opt.get("max")), key, manifest)
         else:
             rgba = black_to_alpha(img) if kind == "glow" else remove_magenta(img)
             pieces = split(rgba, opt.get("dilate", 0), opt.get("threshold", 0.5), opt.get("row", False))

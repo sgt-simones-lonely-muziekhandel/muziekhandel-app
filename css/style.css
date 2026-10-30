@@ -1,4 +1,4 @@
-/* Muziekhandel Van der Velde — colours and type from docs/design/README.md */
+/* Muziekhandel Simone — colours and type from docs/design/README.md */
 :root {
   --paper: #F4E9D7;
   --paper-2: #EAD9BA;
@@ -84,7 +84,8 @@ button { font: inherit; color: inherit; }
 .btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn:disabled { opacity: .45; cursor: default; }
-.btn:focus-visible, .q:focus-visible, .tube:focus-visible { outline: 3px solid var(--lamp); outline-offset: 3px; }
+.btn:focus-visible, .q:focus-visible, .tube:focus-visible { outline: none; filter: brightness(1.12); }
+canvas:focus, canvas:focus-visible { outline: none; }
 .btn .ico { font-size: 1.1em; }
 .btn.brass {
   color: #2a1a0a; background: linear-gradient(#f6dc96, #c99a45 60%, #a87a2e); border: 2px solid #5a3d12;
@@ -94,7 +95,7 @@ button { font: inherit; color: inherit; }
   color: var(--paper); background: linear-gradient(#6b4e36, #4a3626 60%, #3a2a1d); border: 2px solid #22170f;
   box-shadow: inset 0 1px 0 rgba(255, 230, 190, .25), 0 4px 0 #22170f, 0 6px 12px rgba(0, 0, 0, .35);
 }
-.btn.on { outline: 3px solid var(--lamp); box-shadow: 0 0 18px rgba(242, 199, 107, .8), 0 4px 0 #5a3d12; }
+.btn.on { box-shadow: 0 0 18px rgba(242, 199, 107, .8), 0 4px 0 #5a3d12; }
 .btn.big { font-size: 24px; min-height: 64px; padding: 12px 40px; border-radius: 14px; }
 .btn.small { min-height: 38px; padding: 6px 12px; font-size: 14px; }
 .btn.round { width: 52px; height: 52px; border-radius: 50%; padding: 0; font-size: 20px; }
@@ -128,6 +129,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
   display: block; width: 60px; height: 60px; border-radius: 50%;
   background: #e9dcc0 url(../public/art/characters/shopkeeper/head.webp) 50% 40% / 92% auto no-repeat;
 }
+.keeper-face.blink { background-image: url(../public/art/characters/shopkeeper/head-blink.webp); }
+.keeper-face.talking { background-image: url(../public/art/characters/shopkeeper/head-talk.webp); }
 .keeper-face.big { width: 120px; height: 120px; }
 .keeper-tip {
   position: absolute; left: 18px; bottom: 18px; padding: 0; border-radius: 50%; cursor: pointer;
@@ -135,7 +138,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 }
 .keeper-tip::after { content: '?'; position: absolute; right: -6px; top: -6px; width: 24px; height: 24px; border-radius: 50%; background: var(--lamp); border: 2px solid #5a3d12; font-weight: 800; display: grid; place-items: center; font-size: 14px; }
 .tip-bubble { position: absolute; left: 100px; bottom: 30px; width: min(420px, calc(100% - 120px)); padding: 16px 18px; font-size: 17px; line-height: 1.45; }
-.tip-bubble p { margin: 0 0 10px; }
+.tip-bubble p { margin: 0 0 6px; min-height: 1.45em; }
+.tip-bubble .keeper-listen { margin-left: -10px; }
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
 /* ---------- Full-screen close-ups: no frame, the picture is the screen ---------- */
@@ -468,45 +472,38 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .plaque b { font-family: var(--font-head); font-size: 16px; letter-spacing: .03em; text-transform: uppercase; }
 .plaque small { font-size: 12px; }
 
-.composer-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; grid-template-areas: 'p t' 'b b'; gap: 18px 26px; }
+.composer-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; grid-template-areas: 'p b' 'p m'; grid-template-rows: auto 1fr; gap: 16px 26px; }
 .composer-portrait { grid-area: p; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .gilt.big { width: 100%; }
-.tree-wrap { grid-area: t; min-width: 0; }
-.tree { position: relative; display: flex; flex-direction: column; gap: 26px; padding: 8px 0 4px; }
-.branches { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-.branch { fill: none; stroke: #c99a45; stroke-width: 4; stroke-linecap: round; }
-.branch-shadow { fill: none; stroke: #5a3d12; stroke-width: 7; stroke-linecap: round; opacity: .55; }
-.ring { fill: var(--red); font-size: 16px; }
-.tree-row { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; position: relative; z-index: 1; }
-.person { display: flex; flex-direction: column; align-items: center; width: 132px; }
-.person .oval { width: 74px; height: 90px; border-radius: 50%; overflow: hidden; background: radial-gradient(#e9dcc0, #b8a27c); border: 5px solid #c99a45; box-shadow: 0 0 0 2px #5a3d12, 0 6px 10px rgba(0, 0, 0, .35); display: grid; place-items: end center; }
-.person .oval img { width: 100%; height: 100%; object-fit: cover; }
-.person .sil { width: 80%; fill: #6b4e36; opacity: .8; }
-.person.small .oval { width: 58px; height: 70px; border-width: 4px; }
-.person.self { width: 160px; }
-.person.self .oval { width: 96px; height: 118px; border-color: #e9c97a; box-shadow: 0 0 0 2px #5a3d12, 0 0 22px rgba(242, 199, 107, .8); }
-.ribbon { margin-top: -6px; text-align: center; padding: 4px 8px; border-radius: 4px; background: var(--paper); border: 1.5px solid #6b4e36; display: flex; flex-direction: column; font-size: 12px; line-height: 1.2; box-shadow: 0 2px 4px rgba(0, 0, 0, .2); position: relative; }
-.ribbon b { font-family: var(--font-head); font-size: 14px; }
-.ribbon span { color: #6b4e36; }
-.ribbon small { color: #8a6e52; }
-.person.self .ribbon { background: linear-gradient(#f0d58e, #c99a45); border-color: #5a3d12; }
-.tree-note { text-align: center; font-size: 22px; margin: 0; position: relative; z-index: 1; }
 
-.bio { grid-area: b; padding: 16px 20px; font-size: 17px; line-height: 1.55; }
+.bio { grid-area: b; padding: 16px 22px; font-size: 18px; line-height: 1.55; }
 .bio-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.bio h3 { font-family: var(--font-head); font-size: 24px; margin: 0; }
+.bio h3 { font-family: var(--font-head); font-size: 26px; margin: 0; }
 .bio p { margin: 8px 0; }
 .fact { background: rgba(242, 199, 107, .3); padding: 8px 12px; border-radius: 6px; border-left: 4px solid var(--gold); }
 .dates { font-size: 15px; color: #5a4636; }
-.bio-pieces { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+
+/* the composer's music: one card per piece, to listen (gramophone) or read (sheet-music book) */
+.composer-music { grid-area: m; min-width: 0; }
+.composer-music .hand { margin: 0 0 4px; }
+.music-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 10px; }
+.music-card { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(255, 250, 238, .55); border: 1.5px solid rgba(74, 54, 38, .35); }
+.mc-cyl { height: 56px; flex: none; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .35)); }
+.mc-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.mc-text b { font-family: var(--font-1900); font-size: 18px; color: #2a1a0a; }
+.mc-text small { font-size: 13px; color: #6b4e36; }
+.mc-actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.mc-actions .btn { justify-content: flex-start; gap: 6px; }
+.mc-actions .read img { height: 22px; border-radius: 2px; }
+.music-none { font-style: italic; color: #5a4636; }
 
 /* ---------- Gramophone ---------- */
 .gramo-grid { display: grid; grid-template-columns: minmax(0, .8fr) 1fr; gap: 20px; }
 .gramo-scene { position: relative; border-radius: 10px; overflow: hidden; border: 4px solid #2e2117; box-shadow: var(--shadow); min-height: 300px; }
-.gramo-scene > img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block; filter: sepia(.1); }
-.gramophone.playing .gramo-scene > img { animation: warm 3s ease-in-out infinite; }
+.gramo-scene > canvas { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block; filter: sepia(.1); }
+.gramophone.playing .gramo-scene > canvas { animation: warm 3s ease-in-out infinite; }
 /* the chosen cylinder, big, standing in the picture with its paper label */
-.cover { position: absolute; left: 50%; top: 9%; bottom: 7%; margin: 0; translate: -50% 0; width: 52%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cover { position: absolute; left: 3%; top: 8%; bottom: 8%; margin: 0; width: 30%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .cover-cyl { flex: 1; min-height: 0; max-width: 70%; object-fit: contain; filter: drop-shadow(0 12px 10px rgba(0, 0, 0, .55)); }
 .cover figcaption { display: flex; flex-direction: column; align-items: center; padding: 8px 14px; border-radius: 6px; background: linear-gradient(#fbf3df, #ead9b4); border: 2px solid #6b4a2a; color: #2a1a0a; text-align: center; min-width: 100%; }
 .cover figcaption b { font-family: var(--font-head); font-size: 19px; line-height: 1.15; }
@@ -557,17 +554,52 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 
 /* ---------- Shopkeeper ---------- */
 /* the conversation sits a bit above the middle of the screen, not down at the bottom edge */
-.keeper { align-items: center; padding-bottom: 12vh; }
-.keeper-box { width: min(980px, 100%); display: flex; gap: 20px; padding: 18px 22px; max-height: 100%; overflow: auto; }
-.keeper-portrait { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; text-align: center; font-family: var(--font-head); width: 140px; }
-.keeper-portrait .keeper-face { border: 5px solid #c99a45; box-shadow: 0 0 0 2px #5a3d12, var(--shadow); }
-.keeper-talk { flex: 1; min-width: 0; }
-.keeper-text { font-size: 20px; line-height: 1.5; margin: 0 0 12px; min-height: 3em; }
-.keeper-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-.keeper-qs { display: flex; flex-wrap: wrap; gap: 8px; }
-.q { padding: 10px 14px; border-radius: 18px 18px 18px 4px; cursor: pointer; font-weight: 700; font-size: 15px; background: #fffaf0; border: 2px solid #6b4e36; box-shadow: 0 3px 0 #6b4e36; transition: transform .12s; }
-.q:hover { transform: translateY(-2px); background: #fff2d4; }
-.keeper-box > .close { align-self: flex-start; }
+.keeper { align-items: center; padding-bottom: 5vh; }
+.keeper-box { width: min(1180px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 12px; padding: 24px 30px 20px; }
+.keeper-main { position: relative; display: flex; gap: 22px; min-height: 0; }
+/* the bubble's tail, pointing at his mouth */
+.keeper-main::before { content: ''; position: absolute; z-index: 1; left: 165px; top: 58px; width: 16px; height: 16px; rotate: 45deg; background: #fbf4e6; border: 1.5px solid rgba(74, 54, 38, .35); border-top: 0; border-right: 0; }
+.keeper-portrait { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: none; width: 150px; text-align: center; }
+.keeper-portrait .keeper-face { width: 132px; height: 132px; border: 5px solid #c99a45; box-shadow: 0 0 0 2px #5a3d12, var(--shadow); }
+.keeper-name { font-family: var(--font-1900); font-size: 15px; line-height: 1.2; color: #4a3626; padding: 3px 10px; border-top: 1.5px solid rgba(74, 54, 38, .4); border-bottom: 1.5px solid rgba(74, 54, 38, .4); }
+.keeper-listen { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 0; background: none; cursor: pointer; font: 700 14px var(--font-body); color: #6b4e36; border-radius: 6px; }
+.keeper-listen svg { width: 18px; height: 18px; }
+.keeper-listen:hover { color: #3a2614; background: rgba(201, 154, 69, .18); }
+/* the speech bubble; long answers scroll inside it, without a scrollbar */
+.keeper-talk { position: relative; flex: 1; min-width: 0; padding: 16px 22px 14px; border-radius: 14px; background: #fbf4e6; border: 1.5px solid rgba(74, 54, 38, .35); box-shadow: inset 0 0 18px rgba(139, 90, 40, .12); overflow: auto; scrollbar-width: none; }
+.keeper-talk.more { mask-image: linear-gradient(#000 calc(100% - 50px), transparent); }
+.keeper-talk::-webkit-scrollbar { display: none; }
+.keeper-text { font-size: 21px; line-height: 1.5; margin: 0; min-height: 3em; color: #2a1a0a; cursor: default; }
+.keeper-extra:not(:empty) { margin-top: 12px; }
+.keeper-go:not(:empty) { margin-top: 12px; }
+.keeper-ask { border-top: 2px dashed rgba(74, 54, 38, .3); padding-top: 8px; }
+.keeper-ask .hand { font-size: 26px; margin: 0 0 6px; color: #6b4e36; }
+.keeper-qs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 4px 16px; }
+/* the keyboard guide in his answer: keys sized to the screen height, the rules in two columns,
+   so the whole answer fits in the bubble without scrolling */
+.keeper .kb-guide { gap: 10px; margin-bottom: 0; }
+.keeper .kb-rows { padding: 10px; gap: 4px; }
+.keeper .kb-row { gap: 4px; }
+.keeper .gk { width: clamp(30px, 5vh, 46px); height: clamp(30px, 5vh, 46px); }
+.keeper .kb-steps { grid-template-columns: 1fr 1fr; gap: 6px 22px; font-size: 16px; }
+@media (max-height: 780px), (max-width: 1100px) {
+  .keeper { padding-bottom: 0; }
+  .keeper-box { padding: 18px 24px 14px; gap: 8px; }
+  .keeper-text { font-size: 19px; line-height: 1.45; }
+  .keeper .kb-steps { font-size: 15px; gap: 4px 18px; }
+  .keeper-ask .hand { font-size: 23px; margin-bottom: 2px; }
+  .keeper-qs { grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
+  .q { padding: 5px 10px; font-size: 17px; }
+}
+/* questions are written on the paper, like lines in a notebook */
+.q { display: flex; align-items: center; gap: 10px; padding: 7px 10px; text-align: left; cursor: pointer; border: 0; border-bottom: 1.5px solid rgba(74, 54, 38, .25); border-radius: 6px 6px 0 0; background: none; font: 600 18px/1.25 var(--font-head); color: #4a3626; transition: background .15s, color .15s; }
+.q::before { content: ''; flex: none; width: 9px; height: 9px; border-radius: 50%; background: #c99a45; box-shadow: 0 0 0 2px rgba(90, 61, 18, .35); transition: transform .15s; }
+.q:hover { background: rgba(201, 154, 69, .16); color: #2a1a0a; }
+.q:hover::before { transform: scale(1.3); }
+.q.on { background: rgba(201, 154, 69, .26); color: #2a1a0a; border-bottom-color: #a87a2e; }
+.q.on::before { background: #8a2f1c; }
+.keeper-close { position: absolute; top: 10px; right: 12px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: none; cursor: pointer; font-size: 18px; color: #6b4e36; }
+.keeper-close:hover { background: rgba(74, 54, 38, .12); color: #2a1a0a; }
 
 /* ---------- Small screens ---------- */
 .rotate-hint { display: none; }
@@ -575,15 +607,17 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
   .rotate-hint { display: block; position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 3; pointer-events: none; white-space: nowrap; }
 }
 @media (max-width: 800px) {
-  .composer-grid { grid-template-columns: 1fr; grid-template-areas: 'p' 't' 'b'; }
+  .composer-grid { grid-template-columns: 1fr; grid-template-areas: 'p' 'b' 'm'; grid-template-rows: none; }
   .composer-portrait .gilt.big { max-width: 240px; }
   .gramo-grid { grid-template-columns: 1fr; }
   .gramo-scene { max-height: 240px; }
   .panel { padding: 10px 12px 14px; }
   .panel-head .back { padding: 6px 10px; }
-  .keeper-box { flex-direction: column; align-items: center; }
+  .keeper-main { flex-direction: column; gap: 10px; }
   .keeper-portrait { width: auto; flex-direction: row; }
-  .keeper-face.big { width: 80px; height: 80px; }
+  .keeper-portrait .keeper-face { width: 72px; height: 72px; }
+  .keeper-main::before { display: none; }
+  .keeper-text { font-size: 17px; }
   .tip-bubble { left: 16px; bottom: 100px; width: calc(100% - 32px); }
   .piano-bar .piece-name { width: 100%; order: -1; }
   .kcap { display: none; }

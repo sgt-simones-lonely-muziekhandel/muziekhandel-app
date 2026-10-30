@@ -6,7 +6,7 @@
 import { Boy } from './boy.js';
 import { COMPOSERS } from './data.js';
 import { FRAME_TYPES, FRAME_SRC, COMPOSER_FRAME } from './frames.js';
-import { hitSpot, nearestSpot, clickSpots, drawOutline, drawLabel } from './hotspots.js';
+import { hitSpot, nearestSpot, clickSpots, drawLabel } from './hotspots.js';
 import { skyAt, currentHour } from './sky.js';
 
 const W = 1440, H = 720;
@@ -62,13 +62,14 @@ const LAMPS = [[518, 160], [982, 160], [1340, 160]];
 // Gilded frames on the wall, each with a composer portrait inside (see js/frames.js).
 const FRAME_IMG = Object.fromEntries(Object.keys(FRAME_TYPES).map(n => [n, load(FRAME_SRC(n))]));
 // A gallery wall above the piano: two in the top row (left and right of the hanging lamp), four below.
+// Sized to the green wall panel between the pillars (x ≈ 345–710, below the beam at y ≈ 95).
 const FRAMES = [
-  { cx: 392, top: 78, h: 94, composer: 'bach' },
-  { cx: 608, top: 76, h: 96, composer: 'mozart' },
-  { cx: 374, top: 186, h: 94, composer: 'beethoven' },
-  { cx: 458, top: 186, h: 92, composer: 'chopin' },
-  { cx: 546, top: 186, h: 94, composer: 'verdi' },
-  { cx: 634, top: 192, h: 82, composer: 'tchaikovsky' },
+  { cx: 398, top: 104, h: 72, composer: 'bach' },
+  { cx: 606, top: 104, h: 74, composer: 'mozart' },
+  { cx: 396, top: 204, h: 72, composer: 'beethoven' },
+  { cx: 471, top: 204, h: 70, composer: 'chopin' },
+  { cx: 546, top: 204, h: 72, composer: 'verdi' },
+  { cx: 628, top: 208, h: 62, composer: 'tchaikovsky' },
 ];
 for (const f of FRAMES) {
   f.type = COMPOSER_FRAME[f.composer];
@@ -85,9 +86,9 @@ function box(item) {
 // Where things are, in world units. `stands` is where the boy walks to, one per rect.
 const HOTSPOTS = [
   { id: 'door', label: 'Naar buiten', rects: [[18, 150, 72, 450]], stands: [85], faceLeft: true, action: g => g.goTo('street') },
-  { id: 'portraits', label: 'Componisten', rects: [[330, 72, 345, 228]], stands: [420], action: g => g.ui.open('gallery') },
+  { id: 'portraits', label: 'Componisten', rects: [[352, 98, 324, 204]], stands: [420], action: g => g.ui.open('gallery') },
   { id: 'piano', label: 'Piano', rects: [[326, 300, 320, 298]], stands: [490], action: g => g.ui.open('piano') },
-  { id: 'keeper', label: 'Meneer Van der Velde', rects: [[666, 270, 436, 380]], stands: [880], action: g => g.ui.open('keeper') },
+  { id: 'keeper', label: 'Meneer Simone', rects: [[666, 270, 436, 380]], stands: [880], action: g => g.ui.open('keeper') },
   { id: 'next', label: 'Luisterhoek →', rects: [[1406, 120, 34, 560]], stands: [1400], action: g => g.goTo('corner') },
   { id: 'library', label: 'Bladmuziek', rects: [[1112, 205, 270, 391]], stands: [1250], action: g => g.ui.open('library') },
 ];
@@ -108,7 +109,7 @@ export class Shop {
     this.boy.x = back ? W - 60 : 200;
     this.boy.dir = back ? -1 : 1;
     this.boy.target = null;
-    this.game.setPlace('Muziekhandel Van der Velde');
+    this.game.setPlace('Muziekhandel Simone');
     if (!this.greeted) {
       this.greeted = true;
       setTimeout(() => this.game.ui.open('keeper', { greeting: true }), 900);
@@ -178,7 +179,6 @@ export class Shop {
     // warm pulse around what the mouse points at, or what the boy stands next to
     const near = this.nearSpot;
     const lit = this.hovered || near;
-    if (lit) drawOutline(ctx, lit, this.time);
 
     ctx.save();
     if (sky.dark > 0) ctx.filter = `brightness(${1 - sky.dark * 0.25})`;

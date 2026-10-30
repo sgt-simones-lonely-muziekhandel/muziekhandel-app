@@ -19,15 +19,74 @@ export function h(html) {
 
 export const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// Read Dutch text aloud for kids who can't read yet.
-export function speak(text) {
+// The shopkeeper's portraits (.keeper-face) talk and blink: `.talking` shows head-talk.webp,
+// `.blink` head-blink.webp (see css). Preloaded so the first swap doesn't flash.
+for (const n of ['head', 'head-talk', 'head-blink']) new Image().src = `public/art/characters/shopkeeper/${n}.webp`;
+setInterval(() => {
+  for (const f of document.querySelectorAll('.keeper-face:not(.talking)')) {
+    if (Math.random() < 0.5) continue;
+    f.classList.add('blink');
+    setTimeout(() => f.classList.remove('blink'), 140);
+  }
+}, 2600);
+
+// Move `face`'s mouth at a speaking rhythm until the returned function is called.
+export function talk(face) {
+  if (!face) return () => {};
+  let open = false, timer = 0;
+  const step = () => {
+    open = !open;
+    face.classList.toggle('talking', open);
+    timer = setTimeout(step, open ? 90 + Math.random() * 90 : 60 + Math.random() * 80);
+  };
+  step();
+  return () => { clearTimeout(timer); face.classList.remove('talking'); };
+}
+
+// Write `text` into `p` letter by letter while `face` talks, pausing (mouth shut) after a sentence
+// or comma. A click on the text shows it all at once. Returns a function that stops it.
+export function typeText(p, text, face) {
+  let i = 0, timer = 0, quiet = null, at = performance.now();
+  const hush = () => { quiet?.(); quiet = null; };
+  const finish = () => {
+    clearTimeout(timer); hush();
+    p.textContent = text;
+    p.removeEventListener('click', finish);
+  };
+  const next = () => {
+    // letters are due at fixed times, so a late timer (a busy frame) catches up instead of slowing down
+    while (i < text.length && performance.now() >= at) {
+      const c = text[i++];
+      at += /[.!?]/.test(c) ? 380 : c === ',' ? 180 : 28;
+    }
+    p.textContent = text.slice(0, i);
+    if (i >= text.length) return finish();
+    if (/[.!?,]/.test(text[i - 1])) hush(); else quiet ??= talk(face);
+    timer = setTimeout(next, at - performance.now());
+  };
+  p.addEventListener('click', finish);
+  next();
+  return finish;
+}
+
+// The icon on the read-aloud buttons.
+export const SPEAKER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+// Read Dutch text aloud for kids who can't read yet; `face` talks while the voice speaks.
+let quietSpeaker = () => {};
+export function speak(text, face) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
+  quietSpeaker();
   const u = new SpeechSynthesisUtterance(text.replace(/[^\p{L}\p{N}\s.,!?'"()-]/gu, ''));
   u.lang = 'nl-NL';
   const v = speechSynthesis.getVoices().find(v => v.lang?.startsWith('nl'));
   if (v) u.voice = v;
   u.rate = 0.95;
+  if (face) {
+    u.onstart = () => { quietSpeaker(); quietSpeaker = talk(face); };
+    u.onend = u.onerror = () => { quietSpeaker(); quietSpeaker = () => {}; };
+  }
   speechSynthesis.speak(u);
 }
 
@@ -41,8 +100,8 @@ export function speak(text) {
  * `full` without a `closeup` gives the same full-screen stage on a wooden desk (`.stage.desk`).
  */
 export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, full = false }) {
-  const tipHtml = tip ? `<button class="keeper-tip" title="Vraag het Meneer Van der Velde"><span class="keeper-face"></span></button>
-      <div class="tip-bubble paper" hidden><p></p><button class="btn wood small speak">Voorlezen</button></div>` : '';
+  const tipHtml = tip ? `<button class="keeper-tip" title="Vraag het Meneer Simone"><span class="keeper-face"></span></button>
+      <div class="tip-bubble paper" hidden><p></p><button class="keeper-listen speak">${SPEAKER}Voorlezen</button></div>` : '';
   const buttons = {
     back: '<button class="btn wood back" data-act="back"><span class="ico">‹</span> Terug</button>',
     close: '<button class="btn wood close" data-act="close" title="Terug naar de winkel">✕</button>',
@@ -65,10 +124,12 @@ export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, 
   el.querySelector('[data-act=close]').onclick = () => ui.closeAll();
   if (tip) {
     const bubble = el.querySelector('.tip-bubble');
-    bubble.querySelector('p').textContent = tip;
+    const tipFace = el.querySelector('.keeper-tip .keeper-face');
+    let stopTyping = () => {};
     // An open tip goes away with any key or any click elsewhere (Escape/Backspace then only close the tip).
     const hideTip = () => {
       bubble.hidden = true;
+      stopTyping();
       removeEventListener('keydown', onTipKey, true);
       removeEventListener('pointerdown', onTipDown, true);
     };
@@ -80,11 +141,13 @@ export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, 
     el.querySelector('.keeper-tip').onclick = () => {
       if (!bubble.hidden) return hideTip();
       bubble.hidden = false;
+      // the shopkeeper says it: the words appear as his mouth moves
+      stopTyping = typeText(bubble.querySelector('p'), tip, tipFace);
       addEventListener('keydown', onTipKey, true);
       addEventListener('pointerdown', onTipDown, true);
     };
     el.hideTip = hideTip;
-    bubble.querySelector('.speak').onclick = () => speak(tip);
+    bubble.querySelector('.speak').onclick = () => speak(tip, tipFace);
   }
   let stage = el.querySelector('.stage');
   if (closeup) {

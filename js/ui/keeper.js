@@ -1,5 +1,5 @@
-// Meneer Van der Velde, the shopkeeper: greets the player and helps them find their way.
-import { h, esc, speak } from './ui.js';
+// Meneer Simone, the shopkeeper: greets the player and helps them find their way.
+import { h, esc, speak, typeText, SPEAKER } from './ui.js';
 import { keyboardGuide } from './piano.js';
 
 const TOPICS = [
@@ -20,7 +20,7 @@ const TOPICS = [
   },
   {
     q: 'Wie zijn die mensen aan de muur?',
-    a: 'Dat zijn componisten: mensen die muziek bedenken en opschrijven. Bach, Mozart, Beethoven en nog meer. Klik op een schilderij en je ziet hun verhaal en hun hele familie.',
+    a: 'Dat zijn componisten: mensen die muziek bedenken en opschrijven. Bach, Mozart, Beethoven en nog meer. Klik op een schilderij en je leest hun verhaal en hoort hun muziek.',
     go: ['gallery', 'Naar de schilderijen'],
   },
   {
@@ -30,63 +30,77 @@ const TOPICS = [
   },
 ];
 
-const GREETING = 'Goedendag, en welkom in Muziekhandel Van der Velde! Ik ben Meneer Van der Velde. Kijk gerust rond. Wil je weten wat je hier kunt doen? Vraag het maar!';
+const GREETING = 'Goedendag, en welkom in Muziekhandel Simone! Ik ben Meneer Simone. Kijk gerust rond. Wil je weten wat je hier kunt doen? Vraag het maar!';
 
+// The dialog: his portrait (talking while his words appear) next to a speech bubble, and under
+// it the questions the player can ask, written on the same paper.
 export function keeperView(ui, { greeting = false } = {}) {
   const el = h(`
     <div class="view keeper">
       <div class="keeper-box paper">
-        <div class="keeper-portrait"><span class="keeper-face big"></span><b>Meneer Van der Velde</b></div>
-        <div class="keeper-talk">
-          <p class="keeper-text"></p>
-          <div class="keeper-extra"></div>
-          <div class="keeper-actions">
-            <button class="btn wood small speak">Voorlezen</button>
+        <button class="keeper-close" title="Sluiten">✕</button>
+        <div class="keeper-main">
+          <div class="keeper-portrait">
+            <span class="keeper-face big"></span>
+            <b class="keeper-name">Meneer Simone</b>
+            <button class="keeper-listen speak" title="Laat Meneer Simone het voorlezen">${SPEAKER}Voorlezen</button>
           </div>
+          <div class="keeper-talk">
+            <p class="keeper-text"></p>
+            <div class="keeper-extra"></div>
+            <div class="keeper-go"></div>
+          </div>
+        </div>
+        <div class="keeper-ask">
+          <h3 class="hand">Vraag het maar…</h3>
           <div class="keeper-qs"></div>
         </div>
-        <button class="btn wood close" title="Sluiten">✕</button>
       </div>
     </div>`);
   const $ = s => el.querySelector(s);
-  let typing = 0, current = '';
+  const face = $('.keeper-face');
+  const talkBox = $('.keeper-talk');
+  let current = '', stopTyping = () => {};
+  // without a scrollbar, a soft fade at the bottom of the bubble shows there is more to read
+  const fade = () => talkBox.classList.toggle('more', talkBox.scrollTop + talkBox.clientHeight < talkBox.scrollHeight - 4);
+  talkBox.addEventListener('scroll', fade);
+  const resized = new ResizeObserver(fade);
+  [...talkBox.children].forEach(c => resized.observe(c));
 
   const say = (text, topic = null) => {
     current = text;
-    clearInterval(typing);
-    const p = $('.keeper-text');
-    p.textContent = '';
-    let i = 0;
-    typing = setInterval(() => {
-      i += 2;
-      p.textContent = text.slice(0, i);
-      if (i >= text.length) clearInterval(typing);
-    }, 18);
+    stopTyping();
+    speechSynthesis?.cancel?.();
+    stopTyping = typeText($('.keeper-text'), text, face);
+    talkBox.scrollTop = 0;
     const extra = $('.keeper-extra');
     extra.innerHTML = '';
     if (topic?.guide) extra.appendChild(keyboardGuide());
-    $('.keeper-actions').querySelectorAll('.go').forEach(b => b.remove());
+    const go = $('.keeper-go');
+    go.innerHTML = '';
     if (topic?.go) {
       const [view, label] = topic.go;
-      const b = h(`<button class="btn brass small go">${esc(label)}</button>`);
+      const b = h(`<button class="btn brass small">${esc(label)} ›</button>`);
       b.onclick = () => { ui.close(); ui.open(view); };
-      $('.keeper-actions').appendChild(b);
+      go.appendChild(b);
     }
+    el.querySelectorAll('.q').forEach(q => q.classList.toggle('on', q.topic === topic));
   };
 
   for (const t of TOPICS) {
     const b = h(`<button class="q">${esc(t.q)}</button>`);
+    b.topic = t;
     b.onclick = () => say(t.a, t);
     $('.keeper-qs').appendChild(b);
   }
-  $('.speak').onclick = () => speak(current);
-  $('.close').onclick = () => ui.close();
+  $('.speak').onclick = () => speak(current, face);
+  $('.keeper-close').onclick = () => ui.close();
   el.addEventListener('pointerdown', e => { if (e.target === el) ui.close(); });
 
   say(greeting ? GREETING : 'Zeg het maar! Waarmee kan ik je helpen?');
 
   return {
     el,
-    destroy() { clearInterval(typing); speechSynthesis?.cancel?.(); },
+    destroy() { stopTyping(); resized.disconnect(); speechSynthesis?.cancel?.(); },
   };
 }
