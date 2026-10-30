@@ -98,8 +98,9 @@ export function speak(text, face) {
  * are filled with a blurred copy), with only small Terug / ✕ buttons and the place name on top, so it
  * feels like the camera moved in rather than a window opening. `body` is then the stage.
  * `full` without a `closeup` gives the same full-screen stage on a wooden desk (`.stage.desk`).
+ * `hideTitle` keeps the title for screen readers only (the panel then has just the two buttons).
  */
-export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, full = false }) {
+export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, full = false, hideTitle = false }) {
   const tipHtml = tip ? `<button class="keeper-tip" title="Vraag het Meneer Simone"><span class="keeper-face"></span></button>
       <div class="tip-bubble paper" hidden><p></p><button class="keeper-listen speak">${SPEAKER}Voorlezen</button></div>` : '';
   const buttons = {
@@ -114,8 +115,8 @@ export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, 
       ${tipHtml}
     </div>`) : h(`
     <div class="view ${cls}">
-      <div class="panel ${closeup ? 'closeup' : 'paper'} ${wide ? 'wide' : ''}">
-        <header class="panel-head">${buttons.back}<h2>${esc(title)}</h2>${buttons.close}</header>
+      <div class="panel ${closeup ? 'closeup' : 'paper'} ${wide ? 'wide' : ''} ${hideTitle ? 'no-title' : ''}">
+        <header class="panel-head">${buttons.back}<h2 class="${hideTitle ? 'visually-hidden' : ''}">${esc(title)}</h2>${buttons.close}</header>
         <div class="panel-body"></div>
       </div>
       ${tipHtml}

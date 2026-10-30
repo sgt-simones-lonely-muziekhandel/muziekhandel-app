@@ -10,6 +10,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 - **Windows** (piano, cabinet, …) open on aged paper over a dimmed shop. Every window has **◀ Terug** (back one step) and **✕** (straight back to the shop); **Esc** and **Backspace** also go back.
 - **Back in the scenes**: with no window open, **Backspace** or **Esc** go one place back (listening corner → shop → street), and so does the browser's back button / a keyboard's back key (`game.back()`, with a `history` entry the game keeps refilling).
 - **Tips** from the shopkeeper (the medallion bottom-left, which stays still) close again with any key or any click outside *Voorlezen*. The tip is typed out while the medallion's face talks (see [shopkeeper](shopkeeper.md)).
+- `frame({ hideTitle: true })` keeps a panel's title for screen readers only; the header then has just *Terug* and ✕ (used by the [gramophone](gramophone.md)).
 - **No focus rectangles**: buttons and books no longer get a gold outline when selected; keyboard focus shows as a slightly brighter button, and the game canvas never shows a focus outline.
 - On a phone held upright, a hint asks to turn the screen.
 
