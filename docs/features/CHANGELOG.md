@@ -2,6 +2,22 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-30 — Going through the shop door, keeper dialogue higher
+
+Changed:
+
+- [Street](street.md): going into the shop is a little scene now: the door swings open, warm light falls out, the boy steps over the threshold into the light and the door closes behind him (and the other way round coming out).
+- [Shopkeeper](shopkeeper.md): the dialogue with the questions sits higher on the screen instead of at the bottom edge; the tip medallion bottom-left no longer bobs up and down.
+
+## 2026-10-30 — Sheet music as a book, dimmer shop lights
+
+Changed:
+
+- [Sheet music](sheet-music.md): the music is a real book on a wooden desk, full screen. The chosen book flies from the cabinet to the middle of the screen and lies there closed; the player opens it and turns the pages from right to left around the spine with a smooth 3D page turn (→ ← keys, the brass buttons or a click on a page): cover, title page (`cover-inside.webp`), then the music two pages at a time, 4 lines of 2 bars per page with bigger notes.
+- [Shop](shop.md): the evening lamps are softer than before, but not dark (a middle setting).
+- [Piano](piano.md): the buttons, octave buttons, status line and pedal are sized only in `cqw`, so they stay inside the piano picture on small screens instead of sticking out over the background.
+- [Game shell](game-shell.md): `frame({ full: true })` without a close-up picture gives a full-screen wooden desk; `ui.open(…, { noFade: true })` opens a full-screen view without the fade to black.
+
 ## 2026-10-30 — Louder piano, light-up keys, cyclist puppets, sheet-music books
 
 Changed:

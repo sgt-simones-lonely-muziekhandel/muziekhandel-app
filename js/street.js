@@ -21,7 +21,13 @@ const INK = '#1d1510';
 // Places in world units, measured on walk.webp.
 export const DOOR_X = 2072;
 const DOOR_SILL = 554;  // the doorstep, where the boy disappears inside
-const DOOR_TIME = 0.7;  // seconds to step through the door
+// The shop door's panel in world units (measured on walk.webp); it hangs on its right edge.
+const DOOR = { x0: 2025, x1: 2120, y0: 316, y1: 556 };
+// Going in: the door swings open, the boy steps over the threshold into the warm light, the door
+// closes behind him. Coming out plays the same timeline backwards.
+const DOOR_OPEN = 0.5, DOOR_WALK = 1.0, DOOR_CLOSE = 0.45;
+const DOOR_TIME = DOOR_OPEN + DOOR_WALK + DOOR_CLOSE;
+const smooth = p => { p = Math.max(0, Math.min(1, p)); return p * p * (3 - 2 * p); };
 const SHOP = { x0: 1640, x1: W, y0: 130, y1: 565 };
 const LAMPS = [[60, 214], [1348, 210]];
 // Gas lamps on the far side of the canal, in far.webp layer pixels.
@@ -93,8 +99,10 @@ export class Street {
   update(dt, input) {
     this.time += dt;
     if (this.door) {
-      // stepping through the door: walk on the spot, no other input
-      this.boy.march(dt);
+      // going through the door: no other input; the boy walks on the spot only while he steps through
+      const { walk } = this.doorState();
+      if (walk > 0 && walk < 1) this.boy.march(dt);
+      else this.boy.update(dt, { left: false, right: false }, this.boy.x, this.boy.x);
       this.door.t += dt;
       if (this.door.t >= DOOR_TIME) {
         // going in: stay hidden while the screen fades to the shop
@@ -137,6 +145,7 @@ export class Street {
         this.drawWater(ctx, sky);
       }
       this.drawLights(ctx, sky);
+      this.drawDoor(ctx, sky);
       this.drawDoorHint(ctx);
       ctx.save();
       if (sky.dark > 0) ctx.filter = `brightness(${1 - sky.dark * 0.3})`;
@@ -148,17 +157,58 @@ export class Street {
     });
   }
 
-  // Going in, the boy steps up onto the doorstep, gets a little smaller and fades into the
-  // dark doorway; coming out is the same backwards.
+  // Where we are in the door timeline: how far the door is open (0–1) and how far the boy has
+  // stepped through (0 on the pavement, 1 inside). Coming out runs it backwards.
+  doorState() {
+    if (!this.door) return { open: 0, walk: 0 };
+    const t = this.door.dir > 0 ? this.door.t : DOOR_TIME - this.door.t;
+    const open = t < DOOR_OPEN ? smooth(t / DOOR_OPEN)
+      : t < DOOR_OPEN + DOOR_WALK ? 1 : 1 - smooth((t - DOOR_OPEN - DOOR_WALK) / DOOR_CLOSE);
+    return { open, walk: smooth((t - DOOR_OPEN) / DOOR_WALK) };
+  }
+
+  // The door swings inwards on its right-hand hinges: the warm shop shows behind it, the panel
+  // narrows towards the hinges and darkens as it turns away, and light falls out onto the pavement.
+  drawDoor(ctx, sky) {
+    const { open } = this.doorState();
+    if (open <= 0.001 || !ready(WALK)) return;
+    const { x0, x1, y0, y1 } = DOOR, w = x1 - x0, h = y1 - y0;
+    // inside: the lit shop
+    const inside = ctx.createLinearGradient(0, y0, 0, y1);
+    inside.addColorStop(0, '#f6cf86'); inside.addColorStop(0.55, '#d79a52'); inside.addColorStop(1, '#6e4122');
+    ctx.fillStyle = inside;
+    ctx.fillRect(x0, y0, w, h);
+    // light on the pavement in front of the door
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const pool = ctx.createRadialGradient((x0 + x1) / 2, y1 + 6, 4, (x0 + x1) / 2, y1 + 6, 120);
+    pool.addColorStop(0, `rgba(255,200,120,${(0.18 + 0.3 * sky.dark) * open})`); pool.addColorStop(1, 'rgba(255,200,120,0)');
+    ctx.fillStyle = pool;
+    ctx.beginPath(); ctx.ellipse((x0 + x1) / 2, y1 + 8, 120, 26, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // the door panel, cut from the street picture, turning about its hinges
+    const a = open * 1.25; // up to ~72°
+    const pw = w * Math.cos(a);
+    ctx.save();
+    ctx.drawImage(nightTinted(WALK, sky.dark), x0 / K, y0 / K, w / K, h / K, x1 - pw, y0, pw, h);
+    ctx.fillStyle = `rgba(20,12,6,${0.45 * Math.sin(a)})`;
+    ctx.fillRect(x1 - pw, y0, pw, h);
+    ctx.restore();
+  }
+
+  // Through the door: the boy steps up onto the threshold, gets a little smaller as he goes in,
+  // his feet disappear behind the threshold and he fades into the lit room.
   drawBoy(ctx) {
     const foot = this.footAt(this.boy.x);
     if (!this.door) { this.boy.draw(ctx, foot, 165); return; }
-    let p = Math.min(1, this.door.t / DOOR_TIME);
-    if (this.door.dir < 0) p = 1 - p;
-    const e = p * p * (3 - 2 * p);
+    const e = this.doorState().walk;
+    if (e >= 1) return;
     ctx.save();
-    ctx.globalAlpha *= 1 - e;
-    this.boy.draw(ctx, foot + (DOOR_SILL - foot) * e, 165 * (1 - 0.1 * e));
+    ctx.beginPath();
+    ctx.rect(DOOR.x0 - 60, 0, DOOR.x1 - DOOR.x0 + 120, 640 + (DOOR.y1 - 640) * smooth(e * 1.6));
+    ctx.clip();
+    ctx.globalAlpha *= 1 - smooth((e - 0.55) / 0.45);
+    this.boy.draw(ctx, foot + (DOOR_SILL + 6 - foot) * smooth(e * 1.4), 165 * (1 - 0.16 * e));
     ctx.restore();
   }
 

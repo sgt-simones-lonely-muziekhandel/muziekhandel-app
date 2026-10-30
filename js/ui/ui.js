@@ -38,6 +38,7 @@ export function speak(text) {
  * With `full` as well, there is no frame at all: the picture fills the screen (the edges that don't fit
  * are filled with a blurred copy), with only small Terug / ✕ buttons and the place name on top, so it
  * feels like the camera moved in rather than a window opening. `body` is then the stage.
+ * `full` without a `closeup` gives the same full-screen stage on a wooden desk (`.stage.desk`).
  */
 export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, full = false }) {
   const tipHtml = tip ? `<button class="keeper-tip" title="Vraag het Meneer Van der Velde"><span class="keeper-face"></span></button>
@@ -46,10 +47,10 @@ export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, 
     back: '<button class="btn wood back" data-act="back"><span class="ico">‹</span> Terug</button>',
     close: '<button class="btn wood close" data-act="close" title="Terug naar de winkel">✕</button>',
   };
-  const el = full && closeup ? h(`
+  const el = full ? h(`
     <div class="view full ${cls}">
       <div class="full-bg"></div>
-      <div class="stage"></div>
+      <div class="stage ${closeup ? '' : 'desk'}"></div>
       <header class="full-hud">${buttons.back}<h2 class="full-title visually-hidden">${esc(title)}</h2>${buttons.close}</header>
       ${tipHtml}
     </div>`) : h(`
@@ -116,10 +117,16 @@ export class UI {
     const below = this.top;
     this.stack.push(view);
     const isFull = view.el.classList.contains('full');
-    this.withFade(isFull || replacing?.el.classList.contains('full'), () => {
+    // `noFade`: the view fades in over the one below (which goes away once it's covered) instead of
+    // through black, e.g. when the music book has just flown to the centre of the screen
+    const noFade = opts.noFade && !replacing;
+    this.withFade(!noFade && (isFull || replacing?.el.classList.contains('full')), () => {
       replacing?.el.remove();
       // a paper card over a full-screen close-up keeps the close-up visible, dimmed, behind it
-      if (below && (isFull || !below.el.classList.contains('full'))) { below.el.hidden = true; below.onHide?.(); }
+      if (below && (isFull || !below.el.classList.contains('full'))) {
+        const hide = () => { if (this.stack.includes(view)) { below.el.hidden = true; below.onHide?.(); } };
+        if (noFade) setTimeout(hide, 500); else hide();
+      }
       this.root.appendChild(view.el);
       this.root.hidden = false;
       requestAnimationFrame(() => view.el.classList.add('in'));

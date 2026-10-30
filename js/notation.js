@@ -7,9 +7,9 @@ const WIDTH = 1000;
 const E4 = 30;              // diatonic step of the bottom staff line
 
 const MEASURES_PER_SYSTEM = 4;
-const perPage = systems => MEASURES_PER_SYSTEM * systems;
+const perPage = (systems, perSystem = MEASURES_PER_SYSTEM) => perSystem * systems;
 
-export const pageCount = (parsed, systems = 2) => Math.ceil(parsed.measures.length / perPage(systems));
+export const pageCount = (parsed, systems = 2, perSystem = MEASURES_PER_SYSTEM) => Math.ceil(parsed.measures.length / perPage(systems, perSystem));
 export const pageOfNote = (parsed, note, systems = 2) => Math.floor(note.measure / perPage(systems));
 
 const weight = n => 22 + 26 * Math.sqrt(n.dur);
@@ -66,33 +66,36 @@ function noteSvg(n, x, y0) {
   return s + '</g>';
 }
 
-/** Render one page of the piece into `host`. Returns a lookup from note index to its <g>. */
-export function renderPage(host, parsed, page, systemsPerPage = 2) {
+/**
+ * Render one page of the piece into `host` (`systemsPerPage` lines of `perSystem` bars, `width` units
+ * wide: narrower makes everything bigger). Returns a lookup from note index to its <g>.
+ */
+export function renderPage(host, parsed, page, systemsPerPage = 2, perSystem = MEASURES_PER_SYSTEM, width = WIDTH) {
   const { measures, piece } = parsed;
-  const first = page * perPage(systemsPerPage);
-  const pageMeasures = measures.slice(first, first + perPage(systemsPerPage));
+  const first = page * perPage(systemsPerPage, perSystem);
+  const pageMeasures = measures.slice(first, first + perPage(systemsPerPage, perSystem));
   const systems = [];
-  for (let k = 0; k < pageMeasures.length; k += MEASURES_PER_SYSTEM) systems.push(pageMeasures.slice(k, k + MEASURES_PER_SYSTEM));
+  for (let k = 0; k < pageMeasures.length; k += perSystem) systems.push(pageMeasures.slice(k, k + perSystem));
 
   const H = systemsPerPage * SYS_H + 10;
-  let svg = `<svg class="staff-svg" viewBox="0 0 ${WIDTH} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  let svg = `<svg class="staff-svg" viewBox="0 0 ${width} ${H}" xmlns="http://www.w3.org/2000/svg">`;
   systems.forEach((sys, si) => {
     const y0 = 34 + si * SYS_H;
     const showTime = si === 0;
     let x = showTime ? 110 : 76;
-    for (let l = 0; l < 5; l++) svg += `<line class="staff-line" x1="10" x2="${WIDTH - 10}" y1="${y0 + l * S}" y2="${y0 + l * S}"/>`;
+    for (let l = 0; l < 5; l++) svg += `<line class="staff-line" x1="10" x2="${width - 10}" y1="${y0 + l * S}" y2="${y0 + l * S}"/>`;
     svg += `<text class="music ink clef" x="16" y="${y0 + 3 * S}" font-size="44">\u{1D11E}</text>`;
     if (showTime) {
       svg += `<text class="timesig" x="84" y="${y0 + 18}" text-anchor="middle">${piece.time[0]}</text>`;
       svg += `<text class="timesig" x="84" y="${y0 + 38}" text-anchor="middle">${piece.time[1]}</text>`;
     }
-    svg += `<text class="mnum" x="${x - 4}" y="${y0 - 10}">${first + si * MEASURES_PER_SYSTEM + 1}</text>`;
+    svg += `<text class="mnum" x="${x - 4}" y="${y0 - 10}">${first + si * perSystem + 1}</text>`;
     // a short last system keeps the spacing of a full one
     const wSys = sys.map(m => m.reduce((a, n) => a + weight(n), 0) + 18);
-    const full = Math.max(MEASURES_PER_SYSTEM, sys.length);
+    const full = Math.max(perSystem, sys.length);
     const avg = wSys.reduce((a, b) => a + b, 0) / sys.length;
     const total = wSys.reduce((a, b) => a + b, 0) + (full - sys.length) * avg;
-    const scale = (WIDTH - 12 - x) / total;
+    const scale = (width - 12 - x) / total;
     sys.forEach((m, mi) => {
       let nx = x + 16 * scale;
       for (const n of m) {
@@ -101,7 +104,7 @@ export function renderPage(host, parsed, page, systemsPerPage = 2) {
         nx += w;
       }
       x += wSys[mi] * scale;
-      const last = first + si * MEASURES_PER_SYSTEM + mi === measures.length - 1;
+      const last = first + si * perSystem + mi === measures.length - 1;
       if (last) {
         svg += `<line class="bar" x1="${x - 7}" x2="${x - 7}" y1="${y0}" y2="${y0 + 4 * S}"/>`;
         svg += `<rect class="ink" x="${x - 4}" y="${y0}" width="5" height="${4 * S}"/>`;

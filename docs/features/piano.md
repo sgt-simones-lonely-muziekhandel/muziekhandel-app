@@ -55,7 +55,7 @@ C red · D orange · E yellow · F green · G teal · A blue · B purple. Sharps
 
 ## How it's built
 
-- **Full screen** on `public/art/closeups/piano.webp` (see [game shell](game-shell.md)): the music is engraved on the blank sheet on the music desk (two lines at a time; *Kies bladmuziek, of speel maar!* is written there until a piece is chosen), the buttons and the piece name sit on the wooden ledge below it, the 88 keys fill the key slot, and the octave buttons, the status line and the pedal are on the strip at the bottom. Everything is placed in percentages of the picture (CSS under `.piano` in `css/style.css`) and sized in `cqw`, so it stays in place at any screen size.
+- **Full screen** on `public/art/closeups/piano.webp` (see [game shell](game-shell.md)): the music is engraved on the blank sheet on the music desk (two lines at a time; *Kies bladmuziek, of speel maar!* is written there until a piece is chosen), the buttons and the piece name sit on the wooden ledge below it, the 88 keys fill the key slot, and the octave buttons, the status line and the pedal are on the strip at the bottom. Everything is placed in percentages of the picture (CSS under `.piano` in `css/style.css`) and sized in `cqw` only, without pixel minimums (buttons, octave buttons, status line, pedal), so it shrinks and grows with the picture and never sticks out over the background, at any screen size.
 
 - `js/ui/piano.js`, `pianoView()`:
   - Keys are DOM elements for the full range `PIANO_LOW`–`PIANO_HIGH` (A0–C8); black keys are positioned over the gaps between white keys. `buildKeys()` redraws them (hidden note names and key caps, the brass `.kb-window` bar) whenever the octave shift or note names change.

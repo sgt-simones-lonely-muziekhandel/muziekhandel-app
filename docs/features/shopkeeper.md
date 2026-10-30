@@ -5,19 +5,19 @@ The third object in the shop: Meneer Van der Velde, the friendly owner with the 
 ## For the player
 
 - **Greeting**: the first time the player enters the shop, he welcomes them.
-- **Talking to him** (click him, or ↑ when standing at the counter, or the round **?** button top-right at any time): a dialogue box with his portrait, his answer typed out letter by letter, and five questions to choose from:
+- **Talking to him** (click him, or ↑ when standing at the counter, or the round **?** button top-right at any time): a dialogue box a little above the middle of the screen (not at the bottom edge) with his portrait, his answer typed out letter by letter, and five questions to choose from:
 
   | Question | What he explains | Button |
   |---|---|---|
   | *Wat kan ik hier doen?* | Everything in the shop | — |
-  | *Hoe speel ik piano?* | Keys, *Speel mee*, plus the [keyboard guide](piano.md#the-keyboard-guide-the-picture-for-learners) | 🎹 Naar de piano |
-  | *Waar is de bladmuziek?* | The cabinet, ← →, Space | 📜 Naar de kast |
-  | *Wie zijn die mensen aan de muur?* | Composers | 🖼️ Naar de schilderijen |
-  | *Mag ik muziek luisteren?* | The gramophone, in the listening corner to the right | 🎵 Naar de grammofoon |
+  | *Hoe speel ik piano?* | Keys, *Speel mee*, plus the [keyboard guide](piano.md#the-keyboard-guide-the-picture-for-learners) | Naar de piano |
+  | *Waar is de bladmuziek?* | The cabinet, ← →, Space | Naar de kast |
+  | *Wie zijn die mensen aan de muur?* | Composers | Naar de schilderijen |
+  | *Mag ik muziek luisteren?* | The gramophone, in the listening corner to the right | Naar de grammofoon |
 
   The button takes the player straight there.
-- **🔊 Voorlezen** reads his answer aloud, for kids who can't read yet.
-- **Tips in every view**: each view has his face in a medallion in the bottom-left corner with a **?**. Clicking it shows a short tip for that view, which can also be read aloud.
+- **Voorlezen** reads his answer aloud, for kids who can't read yet.
+- **Tips in every view**: each view has his face in a medallion in the bottom-left corner with a **?**. The medallion stays still in its place (it used to bob up and down). Clicking it shows a short tip for that view, which can also be read aloud.
 
 ## How it's built
 

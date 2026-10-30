@@ -171,7 +171,7 @@ export class Shop {
     const sky = skyAt(currentHour());
     // evening: the room gets darker and bluer…
     if (sky.dark > 0.01) {
-      ctx.fillStyle = `rgba(14,16,40,${sky.dark * 0.42})`;
+      ctx.fillStyle = `rgba(14,16,40,${sky.dark * 0.45})`;
       ctx.fillRect(0, 0, W, H);
     }
 
@@ -195,7 +195,8 @@ export class Shop {
     ctx.restore();
   }
 
-  // Lamps go on with the street lamps (sky.lampsOn) and get brighter as it gets darker.
+  // Lamps go on with the street lamps (sky.lampsOn) and get brighter as it gets darker. Kept dim on
+  // purpose: an old shop lit by a few bulbs, not a bright room.
   drawLamps(ctx, sky) {
     if (!sky.lampsOn) return;
     const a = Math.min(1, (sky.dark - 0.3) / 0.4);
@@ -205,11 +206,11 @@ export class Shop {
       const f = 0.95 + 0.03 * Math.sin(this.time * 9 + i * 2) + 0.02 * Math.sin(this.time * 23 + i);
       // the bulb
       const bulb = ctx.createRadialGradient(x, y, 1, x, y, 26);
-      bulb.addColorStop(0, `rgba(255,240,190,${0.9 * a * f})`); bulb.addColorStop(1, 'rgba(255,214,140,0)');
+      bulb.addColorStop(0, `rgba(255,240,190,${0.85 * a * f})`); bulb.addColorStop(1, 'rgba(255,214,140,0)');
       ctx.fillStyle = bulb; ctx.fillRect(x - 26, y - 26, 52, 52);
       // light falling from the shade: a few cones on top of each other, so the edges are soft
       const cone = ctx.createLinearGradient(0, y, 0, 640);
-      cone.addColorStop(0, `rgba(255,205,120,${0.06 * a * f})`); cone.addColorStop(1, 'rgba(255,205,120,0)');
+      cone.addColorStop(0, `rgba(255,205,120,${0.045 * a * f})`); cone.addColorStop(1, 'rgba(255,205,120,0)');
       ctx.fillStyle = cone;
       for (const spread of [240, 190, 140, 95]) {
         const top = 14 + spread * 0.1;
@@ -217,11 +218,11 @@ export class Shop {
       }
       // warm glow on the wall around it
       const glow = ctx.createRadialGradient(x, y, 10, x, y, 280);
-      glow.addColorStop(0, `rgba(255,200,120,${0.28 * a * f})`); glow.addColorStop(1, 'rgba(255,200,120,0)');
+      glow.addColorStop(0, `rgba(255,200,120,${0.2 * a * f})`); glow.addColorStop(1, 'rgba(255,200,120,0)');
       ctx.fillStyle = glow; ctx.fillRect(x - 280, y - 280, 560, 560);
       // pool of light on the floor
       const pool = ctx.createRadialGradient(x, 660, 5, x, 660, 220);
-      pool.addColorStop(0, `rgba(255,205,130,${0.2 * a * f})`); pool.addColorStop(1, 'rgba(255,205,130,0)');
+      pool.addColorStop(0, `rgba(255,205,130,${0.14 * a * f})`); pool.addColorStop(1, 'rgba(255,205,130,0)');
       ctx.fillStyle = pool; ctx.fillRect(x - 220, 440, 440, 440);
     });
     ctx.restore();
