@@ -61,7 +61,7 @@ ASSETS = [
     ("music_store_internal/Antique Piano with Blank Sheet Music.png", "opaque", "closeups/piano", {}),
     ("music_store_internal/Antique Wooden Display Cabinet Interior.png", "opaque", "closeups/cabinet", {}),
     ("music_store_internal/Vintage Green Damask Gallery Wall.png", "opaque", "closeups/gallery-wall", {}),
-    ("music_store_internal/Sunlit Vintage Music Room.png", "opaque", "closeups/gramophone-corner", {}),
+    ("music_store_internal/Antique Phonograph Chest in Sunlit Music Room.png", "opaque", "closeups/gramophone-corner", {}),
     # Characters (cut-out puppets; "1" is the part on the left of the sheet)
     ("characters/Vintage Boy Character Sprite Sheet.png", "sheet", "characters/kid-past",
      {"scale": CHAR_SCALE, "names": ["head", "full", *ARM_LEG, "lower-leg-1", "lower-leg-2"]}),
