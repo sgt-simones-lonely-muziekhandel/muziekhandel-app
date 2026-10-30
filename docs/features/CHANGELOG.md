@@ -2,6 +2,16 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-30 — The time-travel story
+
+Added:
+
+- [Story](story.md): after opening the crate, a short anime-like film of four painted shots that drift, zoom and dissolve into each other: the crate opening in a golden flash, the hands opening a cylinder tube with light, notes and sheet music pouring out, a swirl of light sweeping the flooded street into the past, and the boy walking up to the shop. Captions on paper strips; a click skips to the next shot. Then the game continues on the [street](street.md).
+
+Changed:
+
+- [Future street](future-street.md): opening the crate now plays the story instead of going straight to the street.
+
 ## 2026-10-30 — The game starts in the future
 
 Added:

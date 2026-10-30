@@ -23,6 +23,7 @@ The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the 
 |---|---|
 | `?uur=21.5` | Pretend it's 21:30, to see the sky at another time of day |
 | `?autostart` | Skip the title screen (starts in the future) |
+| `?autostart&scene=story` | Play the time-travel story |
 | `?autostart&scene=street` | Start in the past, on the street |
 | `?autostart&scene=shop` | Start inside the shop |
 | `?autostart&scene=shop&open=piano&piece=ode` | Open a view: `piano`, `sheet`, `library`, `gallery`, `composer` (`&composer=mozart`), `gramophone`, `keeper` |
@@ -30,6 +31,7 @@ The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the 
 ## What's in the game
 
 - **Future street** (`js/future.js`): the start. The same quay far in the future: flooded, ruined, raining. The boy (in his gas mask) finds a glowing crate with cylinders and sheet music; opening it leads to the past.
+- **Story** (`js/story.js`): the time travel as a short anime-like film: the crate, the cylinder tube opening, the swirl that turns the flooded street into the past, and arriving at the shop.
 - **Street** (`js/street.js`): Amsterdam around 1900, drawn live on a canvas. Canal and bridge on the left, houses and the shop on the right. The sky follows the visitor's real local time (`js/sky.js`); windows and street lamps light up in the evening. When the player stands still, people ride past on bikes (`js/cyclist.js`).
 - **Shop** (`js/shop.js`): painted interior with hotspots: the sheet music cabinet, the piano, the portraits, Meneer Van der Velde and the gramophone. Walk with ← → or click/tap an object.
 - **Sheet music** (`js/ui/library.js`, `js/ui/sheet.js`, `js/notation.js`): pick a tube from the cabinet, flip pages with ← →, Space takes the piece to the piano. Every note has a colour and a name, matching the piano keys.

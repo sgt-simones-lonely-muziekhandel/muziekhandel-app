@@ -2,7 +2,8 @@
 // painted layers in public/art/future-street (sky, far, walk, foreground) with parallax, a
 // drifting storm sky, rain, now and then distant lightning, and the flooded canal rippling.
 // The shop is boarded up behind the flood, so the player can't go in; instead a glowing crate
-// with phonograph cylinders and sheet music stands on the quay. Clicking it starts the story.
+// with phonograph cylinders and sheet music stands on the quay. Clicking it starts the story
+// (js/story.js), which ends in the past.
 import { Boy } from './boy.js';
 
 const ART = 'public/art/future-street/';
@@ -89,8 +90,8 @@ export class FutureStreet {
     if (this.opening) {
       this.boy.update(dt, { left: false, right: false }, this.boy.x, this.boy.x);
       this.opening.t += dt;
-      // The story (crate, cylinder, time travel) will play here; for now it goes straight to the past.
-      if (this.opening.t >= OPEN_TIME && !this.opening.done) { this.opening.done = true; this.game.goTo('street'); }
+      // then the story takes over: the crate, the cylinder, the time travel (js/story.js)
+      if (this.opening.t >= OPEN_TIME && !this.opening.done) { this.opening.done = true; this.game.goTo('story'); }
     } else {
       this.boy.update(dt, input, 90, WALK_MAX);
     }

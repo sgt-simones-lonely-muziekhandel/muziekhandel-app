@@ -1,5 +1,6 @@
 import { Street } from './street.js';
 import { FutureStreet } from './future.js';
+import { Story } from './story.js';
 import { Shop } from './shop.js';
 import { Corner } from './corner.js';
 import { UI } from './ui/ui.js';
@@ -17,7 +18,7 @@ class Game {
     this.camX = 0;
     this.viewW = 1280;
     this.ui = new UI(this);
-    this.scenes = { future: new FutureStreet(this), street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
+    this.scenes = { future: new FutureStreet(this), story: new Story(this), street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
     // the game starts in the future, on the flooded quay
     this.scene = this.scenes.future;
     this.running = false;
