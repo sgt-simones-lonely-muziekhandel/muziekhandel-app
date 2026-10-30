@@ -123,10 +123,12 @@ All game-ready images are in [`public/art/`](../../public/art/) as WebP (about 4
 | Folder | Contents |
 |---|---|
 | `past-street/`, `future-street/` | Parallax layers, back to front: `sky`, `far`, `walk` (the quay the player walks on, with the shop on the right), `foreground` (dark silhouettes). Layers are full-width and line up with each other. `future-street/crate` is the box with the cylinders. |
-| `shop/` | `back-wall`, `foreground`, and the clickable objects `piano`, `counter`, `cabinet`, `gramophone`; `frames/` holds the empty golden picture frames. |
+| `shop/` | `back-wall`, `foreground`, and the clickable objects `piano`, `counter`, `cabinet`, `gramophone` (piano and cabinet seen straight from the front); `frames/` holds the empty golden picture frames. |
 | `closeups/` | Full-screen views: `piano` (empty music stand and keyboard strip, filled by the game), `cabinet` (empty slots), `gallery-wall`, `gramophone-corner`. |
-| `characters/` | `kid-past`, `kid-future` (gas mask), `shopkeeper`: each has `full` plus separate puppet parts (`head`, `torso`, arms, legs). Parts ending in `-1` were on the left of the sheet. `sheetX`/`sheetY` in the manifest give each part's position on the original sheet, as a starting point for putting the puppet together. All characters share one scale. |
+| `characters/` | `kid-past`, `kid-future` (gas mask), `shopkeeper`: each has `full` plus separate puppet parts (`head`, `torso`, arms, legs). Parts ending in `-1` were on the left of the sheet. `sheetX`/`sheetY` in the manifest give each part's position on the original sheet, as a starting point for putting the puppet together. All characters share one scale. The shopkeeper faces the front and has extra heads to swap in while he talks: `head-smile`, `head-talk`, `head-blink`, `head-surprised`. |
+| `characters/cyclist-man`, `cyclist-woman` | Street NPCs on bicycles, side view facing right (mirror them to ride left). `full` plus `bicycle` (frame without wheels), `wheel-1`/`wheel-2` and `crank` to spin, the rider's body and legs to pedal. |
 | `items/cylinder/` | Phonograph cylinder tubes (`cream`, `red`, `blue`, `green`, `open`). |
+| `items/sheet-music/` | `cover-1` to `cover-6`: placeholder covers with an empty title label (the real title is drawn by the game). `cover-inside`, `page-left`, `page-right` (empty staves) for the opening animation: the cover folds open from the left edge and the two pages show side by side, with the notes drawn on the staves by the game. |
 | `ui/` | Empty `card`, `plaque`, `button`, `paper-strip`; `icons/` with `read`, `music`, `discover`, `collect`, `play`, `back`, `sound`, `close`. |
 | `fx/` | `glow-yellow`, `glow-orange`, `fog`, `rain`, `ash` (light on transparency, works with additive blending), `sheet-music`, `note` (for the time-travel swirl). |
 | `portraits/` | `team-1` to `team-4`: the team as oil paintings for the gallery. |

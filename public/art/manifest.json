@@ -57,7 +57,7 @@
   "shop/piano": {
     "file": "art/shop/piano.webp",
     "width": 1024,
-    "height": 950
+    "height": 910
   },
   "shop/counter": {
     "file": "art/shop/counter.webp",
@@ -66,7 +66,7 @@
   },
   "shop/cabinet": {
     "file": "art/shop/cabinet.webp",
-    "width": 704,
+    "width": 648,
     "height": 1024
   },
   "shop/gramophone": {
@@ -275,94 +275,262 @@
   },
   "characters/shopkeeper/full": {
     "file": "art/characters/shopkeeper/full.webp",
-    "width": 251,
-    "height": 654,
-    "sheetX": 65,
-    "sheetY": 30
+    "width": 328,
+    "height": 660,
+    "sheetX": 49,
+    "sheetY": 22
   },
   "characters/shopkeeper/head": {
     "file": "art/characters/shopkeeper/head.webp",
-    "width": 153,
-    "height": 140,
-    "sheetX": 610,
-    "sheetY": 9
+    "width": 148,
+    "height": 152,
+    "sheetX": 638,
+    "sheetY": 13
   },
   "characters/shopkeeper/upper-arm-1": {
     "file": "art/characters/shopkeeper/upper-arm-1.webp",
-    "width": 94,
+    "width": 97,
     "height": 125,
-    "sheetX": 479,
-    "sheetY": 132
+    "sheetX": 463,
+    "sheetY": 145
   },
   "characters/shopkeeper/torso": {
     "file": "art/characters/shopkeeper/torso.webp",
-    "width": 208,
-    "height": 267,
-    "sheetX": 580,
-    "sheetY": 153
+    "width": 236,
+    "height": 264,
+    "sheetX": 594,
+    "sheetY": 154
   },
   "characters/shopkeeper/upper-arm-2": {
     "file": "art/characters/shopkeeper/upper-arm-2.webp",
-    "width": 93,
-    "height": 125,
-    "sheetX": 817,
-    "sheetY": 132
+    "width": 97,
+    "height": 124,
+    "sheetX": 867,
+    "sheetY": 146
   },
   "characters/shopkeeper/lower-arm-1": {
     "file": "art/characters/shopkeeper/lower-arm-1.webp",
-    "width": 77,
-    "height": 161,
+    "width": 71,
+    "height": 181,
     "sheetX": 453,
-    "sheetY": 248
+    "sheetY": 258
   },
   "characters/shopkeeper/lower-arm-2": {
     "file": "art/characters/shopkeeper/lower-arm-2.webp",
-    "width": 76,
-    "height": 161,
-    "sheetX": 860,
-    "sheetY": 248
+    "width": 71,
+    "height": 179,
+    "sheetX": 903,
+    "sheetY": 260
   },
   "characters/shopkeeper/upper-leg-1": {
     "file": "art/characters/shopkeeper/upper-leg-1.webp",
-    "width": 86,
-    "height": 119,
-    "sheetX": 513,
-    "sheetY": 364
+    "width": 84,
+    "height": 117,
+    "sheetX": 541,
+    "sheetY": 367
   },
   "characters/shopkeeper/upper-leg-2": {
     "file": "art/characters/shopkeeper/upper-leg-2.webp",
-    "width": 87,
-    "height": 126,
-    "sheetX": 792,
-    "sheetY": 364
+    "width": 84,
+    "height": 116,
+    "sheetX": 799,
+    "sheetY": 368
   },
   "characters/shopkeeper/lower-leg-1": {
     "file": "art/characters/shopkeeper/lower-leg-1.webp",
-    "width": 84,
-    "height": 113,
-    "sheetX": 520,
-    "sheetY": 479
+    "width": 77,
+    "height": 109,
+    "sheetX": 546,
+    "sheetY": 480
   },
   "characters/shopkeeper/lower-leg-2": {
     "file": "art/characters/shopkeeper/lower-leg-2.webp",
-    "width": 87,
-    "height": 107,
-    "sheetX": 792,
-    "sheetY": 486
+    "width": 77,
+    "height": 108,
+    "sheetX": 802,
+    "sheetY": 481
   },
   "characters/shopkeeper/foot-1": {
     "file": "art/characters/shopkeeper/foot-1.webp",
-    "width": 139,
-    "height": 94,
-    "sheetX": 469,
+    "width": 119,
+    "height": 99,
+    "sheetX": 500,
     "sheetY": 585
   },
   "characters/shopkeeper/foot-2": {
     "file": "art/characters/shopkeeper/foot-2.webp",
-    "width": 136,
-    "height": 108,
-    "sheetX": 750,
-    "sheetY": 586
+    "width": 115,
+    "height": 102,
+    "sheetX": 805,
+    "sheetY": 585
+  },
+  "characters/shopkeeper/head-smile": {
+    "file": "art/characters/shopkeeper/head-smile.webp",
+    "width": 148,
+    "height": 150,
+    "sheetX": 11,
+    "sheetY": 37
+  },
+  "characters/shopkeeper/head-talk": {
+    "file": "art/characters/shopkeeper/head-talk.webp",
+    "width": 149,
+    "height": 151,
+    "sheetX": 177,
+    "sheetY": 37
+  },
+  "characters/shopkeeper/head-blink": {
+    "file": "art/characters/shopkeeper/head-blink.webp",
+    "width": 149,
+    "height": 151,
+    "sheetX": 345,
+    "sheetY": 37
+  },
+  "characters/shopkeeper/head-surprised": {
+    "file": "art/characters/shopkeeper/head-surprised.webp",
+    "width": 148,
+    "height": 151,
+    "sheetX": 512,
+    "sheetY": 36
+  },
+  "characters/cyclist-man/head": {
+    "file": "art/characters/cyclist-man/head.webp",
+    "width": 116,
+    "height": 125,
+    "sheetX": 544,
+    "sheetY": 16
+  },
+  "characters/cyclist-man/full": {
+    "file": "art/characters/cyclist-man/full.webp",
+    "width": 496,
+    "height": 566,
+    "sheetX": 9,
+    "sheetY": 74
+  },
+  "characters/cyclist-man/torso": {
+    "file": "art/characters/cyclist-man/torso.webp",
+    "width": 220,
+    "height": 185,
+    "sheetX": 522,
+    "sheetY": 130
+  },
+  "characters/cyclist-man/bicycle": {
+    "file": "art/characters/cyclist-man/bicycle.webp",
+    "width": 382,
+    "height": 284,
+    "sheetX": 666,
+    "sheetY": 233
+  },
+  "characters/cyclist-man/upper-leg-1": {
+    "file": "art/characters/cyclist-man/upper-leg-1.webp",
+    "width": 74,
+    "height": 114,
+    "sheetX": 530,
+    "sheetY": 313
+  },
+  "characters/cyclist-man/upper-leg-2": {
+    "file": "art/characters/cyclist-man/upper-leg-2.webp",
+    "width": 70,
+    "height": 111,
+    "sheetX": 603,
+    "sheetY": 313
+  },
+  "characters/cyclist-man/lower-leg-1": {
+    "file": "art/characters/cyclist-man/lower-leg-1.webp",
+    "width": 77,
+    "height": 123,
+    "sheetX": 522,
+    "sheetY": 428
+  },
+  "characters/cyclist-man/lower-leg-2": {
+    "file": "art/characters/cyclist-man/lower-leg-2.webp",
+    "width": 90,
+    "height": 118,
+    "sheetX": 618,
+    "sheetY": 426
+  },
+  "characters/cyclist-man/wheel-1": {
+    "file": "art/characters/cyclist-man/wheel-1.webp",
+    "width": 163,
+    "height": 165,
+    "sheetX": 553,
+    "sheetY": 537
+  },
+  "characters/cyclist-man/wheel-2": {
+    "file": "art/characters/cyclist-man/wheel-2.webp",
+    "width": 165,
+    "height": 165,
+    "sheetX": 893,
+    "sheetY": 537
+  },
+  "characters/cyclist-man/crank": {
+    "file": "art/characters/cyclist-man/crank.webp",
+    "width": 162,
+    "height": 67,
+    "sheetX": 723,
+    "sheetY": 583
+  },
+  "characters/cyclist-woman/upper-body": {
+    "file": "art/characters/cyclist-woman/upper-body.webp",
+    "width": 230,
+    "height": 281,
+    "sheetX": 566,
+    "sheetY": 8
+  },
+  "characters/cyclist-woman/full": {
+    "file": "art/characters/cyclist-woman/full.webp",
+    "width": 496,
+    "height": 549,
+    "sheetX": 4,
+    "sheetY": 87
+  },
+  "characters/cyclist-woman/skirt": {
+    "file": "art/characters/cyclist-woman/skirt.webp",
+    "width": 211,
+    "height": 197,
+    "sheetX": 483,
+    "sheetY": 272
+  },
+  "characters/cyclist-woman/bicycle": {
+    "file": "art/characters/cyclist-woman/bicycle.webp",
+    "width": 358,
+    "height": 274,
+    "sheetX": 692,
+    "sheetY": 230
+  },
+  "characters/cyclist-woman/lower-leg-1": {
+    "file": "art/characters/cyclist-woman/lower-leg-1.webp",
+    "width": 74,
+    "height": 113,
+    "sheetX": 518,
+    "sheetY": 466
+  },
+  "characters/cyclist-woman/lower-leg-2": {
+    "file": "art/characters/cyclist-woman/lower-leg-2.webp",
+    "width": 80,
+    "height": 113,
+    "sheetX": 615,
+    "sheetY": 466
+  },
+  "characters/cyclist-woman/wheel-2": {
+    "file": "art/characters/cyclist-woman/wheel-2.webp",
+    "width": 168,
+    "height": 169,
+    "sheetX": 894,
+    "sheetY": 536
+  },
+  "characters/cyclist-woman/wheel-1": {
+    "file": "art/characters/cyclist-woman/wheel-1.webp",
+    "width": 146,
+    "height": 142,
+    "sheetX": 536,
+    "sheetY": 574
+  },
+  "characters/cyclist-woman/crank": {
+    "file": "art/characters/cyclist-woman/crank.webp",
+    "width": 167,
+    "height": 68,
+    "sheetX": 704,
+    "sheetY": 606
   },
   "items/cylinder/cream": {
     "file": "art/items/cylinder/cream.webp",
@@ -388,6 +556,51 @@
     "file": "art/items/cylinder/open.webp",
     "width": 430,
     "height": 512
+  },
+  "items/sheet-music/cover-1": {
+    "file": "art/items/sheet-music/cover-1.webp",
+    "width": 356,
+    "height": 498
+  },
+  "items/sheet-music/cover-2": {
+    "file": "art/items/sheet-music/cover-2.webp",
+    "width": 354,
+    "height": 498
+  },
+  "items/sheet-music/cover-3": {
+    "file": "art/items/sheet-music/cover-3.webp",
+    "width": 358,
+    "height": 499
+  },
+  "items/sheet-music/cover-4": {
+    "file": "art/items/sheet-music/cover-4.webp",
+    "width": 356,
+    "height": 499
+  },
+  "items/sheet-music/cover-5": {
+    "file": "art/items/sheet-music/cover-5.webp",
+    "width": 358,
+    "height": 498
+  },
+  "items/sheet-music/cover-6": {
+    "file": "art/items/sheet-music/cover-6.webp",
+    "width": 353,
+    "height": 498
+  },
+  "items/sheet-music/cover-inside": {
+    "file": "art/items/sheet-music/cover-inside.webp",
+    "width": 566,
+    "height": 768
+  },
+  "items/sheet-music/page-left": {
+    "file": "art/items/sheet-music/page-left.webp",
+    "width": 558,
+    "height": 768
+  },
+  "items/sheet-music/page-right": {
+    "file": "art/items/sheet-music/page-right.webp",
+    "width": 564,
+    "height": 768
   },
   "ui/card": {
     "file": "art/ui/card.webp",
