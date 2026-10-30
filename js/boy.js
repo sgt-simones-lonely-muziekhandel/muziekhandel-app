@@ -2,28 +2,35 @@
 // (head, torso, upper/lower arms and legs). Each piece turns around its joint, so the walk
 // is posed every frame: legs swing and bend, arms swing the other way, the body rides up
 // and down on whichever foot is on the ground. Walks with the arrow keys or to a clicked spot.
+// The future boy (characters/kid-future, grey jacket and gas mask) was cut from the same sheet
+// layout, so his pieces share the same joints.
 
-const ART = 'public/art/characters/kid-past/';
-const load = name => { const i = new Image(); i.src = `${ART}${name}.webp`; return i; };
 const ready = img => img.complete && img.naturalWidth > 0;
 
 // Joints in each piece's own pixels. `pivot` is where it hangs from; `end` is where the next piece
 // hangs (elbow, knee); `soles` are heel, middle and toe of the shoe. All pieces share one scale.
-const PARTS = {
-  torso: { img: load('torso'), neck: [156, 14], shoulder: [128, 50], hipFront: [150, 196], hipBack: [124, 196] },
-  head: { img: load('head'), pivot: [96, 158] },
-  upperArm1: { img: load('upper-arm-1'), pivot: [54, 21], end: [25, 91] },
-  lowerArm1: { img: load('lower-arm-1'), pivot: [25, 19] },
-  upperArm2: { img: load('upper-arm-2'), pivot: [23, 20], end: [55, 93] },
-  lowerArm2: { img: load('lower-arm-2'), pivot: [57, 18] },
-  upperLeg1: { img: load('upper-leg-1'), pivot: [52, 21], end: [40, 124] },
-  lowerLeg1: { img: load('lower-leg-1'), pivot: [60, 13], soles: [[28, 150], [78, 158], [115, 152]] },
-  upperLeg2: { img: load('upper-leg-2'), pivot: [33, 19], end: [49, 124] },
-  lowerLeg2: { img: load('lower-leg-2'), pivot: [27, 11], soles: [[9, 143], [55, 147], [110, 141]] },
-};
-// The angle (forward of straight down) each upper piece already has in its picture.
-for (const p of Object.values(PARTS)) {
-  p.rest = p.end ? Math.atan2(p.end[0] - p.pivot[0], p.end[1] - p.pivot[1]) : 0;
+const kits = new Map();
+function parts(kit) {
+  if (kits.has(kit)) return kits.get(kit);
+  const load = name => { const i = new Image(); i.src = `public/art/characters/${kit}/${name}.webp`; return i; };
+  const P = {
+    torso: { img: load('torso'), neck: [156, 14], shoulder: [128, 50], hipFront: [150, 196], hipBack: [124, 196] },
+    head: { img: load('head'), pivot: [96, 158] },
+    upperArm1: { img: load('upper-arm-1'), pivot: [54, 21], end: [25, 91] },
+    lowerArm1: { img: load('lower-arm-1'), pivot: [25, 19] },
+    upperArm2: { img: load('upper-arm-2'), pivot: [23, 20], end: [55, 93] },
+    lowerArm2: { img: load('lower-arm-2'), pivot: [57, 18] },
+    upperLeg1: { img: load('upper-leg-1'), pivot: [52, 21], end: [40, 124] },
+    lowerLeg1: { img: load('lower-leg-1'), pivot: [60, 13], soles: [[28, 150], [78, 158], [115, 152]] },
+    upperLeg2: { img: load('upper-leg-2'), pivot: [33, 19], end: [49, 124] },
+    lowerLeg2: { img: load('lower-leg-2'), pivot: [27, 11], soles: [[9, 143], [55, 147], [110, 141]] },
+  };
+  // The angle (forward of straight down) each upper piece already has in its picture.
+  for (const p of Object.values(P)) {
+    p.rest = p.end ? Math.atan2(p.end[0] - p.pivot[0], p.end[1] - p.pivot[1]) : 0;
+  }
+  kits.set(kit, P);
+  return P;
 }
 const FIGURE_H = 600; // head top to sole, in piece pixels, standing straight
 
@@ -49,7 +56,8 @@ const rot = ([x, y], a) => [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) +
 const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
 
 export class Boy {
-  constructor(x) {
+  constructor(x, kit = 'kid-past') {
+    this.parts = parts(kit);
     this.x = x;
     this.dir = 1;
     this.moving = false;
@@ -133,7 +141,7 @@ export class Boy {
 
   draw(ctx, footY, height) {
     this.lastHeight = height;
-    const P = PARTS, T = P.torso;
+    const P = this.parts, T = P.torso;
     const pose = this.pose();
     const k = height / FIGURE_H;
 

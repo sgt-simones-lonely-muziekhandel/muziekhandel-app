@@ -1,4 +1,5 @@
 import { Street } from './street.js';
+import { FutureStreet } from './future.js';
 import { Shop } from './shop.js';
 import { Corner } from './corner.js';
 import { UI } from './ui/ui.js';
@@ -16,8 +17,9 @@ class Game {
     this.camX = 0;
     this.viewW = 1280;
     this.ui = new UI(this);
-    this.scenes = { street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
-    this.scene = this.scenes.street;
+    this.scenes = { future: new FutureStreet(this), street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
+    // the game starts in the future, on the flooded quay
+    this.scene = this.scenes.future;
     this.running = false;
     this.bindInput();
     addEventListener('resize', () => this.resize());
@@ -159,12 +161,12 @@ document.getElementById('btn-start').addEventListener('click', () => {
   game.start();
 });
 
-// Allow ?scene=shop for quick testing.
+// Allow ?scene=street or ?scene=shop for quick testing.
 const qs = new URLSearchParams(location.search);
 if (qs.get('autostart') != null) {
   document.getElementById('title-screen').classList.add('gone');
   game.start();
   const sc = qs.get('scene');
-  if (game.scenes[sc] && sc !== 'street') { game.scenes.shop.greeted = qs.get('greet') == null; game.scene = game.scenes[sc]; game.fit(); game.scene.enter(); }
+  if (game.scenes[sc] && game.scenes[sc] !== game.scene) { game.scenes.shop.greeted = qs.get('greet') == null; game.scene = game.scenes[sc]; game.fit(); game.scene.enter(); }
   if (qs.get('open')) setTimeout(() => game.ui.open(qs.get('open'), { pieceId: qs.get('piece'), composerId: qs.get('composer') }), 300);
 }

@@ -4,6 +4,7 @@ One document per feature: what it does for the player, how it's built, where the
 
 | Feature | Document | Main files |
 |---|---|---|
+| Future street (the start) | [future-street.md](future-street.md) | `js/future.js` |
 | Street outside the shop | [street.md](street.md) | `js/street.js` |
 | Real-time sky | [sky.md](sky.md) | `js/sky.js` |
 | Cyclists | [cyclists.md](cyclists.md) | `js/cyclist.js` |

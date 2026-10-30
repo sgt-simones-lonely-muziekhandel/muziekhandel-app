@@ -1,6 +1,6 @@
 # Player character
 
-The boy with the flat cap, jacket and backpack (`public/art/characters/kid-past/`). The same character walks on the street, in the shop and in the listening corner.
+The boy with the flat cap, jacket and backpack (`public/art/characters/kid-past/`). The same character walks on the street, in the shop and in the listening corner. In the [future street](future-street.md) he is `characters/kid-future/` (grey jacket, gas mask): `new Boy(x, 'kid-future')`. Both were cut from the same sheet layout, so they share the joints in `parts()`.
 
 ## For the player
 

@@ -42,7 +42,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 
 ### Test URL parameters
 
-`?autostart`, `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
+`?autostart` (starts in the future), `&scene=street` / `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
 
 ## Known limits / next steps
 

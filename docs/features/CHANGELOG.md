@@ -2,6 +2,17 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-30 — The game starts in the future
+
+Added:
+
+- [Future street](future-street.md): the game now starts on the flooded, ruined quay in the future, with the boy in his gas mask. Rain, distant lightning, rippling flood water. The shop can't be reached; instead a glowing crate stands on the quay, and opening it leads to the past (for now straight to the [street](street.md); the story in between comes later).
+
+Changed:
+
+- [Player](player.md): `new Boy(x, kit)` takes the character folder (`'kid-past'` by default, `'kid-future'` for the future); both share the same joints.
+- [Game shell](game-shell.md): the first scene is `future`; `?autostart&scene=street` starts in the past.
+
 ## 2026-10-30 — Going through the shop door, keeper dialogue higher
 
 Changed:
