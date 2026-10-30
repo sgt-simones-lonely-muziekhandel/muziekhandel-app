@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Muziekhandel Van der Velde</title>
+  <meta name="description" content="Speel, luister en ontdek muziek in een oude muziekwinkel in Amsterdam, rond 1900.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%8E%B9%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Cinzel+Decorative:wght@700&family=EB+Garamond:ital,wght@0,500;0,700;1,500&family=Noto+Music&family=Playfair+Display:ital,wght@0,700;0,800;1,500&family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game">
+    <canvas id="stage"></canvas>
+    <div id="hud">
+      <div class="hud-right">
+        <span id="piano-status" class="hud-chip" hidden>Piano wordt gestemd…</span>
+        <button class="hud-btn" id="btn-help" title="Hulp van Meneer Van der Velde">?</button>
+      </div>
+    </div>
+    <div class="hud-chip rotate-hint">Draai je scherm voor het mooiste beeld</div>
+    <div id="overlay" hidden></div>
+    <div id="fade"></div>
+
+    <section id="title-screen">
+      <div class="title-plaque">
+        <div class="title-small">Muziekhandel</div>
+        <h1>Van der Velde</h1>
+        <div class="title-since">— sinds 1892 —</div>
+      </div>
+      <p class="title-sub">Speel, luister en ontdek muziek in Amsterdam, rond 1900.</p>
+      <button class="btn brass big" id="btn-start">Start</button>
+      <p class="title-keys">← → lopen &nbsp;·&nbsp; ↑ of Enter: naar binnen / bekijken &nbsp;·&nbsp; Esc: terug</p>
+    </section>
+  </div>
+
+  <!-- Hand-drawn edge filter used by paper cards -->
+  <svg width="0" height="0" style="position:absolute">
+    <filter id="rough">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5"/>
+    </filter>
+  </svg>
+
+  <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
