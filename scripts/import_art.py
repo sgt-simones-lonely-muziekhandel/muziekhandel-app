@@ -38,7 +38,7 @@ ARM_LEG = ["upper-arm-1", "torso", "upper-arm-2", "lower-arm-1", "lower-arm-2", 
 ASSETS = [
     # Past street (parallax, back to front)
     ("past/Serene Golden-Hour Cloudscape.png", "opaque", "past-street/sky", {}),
-    ("past/Magenta-Sky Amsterdam Canal at Golden Hour.png", "layer", "past-street/far", {}),
+    ("past/Intact Three-Arched Canal Bridge.png", "layer", "past-street/far", {}),
     ("past/Golden-Hour Canal Music Shop.png", "layer", "past-street/walk", {}),
     ("past/Magenta Garden Silhouette Frame.png", "layer", "past-street/foreground", {}),
     # Future street
