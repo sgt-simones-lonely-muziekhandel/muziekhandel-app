@@ -94,9 +94,8 @@ export class Corner {
   }
 }
 
-// The room with the gramophone on its table, lit for the time of day (W × H scene units). Also
-// drawn in the gramophone close-up (ui/gramophone.js), so the window there matches the clock too.
-export function drawCornerPicture(ctx, sky, time) {
+// The room with the gramophone on its table, lit for the time of day (W × H scene units).
+function drawCornerPicture(ctx, sky, time) {
   if (ready(IMG.bg)) ctx.drawImage(IMG.bg, 0, 0, W, H);
   const g = IMG.gramophone;
   if (ready(g)) {
@@ -107,7 +106,6 @@ export function drawCornerPicture(ctx, sky, time) {
   }
   drawNight(ctx, sky, time);
 }
-export const CORNER_SIZE = { w: W, h: H };
 
 // Evening and night: the sky in the window turns the colour of the real sky, the room gets darker
 // and bluer, the street lamps outside and a lamp over the gramophone glow (not too bright).

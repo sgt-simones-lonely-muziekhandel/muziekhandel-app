@@ -17,7 +17,7 @@ A small room to the right of the shop, where the [gramophone](gramophone.md) sta
 - **Gramophone**: `public/art/shop/gramophone.webp` (594 × 1024) is a cylinder phonograph on its own cabinet; only the top 584 source rows (horn and the box down to its black base, `TOP_ROWS`) are drawn, 300 units wide, standing on the table top (`GRAMO`), so the base isn't cut off.
 - **Boy**: drawn bigger than in the shop (360 units high, feet at y = 706) because the corner is a close-up. He can walk from x = 60 to 260 units before the right edge (the armchair).
 - **Hotspots** (`HOTSPOTS`): same format and helpers as the shop (`js/hotspots.js`).
-- **Picture**: `drawCornerPicture(ctx, sky, time)` draws the room, the phonograph and the time of day; it is exported so the [gramophone](gramophone.md) close-up shows exactly the same room.
+- **Picture**: `drawCornerPicture(ctx, sky, time)` draws the room, the phonograph and the time of day.
 - **Time of day** (`drawNight`): the painting is in daylight, so by the visitor's clock ([sky](sky.md)) the window panes are multiplied with the real sky colours, the room gets a dark blue tint, and once the street lamps are on, the two lamps seen through the window and a soft warm light over the gramophone glow. The boy is darkened a little, as in the shop. Test with `?uur=21`.
 - **Scene changes**: in `update`, holding ← at the left edge calls `game.goTo('shop')`; the shop's right edge calls `game.goTo('corner')`.
 

@@ -2,6 +2,25 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Gramophone without floating notes
+
+Changed:
+
+- [Gramophone](gramophone.md): no more music notes floating up from the cylinder while it plays.
+
+## 2026-10-30 — Gramophone showcase
+
+Changed:
+
+- [Gramophone](gramophone.md): the picture of the room on the left is replaced by a dark showcase with a warm spotlight; the chosen cylinder stands big in the centre of it, opened, with its lid beside it and its label underneath. The light breathes while the music plays.
+
+## 2026-10-30 — Gramophone: no title, labels under the cylinders, lids that pop off
+
+Changed:
+
+- [Gramophone](gramophone.md): the hard-to-read *De grammofoon* title is gone (only *Terug* and ✕ remain). The title and composer tags now sit under each cylinder instead of over it. Choosing a cylinder animates its box: it jumps, the lid (`<colour>-lid`) flies off and lands next to it, and the box shows the wax cylinder inside (`<colour>-open`); choosing another one or stopping puts the lid back on.
+- [Game shell](game-shell.md): `frame()` has a `hideTitle` option.
+
 ## 2026-10-30 — Smaller portraits in the shop, composer card without family tree
 
 Changed:
