@@ -11,22 +11,22 @@ const TOPICS = [
     q: 'Hoe speel ik piano?',
     a: 'Je kunt de toetsen aanklikken, of je eigen toetsenbord gebruiken. Kijk maar naar het plaatje: elke letter is een toets van de piano. Kies daarna bladmuziek en druk op "Speel mee". De noot die oplicht, die speel jij!',
     guide: true,
-    go: ['piano', '🎹 Naar de piano'],
+    go: ['piano', 'Naar de piano'],
   },
   {
     q: 'Waar is de bladmuziek?',
     a: 'In de grote kast, rechts naast mijn toonbank! In elke koker zit een opgerold muziekstuk. Haal er maar eentje uit. Met de pijltjes blader je, en met de spatiebalk speel je het op de piano.',
-    go: ['library', '📜 Naar de kast'],
+    go: ['library', 'Naar de kast'],
   },
   {
     q: 'Wie zijn die mensen aan de muur?',
     a: 'Dat zijn componisten: mensen die muziek bedenken en opschrijven. Bach, Mozart, Beethoven en nog meer. Klik op een schilderij en je ziet hun verhaal en hun hele familie.',
-    go: ['gallery', '🖼️ Naar de schilderijen'],
+    go: ['gallery', 'Naar de schilderijen'],
   },
   {
     q: 'Mag ik muziek luisteren?',
     a: 'Natuurlijk! Mijn grammofoon is gloednieuw, de nieuwste uitvinding! Hij staat in de luisterhoek: loop maar helemaal naar rechts. Kies een cilinder en luister maar.',
-    go: ['gramophone', '🎵 Naar de grammofoon'],
+    go: ['gramophone', 'Naar de grammofoon'],
   },
 ];
 
@@ -41,7 +41,7 @@ export function keeperView(ui, { greeting = false } = {}) {
           <p class="keeper-text"></p>
           <div class="keeper-extra"></div>
           <div class="keeper-actions">
-            <button class="btn wood small speak">🔊 Voorlezen</button>
+            <button class="btn wood small speak">Voorlezen</button>
           </div>
           <div class="keeper-qs"></div>
         </div>

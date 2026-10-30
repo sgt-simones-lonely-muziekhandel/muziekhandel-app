@@ -38,7 +38,7 @@ ARM_LEG = ["upper-arm-1", "torso", "upper-arm-2", "lower-arm-1", "lower-arm-2", 
 ASSETS = [
     # Past street (parallax, back to front)
     ("past/Serene Golden-Hour Cloudscape.png", "opaque", "past-street/sky", {}),
-    ("past/Magenta-Sky Amsterdam Canal at Golden Hour.png", "layer", "past-street/far", {}),
+    ("past/Intact Three-Arched Canal Bridge.png", "layer", "past-street/far", {}),
     ("past/Golden-Hour Canal Music Shop.png", "layer", "past-street/walk", {}),
     ("past/Magenta Garden Silhouette Frame.png", "layer", "past-street/foreground", {}),
     # Future street
@@ -50,9 +50,9 @@ ASSETS = [
     # Shop floor
     ("music_store_internal/Canal-Side Atelier at Dusk.png", "opaque", "shop/back-wall", {}),
     ("music_store_internal/Magenta Interior Silhouette with Lamps.png", "layer", "shop/foreground", {}),
-    ("music_store_internal/Slapende kat op een antieke piano.png", "object", "shop/piano", {"max": 1024}),
+    ("music_store_internal/Sleeping Cat on an Ornate Piano.png", "object", "shop/piano", {"max": 1024}),
     ("music_store_internal/Vintage Shop Counter on Magenta.png", "object", "shop/counter", {"max": 1024}),
-    ("music_store_internal/Antique Apothecary Music Cabinet.png", "object", "shop/cabinet", {"max": 1024}),
+    ("music_store_internal/Antique Music Cabinet with Sheet Music.png", "object", "shop/cabinet", {"max": 1024}),
     ("music_store_internal/Antique Gramophone on Ornate Cabinet.png", "object", "shop/gramophone", {"max": 1024}),
     ("music_store_internal/Ornate Golden Frames on Magenta.png", "sheet", "shop/frames",
      {"max": 768, "dilate": 6, "row": True, "names": ["oval-large", "rect-large", "oval-small", "rect-medium", "rect-small"]}),
@@ -66,11 +66,26 @@ ASSETS = [
      {"scale": CHAR_SCALE, "names": ["head", "full", *ARM_LEG, "lower-leg-1", "lower-leg-2"]}),
     ("characters/Wartime Gas Mask Character Sprite Sheet.png", "sheet", "characters/kid-future",
      {"scale": CHAR_SCALE, "names": ["head", "full", *ARM_LEG, "lower-leg-1", "lower-leg-2"]}),
-    ("characters/Victorian Gentleman Puppet Sprite Sheet.png", "sheet", "characters/shopkeeper",
+    ("characters/Jovial Gentleman Character Rig Sheet.png", "sheet", "characters/shopkeeper",
      {"scale": CHAR_SCALE, "names": ["full", "head", *ARM_LEG, "lower-leg-1", "lower-leg-2", "foot-1", "foot-2"]}),
+    # Talking/blinking heads, scaled to the size of the shopkeeper's head part
+    ("characters/Four Cheerful Elderly Expressions.png", "sheet", "characters/shopkeeper",
+     {"scale": 0.31, "dilate": 6, "row": True, "names": ["head-smile", "head-talk", "head-blink", "head-surprised"]}),
+    # Cyclists (side view, facing right; wheels and crank spin, legs pedal)
+    ("characters/Edwardian Bicycle Paper Puppet Sheet.png", "sheet", "characters/cyclist-man",
+     {"scale": CHAR_SCALE, "names": ["head", "full", "torso", "bicycle", "upper-leg-1", "upper-leg-2",
+                                     "lower-leg-1", "lower-leg-2", "wheel-1", "wheel-2", "crank"]}),
+    ("characters/Edwardian Bicycle Paper Doll Assembly Sheet.png", "sheet", "characters/cyclist-woman",
+     {"scale": CHAR_SCALE, "names": ["upper-body", "full", "skirt", "bicycle", "lower-leg-1", "lower-leg-2",
+                                     "wheel-2", "wheel-1", "crank"]}),
     # Items
     ("music_store_internal/Vintage Phonograph Cylinder Collection.png", "sheet", "items/cylinder",
      {"max": 512, "dilate": 6, "row": True, "names": ["cream", "red", "blue", "green", "open"]}),
+    # Sheet music: placeholder covers, and the pieces for the opening animation
+    ("details/Vintage Art Nouveau Music Covers.png", "sheet", "items/sheet-music",
+     {"max": 512, "dilate": 6, "row": True, "names": ["cover-1", "cover-2", "cover-3", "cover-4", "cover-5", "cover-6"]}),
+    ("details/Antique Music Manuscript Triptych.png", "sheet", "items/sheet-music",
+     {"max": 768, "dilate": 6, "row": True, "names": ["cover-inside", "page-left", "page-right"]}),
     # UI
     ("details/Vintage Parchment and Brass UI Frames.png", "sheet", "ui",
      {"max": 512, "dilate": 6, "row": True, "names": ["card", "plaque", "button", "paper-strip"]}),
@@ -141,7 +156,8 @@ def split(rgba, dilate, threshold=0.5, row=False, min_area=1500, pad=4):
         y0, y1 = max(sl[0].start - pad, 0), min(sl[0].stop + pad, rgba.shape[0])
         x0, x1 = max(sl[1].start - pad, 0), min(sl[1].stop + pad, rgba.shape[1])
         crop = rgba[y0:y1, x0:x1].copy()
-        crop[..., 3] *= grown[y0:y1, x0:x1] == i
+        # keep everything enclosed by the piece too (thin spokes and the hub inside a wheel)
+        crop[..., 3] *= (grown[y0:y1, x0:x1] == i) | ndimage.binary_fill_holes(labels[y0:y1, x0:x1] == i)
         pieces.append(((y0, x0), crop))
     pieces.sort(key=lambda p: p[0][1] if row else (round(p[0][0] / 120), p[0][1]))
     return pieces

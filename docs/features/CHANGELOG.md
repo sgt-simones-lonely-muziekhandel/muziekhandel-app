@@ -2,6 +2,41 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-30 — Louder piano, light-up keys, cyclist puppets, sheet-music books
+
+Changed:
+
+- [Audio](audio.md): the piano is louder (+8 dB), with a limiter so loud chords don't clip.
+- [Piano](piano.md): plain keys without shadows or labels; a key only lights up (with a beam of light and a floating ♪) while it sounds or is the next one to play, together with the note on the sheet. Buttons without emoji, a little bigger.
+- [Game shell](game-shell.md): no emoji on any button; no place names top-left (plaque and close-up titles removed).
+- [Sheet music](sheet-music.md): the cabinet holds sheet-music books (`items/sheet-music/cover-1…6`) with the title and composer printed on the cover, and stars on the plaques. Opening one swings its cover open onto the title page (`cover-inside.webp`, only the title and composer change). Covers and title page use Playfair Display.
+- [Gramophone](gramophone.md): the picture is the listening corner with the chosen cylinder standing big in it, with its label.
+- [Cyclists](cyclists.md): the hand-drawn cyclists are replaced by cut-out puppets of the gentleman and the lady (`characters/cyclist-man`, `cyclist-woman`), with turning wheels and crank and legs that follow the pedals.
+
+Added:
+
+- [Piano](piano.md): in the evening the candles flicker with a faint glow and the room around the piano darkens a little.
+- [Listening corner](listening-corner.md): follows the real time of day: night sky in the window, darker room, glowing lamps.
+- [Game shell](game-shell.md): Backspace / Esc / the browser's back button go one place back; shopkeeper tips close with any key or click.
+
+## 2026-10-30 — Full-screen close-ups, furniture against the wall
+
+Changed:
+
+- [Piano](piano.md): full screen on the piano close-up (`closeups/piano.webp`): music on the music desk, keys in the key slot, buttons on the wood. No window frame.
+- [Composers](composers.md) and [sheet music cabinet](sheet-music.md): the close-ups fill the screen too. Opening and closing them fades to black like a scene change ([game shell](game-shell.md)).
+- [Shop](shop.md): the piano and the cabinet stand against the back wall, with a soft shadow on the wall.
+
+## 2026-10-30 — Shop sizes and evening lights
+
+Changed:
+
+- [Shop](shop.md): bigger piano, cabinet and shopkeeper; the counter is narrower (its middle panel is cut out) but keeps its height, with the desk top just below the window.
+
+Added:
+
+- [Shop](shop.md): in the evening (real time) the room darkens and the three hanging lamps light up, with soft cones of light, a glow on the wall and pools on the floor.
+
 ## 2026-10-30 — Taller counter, door entrance, cylinders at the gramophone
 
 Changed:

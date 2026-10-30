@@ -19,6 +19,7 @@ export function galleryView(ui) {
     cls: 'gallery',
     wide: true,
     closeup: 'public/art/closeups/gallery-wall.webp',
+    full: true,
     tip: 'Dit zijn beroemde componisten: mensen die muziek bedenken en opschrijven. Klik op een schilderij om hun verhaal en hun familie te zien.',
   });
   COMPOSERS.forEach((c, i) => {
@@ -62,7 +63,7 @@ export function composerView(ui, { composerId }) {
     title: c.name,
     cls: 'composer',
     wide: true,
-    tip: 'Links zie je het schilderij, rechts de familie: bovenaan de ouders, in het midden broers, zussen en de componist zelf, onderaan de kinderen. Klik op 🔊 om het verhaal te horen.',
+    tip: 'Links zie je het schilderij, rechts de familie: bovenaan de ouders, in het midden broers, zussen en de componist zelf, onderaan de kinderen. Klik op Voorlezen om het verhaal te horen.',
   });
 
   body.appendChild(h(`
@@ -76,7 +77,7 @@ export function composerView(ui, { composerId }) {
         <div class="tree"><svg class="branches"></svg></div>
       </div>
       <div class="bio paper-inner">
-        <div class="bio-head"><h3>${esc(c.name)} — zijn verhaal</h3><button class="btn wood small speak">🔊 Voorlezen</button></div>
+        <div class="bio-head"><h3>${esc(c.name)} — zijn verhaal</h3><button class="btn wood small speak">Voorlezen</button></div>
         <p>${esc(c.bio)}</p>
         <p class="fact"><b>Wist je dat?</b> ${esc(c.fact)}</p>
         <p class="dates"><b>Geboren:</b> ${esc(c.born)} &nbsp; <b>Gestorven:</b> ${esc(c.died)}</p>
@@ -88,10 +89,10 @@ export function composerView(ui, { composerId }) {
   if (pieces.length) {
     bp.appendChild(h('<b>Bladmuziek in de winkel:</b>'));
     for (const p of pieces) {
-      const b = h(`<button class="btn wood small"><span class="ico">📜</span> ${esc(p.title)}</button>`);
+      const b = h(`<button class="btn wood small">${esc(p.title)}</button>`);
       b.onclick = () => ui.open('sheet', { pieceId: p.id });
       bp.appendChild(b);
-      const g = h(`<button class="btn wood small"><span class="ico">🎵</span> Luister</button>`);
+      const g = h(`<button class="btn wood small">Luister</button>`);
       g.onclick = () => ui.open('gramophone', { pieceId: p.id });
       bp.appendChild(g);
     }

@@ -29,6 +29,6 @@ The third object in the shop: Meneer Van der Velde, the friendly owner with the 
 
 ## Known limits / next steps
 
-- He doesn't move yet. The separate body parts in `public/art/characters/shopkeeper/` could be rigged to make him wave, point at objects and "talk".
+- He doesn't move yet. `public/art/characters/shopkeeper/` now has separate body parts and heads (`head-talk`, `head-blink`, `head-smile`, `head-surprised`), so he could be built as a puppet like the [boy](player.md): blinking, talking while his answer is typed, waving.
 - Speech quality depends on the voices installed on the device.
 - He could give hints based on what the player hasn't tried yet.

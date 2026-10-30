@@ -1,131 +1,210 @@
-// People on old Dutch bikes who ride past while the player stands still.
+// People on old Dutch bikes who ride past while the player stands still: cut-out puppets built
+// from public/art/characters/cyclist-man and cyclist-woman. The wheels turn at their hubs, the
+// crank turns at the bottom bracket and the legs follow the pedals (two-bone IK from hip to pedal).
 
-const INK = '#1d1510';
-const KINDS = [
-  { kind: 'heer', coat: '#3a3f4a', trousers: '#2b2b30', hat: 'bowler', skin: '#e8c4a0' },
-  { kind: 'dame', coat: '#8e3b3b', skirt: '#4a3626', hat: 'wide', skin: '#f0cfae', basket: true },
-  { kind: 'bakker', coat: '#e9e2d0', trousers: '#5b4a3a', hat: 'cap', skin: '#e2b893', basket: true },
-  { kind: 'dame', coat: '#3f5566', skirt: '#6b7a6a', hat: 'wide', skin: '#e8c4a0' },
-];
+const ready = img => img.ready || (img.complete && img.naturalWidth > 0);
+const load = (dir, name) => { const i = new Image(); i.src = `public/art/characters/${dir}/${name}.webp`; return i; };
+
+// Every rig is laid out in the pixels of its full.webp (the finished drawing), so it can be lined up
+// against it. Static pieces: `at` is where the piece's `pivot` goes, `s` its scale, `r` a tilt (radians).
+// Legs: `hip` in full px, `thigh`/`shin` lengths in full px; the lower-leg piece hangs from `pivot`
+// and puts `foot` (the ball of the foot) on the pedal.
+const RIGS = {
+  man: {
+    dir: 'cyclist-man', H: 566,
+    // hubs and crank are points of bicycle.webp, placed with the bicycle's transform
+    bicycle: { at: [222, 474], pivot: [169, 230], s: 1.0, r: -0.05, rearHub: [80, 212], frontHub: [330, 226] },
+    wheels: [{ s: 1.17, pivot: [80, 81] }, { s: 1.17, pivot: [80, 81] }], wheelR: 95,
+    crank: { pivot: [79, 34], s: 1.0, r: 55 },
+    torso: { at: [212, 126], pivot: [75, 10], s: 1.0, r: 0.12, patch: [[31, 44, 18, [40, 64]]] },
+    head: { at: [212, 126], pivot: [53, 120], s: 0.984, r: 0 },
+    legs: {
+      hip: [168, 296], thigh: 106, shin: 126,
+      upper: [{ img: 'upper-leg-1', pivot: [25, 20], knee: [42, 100], s: 1.15 }, { img: 'upper-leg-2', pivot: [30, 20], knee: [40, 100], s: 1.15 }],
+      lower: [{ img: 'lower-leg-1', pivot: [51, 9], foot: [42, 107], s: 1.12 }, { img: 'lower-leg-2', pivot: [23, 7], foot: [53, 105], s: 1.12 }],
+    },
+    order: ['wheels', 'legB', 'bicycle', 'crank', 'legF', 'torso', 'head'],
+  },
+  woman: {
+    dir: 'cyclist-woman', H: 549,
+    bicycle: { at: [222, 482], pivot: [162, 242], s: 1.1, r: 0, rearHub: [47, 219], frontHub: [324, 235] },
+    wheels: [{ s: 1.15, pivot: [73, 71] }, { s: 1.0, pivot: [84, 84] }], wheelR: 83,
+    crank: { pivot: [80, 34], s: 1.0, r: 55 },
+    torso: { img: 'upper-body', at: [78, 10], pivot: [0, 0], s: 1.1, r: 0.04, patch: [[46, 160, 10, [62, 172]]] },
+    skirt: { at: [178, 292], pivot: [105, 12], s: 0.95, r: -0.4, patch: [[84, 14, 10, [118, 16]], [153, 14, 10, [118, 16]]] },
+    legs: {
+      hip: [178, 322], thigh: 100, shin: 124,
+      lower: [{ img: 'lower-leg-1', pivot: [36, 12], foot: [40, 105], s: 1.1, patch: [[36, 14, 11, [36, 34]]] },
+        { img: 'lower-leg-2', pivot: [19, 12], foot: [45, 105], s: 1.1, patch: [[19, 14, 11, [19, 34]]] }],
+    },
+    order: ['wheels', 'legB', 'bicycle', 'crank', 'legF', 'skirt', 'torso'],
+  },
+};
+
+// The pieces have little round joint marks painted on them; `patch` covers those with the colour
+// next to them: [x, y, radius, [sample x, sample y]].
+function patched(img, patches) {
+  const c = document.createElement('canvas');
+  const paint = () => {
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-atop';
+    for (const [x, y, r, [sx, sy]] of patches) {
+      const [R, G, B] = g.getImageData(sx, sy, 1, 1).data;
+      g.fillStyle = `rgb(${R},${G},${B})`;
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    }
+    c.ready = true;
+  };
+  if (ready(img)) paint(); else img.addEventListener('load', paint);
+  return c;
+}
+
+// A point of bicycle.webp in full.webp pixels.
+const onBike = (b, [x, y]) => {
+  const dx = (x - b.pivot[0]) * b.s, dy = (y - b.pivot[1]) * b.s, c = Math.cos(b.r), s = Math.sin(b.r);
+  return [b.at[0] + dx * c - dy * s, b.at[1] + dx * s + dy * c];
+};
+
+for (const rig of Object.values(RIGS)) {
+  const L = n => load(rig.dir, n);
+  rig.img = { bicycle: L('bicycle'), crank: L('crank'), wheel1: L('wheel-1'), wheel2: L('wheel-2'), full: L('full') };
+  for (const key of ['torso', 'head', 'skirt']) {
+    const p = rig[key];
+    if (!p) continue;
+    const img = L(p.img || key);
+    p.image = p.patch ? patched(img, p.patch) : img;
+  }
+  [...(rig.legs.upper || []), ...rig.legs.lower].forEach(p => { p.image = p.patch ? patched(L(p.img), p.patch) : L(p.img); });
+  rig.rear = onBike(rig.bicycle, rig.bicycle.rearHub);
+  rig.front = onBike(rig.bicycle, rig.bicycle.frontHub);
+  rig.bb = rig.bicycle.at;
+  rig.ground = Math.max(rig.rear[1], rig.front[1]) + rig.wheelR;
+}
+export const CYCLIST_RIGS = RIGS;
+
+// The far leg is drawn a little darker so the rider reads as round.
+const shaded = new Map();
+function shade(img) {
+  if (!ready(img)) return null;
+  if (!shaded.has(img)) {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-atop';
+    g.fillStyle = 'rgba(20,12,6,0.3)';
+    g.fillRect(0, 0, c.width, c.height);
+    shaded.set(img, c);
+  }
+  return shaded.get(img);
+}
+
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const ang = v => Math.atan2(v[1], v[0]);
+
+// Knee position for a leg from hip to foot, bending forward (+x).
+function knee(hip, foot, l1, l2) {
+  const d = Math.min(Math.hypot(foot[0] - hip[0], foot[1] - hip[1]), (l1 + l2) * 0.999);
+  const a = Math.atan2(foot[1] - hip[1], foot[0] - hip[0]);
+  const b = Math.acos(Math.max(-1, Math.min(1, (l1 * l1 + d * d - l2 * l2) / (2 * l1 * d))));
+  const k1 = [hip[0] + l1 * Math.cos(a - b), hip[1] + l1 * Math.sin(a - b)];
+  const k2 = [hip[0] + l1 * Math.cos(a + b), hip[1] + l1 * Math.sin(a + b)];
+  return k1[0] > k2[0] ? k1 : k2;
+}
+
+// Draw a piece so that its point `from` lands on `at` and from→to points along `dir`, `len` long:
+// stretched along the bone, `width` times across it.
+function bone(ctx, img, from, to, at, dir, len, width) {
+  if (!img) return;
+  const rest = sub(to, from);
+  ctx.save();
+  ctx.translate(at[0], at[1]);
+  ctx.rotate(dir);
+  ctx.scale(len / Math.hypot(rest[0], rest[1]), width);
+  ctx.rotate(-ang(rest));
+  ctx.drawImage(img, -from[0], -from[1]);
+  ctx.restore();
+}
+
+function piece(ctx, img, p, dy = 0, r = p.r || 0) {
+  if (!img || !ready(img)) return;
+  ctx.save();
+  ctx.translate(p.at[0], p.at[1] + dy);
+  ctx.rotate(r);
+  ctx.scale(p.s, p.s);
+  ctx.drawImage(img, -p.pivot[0], -p.pivot[1]);
+  ctx.restore();
+}
+
+// Draw a rig in its own full.webp pixels, with the crank at angle `crank` and wheels at `wheel`.
+export function drawRig(ctx, rig, crank, wheel) {
+  const I = rig.img, Lg = rig.legs;
+  const bob = Math.sin(crank * 2) * 1.5;
+  const pedal = sgn => [rig.bb[0] + sgn * rig.crank.r * Math.cos(crank), rig.bb[1] + sgn * rig.crank.r * Math.sin(crank) - 6];
+  const hip = [Lg.hip[0], Lg.hip[1] + bob];
+  const leg = (i, sgn, dark) => {
+    const foot = pedal(sgn);
+    const k = knee(hip, foot, Lg.thigh, Lg.shin);
+    const lo = Lg.lower[i], up = Lg.upper?.[i];
+    const pick = img => (dark ? shade(img) : ready(img) ? img : null);
+    bone(ctx, pick(lo.image), lo.pivot, lo.foot, k, ang(sub(foot, k)), Math.hypot(foot[0] - k[0], foot[1] - k[1]), lo.s);
+    if (up) bone(ctx, pick(up.image), up.pivot, up.knee, hip, ang(sub(k, hip)), Lg.thigh, up.s);
+  };
+  for (const part of rig.order) {
+    if (part === 'wheels') {
+      for (const [img, hub, w] of [[I.wheel1, rig.rear, rig.wheels[0]], [I.wheel2, rig.front, rig.wheels[1]]]) {
+        if (!ready(img)) continue;
+        ctx.save();
+        ctx.translate(hub[0], hub[1]);
+        ctx.rotate(wheel);
+        ctx.scale(w.s, w.s);
+        ctx.drawImage(img, -w.pivot[0], -w.pivot[1]);
+        ctx.restore();
+      }
+    } else if (part === 'bicycle') piece(ctx, I.bicycle, rig.bicycle);
+    else if (part === 'crank') piece(ctx, I.crank, { at: rig.bb, pivot: rig.crank.pivot, s: rig.crank.s }, 0, crank);
+    else if (part === 'legB') leg(1, -1, true);
+    else if (part === 'legF') leg(0, 1, false);
+    else if (part === 'torso') piece(ctx, rig.torso.image, rig.torso, bob);
+    else if (part === 'head') piece(ctx, rig.head.image, rig.head, bob);
+    else if (part === 'skirt') piece(ctx, rig.skirt.image, rig.skirt, bob);
+  }
+}
+
+const RIDER_H = 200; // height on the street, in world units (the boy is 165)
 
 export class Cyclist {
   constructor(dir, x) {
     this.dir = dir;
     this.x = x;
     this.speed = 150 + Math.random() * 70;
+    this.rig = Math.random() < 0.5 ? RIGS.man : RIGS.woman;
     this.wheel = 0;
-    this.look = KINDS[Math.floor(Math.random() * KINDS.length)];
+    this.crank = Math.random() * Math.PI * 2;
   }
 
   update(dt) {
     this.x += this.dir * this.speed * dt;
-    this.wheel += this.speed * dt / 30;
+    const k = RIDER_H / this.rig.H;
+    const turn = this.speed * dt / (this.rig.wheelR * k);
+    this.wheel += turn;
+    this.crank += turn * 0.45; // geared: the pedals go round slower than the wheels
   }
 
   draw(ctx, groundY) {
-    const L = this.look, R = 30;
+    const rig = this.rig, k = RIDER_H / rig.H;
+    const cx = (rig.rear[0] + rig.front[0]) / 2;
     ctx.save();
     ctx.translate(this.x, groundY);
-    ctx.scale(this.dir * 1.3, 1.3);
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-
-    const rear = [-46, -R], front = [46, -R], crank = [-4, -R - 2];
-    const seat = [-20, -R - 58], head = [32, -R - 58], bar = [30, -R - 70];
-    const a = this.wheel * 0.55;
-    const pedal = ph => [crank[0] + 13 * Math.cos(a + ph), crank[1] + 13 * Math.sin(a + ph)];
-    const hip = [seat[0] + 2, seat[1] - 6];
-    const knee = foot => {
-      const l1 = 34, l2 = 35;
-      const dx = foot[0] - hip[0], dy = foot[1] - hip[1];
-      const d = Math.min(l1 + l2 - 0.5, Math.hypot(dx, dy));
-      const base = Math.atan2(dy, dx);
-      const off = Math.acos((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d));
-      return [hip[0] + l1 * Math.cos(base - off), hip[1] + l1 * Math.sin(base - off)];
-    };
-    const line = (pts, color, w) => {
-      ctx.beginPath(); ctx.moveTo(...pts[0]); for (const p of pts.slice(1)) ctx.lineTo(...p);
-      ctx.strokeStyle = INK; ctx.lineWidth = w + 3; ctx.stroke();
-      ctx.strokeStyle = color; ctx.lineWidth = w; ctx.stroke();
-    };
-    const legColor = L.trousers || '#2a2420';
-
-    // far leg (behind the bike)
-    const p2 = pedal(Math.PI);
-    line([hip, knee(p2), p2], shadeColor(legColor), 8);
-
-    // wheels
-    for (const [cx, cy] of [rear, front]) {
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke();
-      ctx.lineWidth = 1;
-      for (let k = 0; k < 8; k++) {
-        const t = this.wheel + k * Math.PI / 4;
-        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(t) * R, cy + Math.sin(t) * R); ctx.stroke();
-      }
-    }
-    // frame
-    ctx.strokeStyle = INK; ctx.lineWidth = 4;
+    ctx.fillStyle = 'rgba(20,12,6,0.25)';
     ctx.beginPath();
-    ctx.moveTo(...rear); ctx.lineTo(...seat); ctx.lineTo(...crank); ctx.lineTo(...rear);
-    ctx.moveTo(...seat); ctx.lineTo(...head); ctx.lineTo(...front);
-    ctx.moveTo(...crank); ctx.lineTo(head[0] - 3, head[1] + 14);
-    ctx.moveTo(...head); ctx.lineTo(...bar); ctx.lineTo(bar[0] - 12, bar[1] - 2);
-    ctx.stroke();
-    // mudguard + saddle
-    ctx.beginPath(); ctx.arc(rear[0], rear[1], R + 5, Math.PI * 1.05, Math.PI * 1.75); ctx.stroke();
-    ctx.fillStyle = '#3a2618'; ctx.beginPath(); ctx.ellipse(seat[0], seat[1] - 2, 11, 4, 0, 0, Math.PI * 2); ctx.fill();
-    if (L.basket) {
-      ctx.fillStyle = '#a07a45';
-      ctx.beginPath(); ctx.roundRect(front[0] - 4, -R - 66, 26, 20, 3); ctx.fill();
-      ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
-      ctx.fillStyle = L.kind === 'bakker' ? '#d9a45a' : '#e05a4f';
-      ctx.beginPath(); ctx.arc(front[0] + 5, -R - 68, 6, 0, Math.PI * 2); ctx.arc(front[0] + 15, -R - 69, 6, 0, Math.PI * 2); ctx.fill();
-    }
-
-    // near leg
-    const p1 = pedal(0);
-    line([hip, knee(p1), p1], legColor, 8);
-    ctx.fillStyle = INK; ctx.fillRect(p1[0] - 6, p1[1] - 2, 13, 5);
-
-    // body
-    const shoulder = [hip[0] + 13, hip[1] - 42];
-    if (L.skirt) {
-      const k1 = knee(p1), k2 = knee(p2);
-      ctx.beginPath();
-      ctx.moveTo(hip[0] - 8, hip[1] - 6);
-      ctx.lineTo(Math.max(k1[0], k2[0]) + 8, Math.max(k1[1], k2[1]) + 12);
-      ctx.lineTo(hip[0] - 14, Math.max(k1[1], k2[1]) + 18);
-      ctx.closePath();
-      ctx.fillStyle = L.skirt; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.stroke();
-    }
-    ctx.beginPath();
-    ctx.moveTo(hip[0] - 9, hip[1] + 2); ctx.lineTo(shoulder[0] - 10, shoulder[1]); ctx.lineTo(shoulder[0] + 8, shoulder[1] + 2); ctx.lineTo(hip[0] + 9, hip[1] + 2);
-    ctx.closePath();
-    ctx.fillStyle = L.coat; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.stroke();
-    line([[shoulder[0], shoulder[1] + 4], [shoulder[0] + 12, shoulder[1] + 22], [bar[0] - 8, bar[1]]], L.coat, 6);
-    // head and hat
-    const hd = [shoulder[0] + 5, shoulder[1] - 14];
-    ctx.beginPath(); ctx.arc(hd[0], hd[1], 10, 0, Math.PI * 2);
-    ctx.fillStyle = L.skin; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.stroke();
-    ctx.fillStyle = INK;
-    if (L.hat === 'bowler') {
-      ctx.beginPath(); ctx.ellipse(hd[0], hd[1] - 8, 14, 3, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(hd[0], hd[1] - 9, 9, Math.PI, 0); ctx.fill();
-    } else if (L.hat === 'wide') {
-      ctx.fillStyle = '#d9c7a0';
-      ctx.beginPath(); ctx.ellipse(hd[0], hd[1] - 8, 20, 4, -0.1, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
-      ctx.beginPath(); ctx.arc(hd[0], hd[1] - 9, 8, Math.PI, 0); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#e05a4f'; ctx.beginPath(); ctx.arc(hd[0] - 6, hd[1] - 12, 3.5, 0, Math.PI * 2); ctx.fill();
-    } else {
-      ctx.fillStyle = '#4a4036';
-      ctx.beginPath(); ctx.arc(hd[0], hd[1] - 6, 10, Math.PI, 0); ctx.fill();
-      ctx.fillRect(hd[0], hd[1] - 8, 14, 3);
-    }
+    ctx.ellipse(0, -1, (rig.front[0] - rig.rear[0]) * k * 0.75, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.scale(this.dir * k, k);
+    ctx.translate(-cx, -rig.ground);
+    drawRig(ctx, rig, this.crank, this.wheel);
     ctx.restore();
   }
-}
-
-function shadeColor(hex) {
-  const n = parseInt(hex.slice(1), 16);
-  return `rgb(${[n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(v * 0.7)).join(',')})`;
 }

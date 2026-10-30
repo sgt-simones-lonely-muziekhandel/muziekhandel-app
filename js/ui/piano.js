@@ -1,4 +1,6 @@
 // The piano: free play, or load a piece and listen / play along with the lit-up notes.
+// Full screen on the close-up of the piano (public/art/closeups/piano.webp): the music stands on
+// the blank sheet on the music desk, the keys sit in the key slot, the buttons on the wood.
 import { frame, h, esc } from './ui.js';
 import { pieceById, composerById } from '../data.js';
 import {
@@ -7,6 +9,7 @@ import {
 } from '../music.js';
 import { renderPage, pageOfNote } from '../notation.js';
 import { noteOn, noteOff, playPiece, audioState, onAudioReady } from '../audio.js';
+import { skyAt, currentHour } from '../sky.js';
 
 export function keyboardGuide() {
   // A picture of the computer keyboard with the piano notes painted on the keys.
@@ -34,44 +37,49 @@ export function keyboardGuide() {
       <ol class="kb-steps">
         <li><span class="step-ico white"></span><span><b>Letters</b> zijn de <b>witte</b> toetsen.</span></li>
         <li><span class="step-ico black"></span><span><b>Cijfers</b> en de toetsen ertussen zijn de <b>zwarte</b> toetsen.</span></li>
-        <li><span class="step-ico">⬆</span><span>Bovenste rij (Q W E…) = <b>hoge</b> noten. Onderste rij (Z X C…) = <b>lage</b> noten.</span></li>
-        <li><span class="step-ico">↔</span><span>Met <b>←</b> en <b>→</b> schuif je het toetsenbord een <b>octaaf</b> lager of hoger. Zo kun je alle 88 toetsen spelen.</span></li>
-        <li><span class="step-ico">🦶</span><span>Houd <b>Shift</b> ingedrukt voor het <b>pedaal</b>: de noten klinken dan door.</span></li>
-        <li><span class="step-ico">✨</span><span>Kies <b>Speel mee</b>: de noot die oplicht op het blad, licht ook op de piano op. Druk op die toets!</span></li>
+        <li><span class="step-ico"><kbd>Q</kbd></span><span>Bovenste rij (Q W E…) = <b>hoge</b> noten. Onderste rij (Z X C…) = <b>lage</b> noten.</span></li>
+        <li><span class="step-ico"><kbd>←</kbd><kbd>→</kbd></span><span>Met <b>←</b> en <b>→</b> schuif je het toetsenbord een <b>octaaf</b> lager of hoger. Zo kun je alle 88 toetsen spelen.</span></li>
+        <li><span class="step-ico"><kbd>Shift</kbd></span><span>Houd <b>Shift</b> ingedrukt voor het <b>pedaal</b>: de noten klinken dan door.</span></li>
+        <li><span class="step-ico glow"></span><span>Kies <b>Speel mee</b>: de noot die oplicht op het blad, licht ook op de piano op. Druk op die toets!</span></li>
       </ol>
     </div>`);
 }
+
+const SYSTEMS = 2; // lines of music on the sheet
 
 export function pianoView(ui, { pieceId } = {}) {
   const { el, body } = frame(ui, {
     title: 'De piano',
     cls: 'piano',
-    wide: true,
+    closeup: 'public/art/closeups/piano.webp',
+    full: true,
     tip: 'Speel met je toetsenbord, je muis of je vinger. Met ← en → ga je een octaaf lager of hoger, met Shift trap je het pedaal in. Kies bladmuziek en druk op "Speel mee": druk dan steeds op de toets die oplicht.',
   });
 
   body.appendChild(h(`
     <div class="piano-wrap">
+      <div class="candle" style="left:7.54%"><span class="candle-glow"></span><span class="flame"></span></div>
+      <div class="candle" style="left:92.05%"><span class="candle-glow"></span><span class="flame"></span></div>
+      <div class="night-shade"></div>
+      <div class="score"><div class="staff-host"></div><p class="score-hint">Kies bladmuziek, of speel maar!</p></div>
       <div class="piano-bar">
-        <button class="btn wood choose"><span class="ico">📜</span> Kies bladmuziek</button>
+        <button class="btn wood choose">Kies muziek</button>
         <span class="piece-name"></span>
         <span class="spacer"></span>
-        <button class="btn brass listen" hidden><span class="ico">👂</span> Luister</button>
-        <button class="btn brass follow" hidden><span class="ico">🎯</span> Speel mee</button>
-        <button class="btn wood slow" hidden title="Langzamer luisteren"><span class="ico">🐢</span> Langzaam</button>
-        <button class="btn wood names" title="Notennamen: letters of do-re-mi"><span class="ico">🔤</span> C D E</button>
-        <button class="btn wood guide-btn"><span class="ico">❓</span> Hulp</button>
+        <button class="btn brass listen" hidden>Luister</button>
+        <button class="btn brass follow" hidden>Speel mee</button>
+        <button class="btn wood slow" hidden title="Langzamer luisteren">Langzaam</button>
+        <button class="btn wood names" title="Notennamen: letters of do-re-mi">C D E</button>
+        <button class="btn wood guide-btn">Hulp</button>
       </div>
-      <div class="score paper-inner" hidden><div class="staff-host"></div></div>
       <div class="status"></div>
       <div class="piano-body">
-        <div class="piano-lid"><span>Van der Velde · Amsterdam</span></div>
         <div class="keys"></div>
         <div class="piano-foot">
           <div class="octave">
-            <button class="btn wood small oct-down" title="Een octaaf lager (←)"><span class="ico">◀</span> Lager</button>
+            <button class="btn wood small oct-down" title="Een octaaf lager (←)"><span class="ico">‹</span> Lager</button>
             <span class="oct-range"></span>
-            <button class="btn wood small oct-up" title="Een octaaf hoger (→)">Hoger <span class="ico">▶</span></button>
+            <button class="btn wood small oct-up" title="Een octaaf hoger (→)">Hoger <span class="ico">›</span></button>
           </div>
           <button class="pedal" title="Pedaal: houd Shift ingedrukt, of klik om het vast te zetten"><span class="pedal-foot"></span><span class="pedal-label">Pedaal</span></button>
         </div>
@@ -82,6 +90,10 @@ export function pianoView(ui, { pieceId } = {}) {
 
   const $ = s => body.querySelector(s);
   const keysEl = $('.keys');
+  // In the evening the candles on the piano burn (by the visitor's real clock, like the shop lamps).
+  const sky = skyAt(currentHour());
+  $('.piano-wrap').classList.toggle('night', sky.lampsOn);
+  $('.piano-wrap').style.setProperty('--dark', sky.dark.toFixed(2));
   const statusEl = $('.status');
   const keyEls = new Map();
 
@@ -99,7 +111,7 @@ export function pianoView(ui, { pieceId } = {}) {
       const code = keyCodeForMidi(m, shift);
       const inWin = m >= lo && m <= hi;
       const k = h(`<div class="key ${info.black ? 'black' : 'white'} ${inWin ? 'inwin' : ''}" style="--c:${NOTE_COLORS[info.letter]}">
-        <span class="kname">${labelFor(info.letter, info.acc)}${!info.black && info.letter === 'C' ? `<sub>${info.oct}</sub>` : ''}</span>
+        <span class="kname">${labelFor(info.letter, info.acc)}</span>
         ${code ? `<span class="kcap">${esc(keyLabels[code])}</span>` : ''}
       </div>`);
       if (info.black) {
@@ -107,7 +119,6 @@ export function pianoView(ui, { pieceId } = {}) {
         k.style.left = `calc(${before * ww}% - ${ww * 0.31}%)`;
         k.style.width = `${ww * 0.62}%`;
       } else k.style.width = `${ww}%`;
-      if (m === 60) k.classList.add('middle-c');
       k.addEventListener('pointerdown', e => { e.preventDefault(); k.setPointerCapture?.(e.pointerId); press(m); });
       k.addEventListener('pointerup', () => release(m));
       k.addEventListener('pointercancel', () => release(m));
@@ -159,17 +170,27 @@ export function pianoView(ui, { pieceId } = {}) {
 
   const setStatus = t => { statusEl.textContent = t; };
 
+  // A little light note that floats up from a key when it sounds.
+  const spark = midi => {
+    const k = keyEls.get(midi);
+    if (!k) return;
+    const sp = h(`<span class="spark" style="--c:${k.style.getPropertyValue('--c')};--dx:${(Math.random() * 2 - 1).toFixed(2)}">${Math.random() < 0.5 ? '♪' : '♫'}</span>`);
+    sp.style.left = `${k.offsetLeft + k.offsetWidth / 2}px`;
+    sp.addEventListener('animationend', () => sp.remove());
+    keysEl.appendChild(sp);
+  };
+
   const showPage = p => {
     if (!parsed || p === page) return;
     page = p;
-    noteEls = renderPage($('.staff-host'), parsed, page, 1);
+    noteEls = renderPage($('.staff-host'), parsed, page, SYSTEMS);
   };
   const clearMarks = () => {
     keyEls.forEach(k => k.classList.remove('target', 'active', 'good', 'wrong'));
     noteEls.forEach(g => g.classList.remove('active'));
   };
   const markNote = (n, cls = 'active') => {
-    showPage(pageOfNote(parsed, n, 1));
+    showPage(pageOfNote(parsed, n, SYSTEMS));
     noteEls.forEach(g => g.classList.remove('active'));
     noteEls.get(n.i)?.classList.add(cls);
   };
@@ -179,11 +200,11 @@ export function pianoView(ui, { pieceId } = {}) {
     const piece = pieceById(id);
     parsed = parsePiece(piece);
     page = -1;
-    $('.score').hidden = false;
+    $('.score-hint').hidden = true;
     $('.piece-name').innerHTML = `<b>${esc(piece.title)}</b> · ${esc(composerById(piece.composer).short)}`;
     ['.listen', '.follow', '.slow'].forEach(s => { $(s).hidden = false; });
     showPage(0);
-    setStatus('Druk op 👂 Luister om het stuk te horen, of op 🎯 Speel mee om het zelf te spelen.');
+    setStatus('Druk op Luister om het stuk te horen, of op Speel mee om het zelf te spelen.');
   }
 
   function stopAll() {
@@ -209,9 +230,9 @@ export function pianoView(ui, { pieceId } = {}) {
       onNote(n) {
         lastKey?.classList.remove('active');
         markNote(n);
-        if (!n.rest) { lastKey = keyEls.get(n.midi); lastKey?.classList.add('active'); }
+        if (!n.rest) { lastKey = keyEls.get(n.midi); lastKey?.classList.add('active'); spark(n.midi); }
       },
-      onEnd() { stopAll(); setStatus('Klaar! Probeer het nu zelf met 🎯 Speel mee.'); },
+      onEnd() { stopAll(); setStatus('Klaar! Probeer het nu zelf met Speel mee.'); },
     });
   }
 
@@ -251,8 +272,8 @@ export function pianoView(ui, { pieceId } = {}) {
     c.innerHTML = `<div class="stars">${'★'.repeat(stars)}<span>${'★'.repeat(3 - stars)}</span></div>
       <h3>${stars === 3 ? 'Prachtig gespeeld!' : stars === 2 ? 'Goed gedaan!' : 'Je hebt het hele stuk gespeeld!'}</h3>
       <p>${mistakes === 0 ? 'Geen enkele fout!' : `${mistakes} ${mistakes === 1 ? 'foutje' : 'foutjes'} — oefening baart kunst.`}</p>
-      <div class="row"><button class="btn brass again"><span class="ico">↺</span> Nog een keer</button>
-      <button class="btn wood other"><span class="ico">📜</span> Ander stuk</button></div>`;
+      <div class="row"><button class="btn brass again">Nog een keer</button>
+      <button class="btn wood other">Ander stuk</button></div>`;
     c.hidden = false;
     c.querySelector('.again').onclick = follow;
     c.querySelector('.other').onclick = () => { c.hidden = true; ui.open('library', { forPiano: true }); };
@@ -266,6 +287,7 @@ export function pianoView(ui, { pieceId } = {}) {
     noteOn(midi);
     const k = keyEls.get(midi);
     k?.classList.add('down');
+    spark(midi);
     if (!audioState.ready) setStatus('De piano wordt nog gestemd… even geduld!');
     if (mode === 'follow') {
       const n = parsed.notes[idx];
@@ -299,7 +321,7 @@ export function pianoView(ui, { pieceId } = {}) {
   $('.slow').onclick = () => { slow = !slow; $('.slow').classList.toggle('on', slow); };
   $('.names').onclick = () => {
     noteNames.mode = noteNames.mode === 'letters' ? 'solfege' : 'letters';
-    $('.names').innerHTML = `<span class="ico">🔤</span> ${noteNames.mode === 'letters' ? 'C D E' : 'do re mi'}`;
+    $('.names').innerHTML = `${noteNames.mode === 'letters' ? 'C D E' : 'do re mi'}`;
     buildKeys();
     if (parsed) { const p = page; page = -1; showPage(p); }
     if (mode === 'follow') nextTarget();
@@ -326,7 +348,7 @@ export function pianoView(ui, { pieceId } = {}) {
     else if (cmd === 0xb0 && note === 64) setPedal(vel >= 64 || pedalLatched); // sustain pedal
   };
   if (navigator.requestMIDIAccess) {
-    const midiBtn = h('<button class="btn wood midi" title="Sluit een echte piano of keyboard aan via USB"><span class="ico">🔌</span> MIDI</button>');
+    const midiBtn = h('<button class="btn wood midi" title="Sluit een echte piano of keyboard aan via USB">MIDI</button>');
     midiBtn.onclick = () => navigator.requestMIDIAccess().then(acc => {
       midiAccess = acc;
       const hook = () => acc.inputs.forEach(i => { i.onmidimessage = onMidi; });

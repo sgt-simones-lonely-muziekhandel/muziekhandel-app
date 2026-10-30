@@ -4,8 +4,8 @@ The portraits on the shop wall above the piano. Clicking them opens a close-up o
 
 ## For the player
 
-1. **Portrait wall** (*De componisten*): the close-up `public/art/closeups/gallery-wall.webp` (green damask wall, picture lamp, wainscot) with the six portraits in the same gilded frames as in the shop, two rows of three, slightly crooked like on a real wall, each with a brass name plaque. Pointing at a frame straightens it and makes it glow; click it to open the composer.
-2. **Composer card**:
+1. **Portrait wall** (*De componisten*), full screen: the close-up `public/art/closeups/gallery-wall.webp` (green damask wall, picture lamp, wainscot) with the six portraits in the same gilded frames as in the shop, two rows of three, slightly crooked like on a real wall, each with a brass name plaque. Pointing at a frame straightens it and makes it glow; click it to open the composer.
+2. **Composer card** (a paper card over the dimmed wall):
    - Large portrait with plaque.
    - **Family tree**: oval medallions on golden branches. Top: (grand)parents. Middle: brothers and sisters, the composer (glowing gold frame) and spouse(s) joined by a ♥. Bottom: children. A handwritten note covers special cases ("…and 16 other children", "never married").
    - **Biography** in short, simple sentences, a **Wist je dat?** (did you know?) fact, and birth/death dates and places.

@@ -16,7 +16,12 @@ export function gramophoneView(ui, { pieceId } = {}) {
   body.appendChild(h(`
     <div class="gramo-grid">
       <div class="gramo-scene">
-        <img src="assets/gramophone-corner.jpg" alt="Een koperen grammofoon op een houten kastje">
+        <img src="public/art/closeups/gramophone-corner.webp" alt="De luisterhoek met de grammofoon">
+        <figure class="cover" hidden>
+          <img class="cover-cyl" alt="">
+          <figcaption><b class="cover-title"></b><span class="cover-comp"></span></figcaption>
+        </figure>
+        <p class="cover-empty">Kies een cilinder uit de kist</p>
         <div class="notes-out"></div>
       </div>
       <div class="gramo-side">
@@ -65,6 +70,14 @@ export function gramophoneView(ui, { pieceId } = {}) {
     nowCyl.src = `${CYLINDER_ART}${color}.webp`;
     nowCyl.hidden = false;
     $('.empty-mandrel').hidden = true;
+    // the chosen cylinder is shown big in the picture, with its label, like the cover of the music
+    const cover = $('.cover');
+    cover.hidden = false;
+    cover.querySelector('.cover-cyl').src = `${CYLINDER_ART}${color}.webp`;
+    cover.querySelector('.cover-title').textContent = piece.title;
+    cover.querySelector('.cover-comp').textContent = comp.name;
+    $('.cover-empty').hidden = true;
+    cover.classList.remove('show'); void cover.offsetWidth; cover.classList.add('show');
     const li = list.querySelector(`[data-id="${id}"]`);
     if (li) { li.classList.add('on'); li.querySelector('.cyl').src = `${CYLINDER_ART}open.webp`; }
     if (!audioState.ready) { $('.now-comp').textContent = 'De grammofoon wordt nog opgewonden… probeer het zo nog eens.'; return; }

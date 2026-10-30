@@ -12,15 +12,19 @@ After about 4 seconds without input, a cyclist rides in from one side and out th
 
 - **Idle time** is tracked by the game (`game.idleTime`), reset on every key press and pointer press.
 - **Spawning**: the cyclist starts just outside the visible area on the side it comes from and gets a random speed (150–220 px/s).
-- **Looks**: four outfits in `KINDS`: a gentleman with a bowler hat, two ladies with long skirts and wide hats, and a baker with a cap. Some have a basket with flowers or bread.
-- **Animation**, all drawn with canvas paths:
-  - Wheels with 8 spokes rotate with the distance travelled.
-  - The pedal crank turns with the wheels; each leg is placed with two-bone inverse kinematics (hip → knee → foot on the pedal), so the knees bend naturally.
-  - The far leg is drawn first in a darker tone, then the bike, then the near leg and the body.
-- Cyclists ride along the front edge of the quay (y = 574), in front of the boy, drawn at 1.3× so adults are taller than the boy.
+- **Riders**: each cyclist is, at random, the gentleman with the bowler hat (`public/art/characters/cyclist-man`) or the lady with the straw hat and the flower basket (`cyclist-woman`), built as cut-out puppets like the [player](player.md).
+- **Rig** (`RIGS` in `js/cyclist.js`): laid out in the pixels of each rider's `full.webp`, so it could be lined up against the finished drawing.
+  - The `bicycle` frame is placed by its bottom bracket, with a scale and a slight tilt; the wheel hubs are points of `bicycle.webp` (`rearHub`, `frontHub`) taken through that same transform, so the wheels always sit in the dropouts.
+  - `wheel-1` / `wheel-2` turn around their hubs with the distance travelled; the `crank` turns around the bottom bracket, geared (0.45 turns per wheel turn).
+  - Legs: two-bone IK from the hip to each pedal, bending the knee forward. Each leg piece is fitted with `bone()`: stretched along the bone to the right length, but only `s` times across it, so the shoes don't grow. The far leg is drawn darker and behind the frame.
+  - The man: thighs, shins, torso (with both arms on the handlebar) and head. The lady: shins below a skirt, and her upper body (head, arms) on top; she has no thighs, the skirt covers them.
+  - The pieces have small round joint marks painted on them; `patch` covers those with the colour next to them, on a cached canvas.
+  - The body bobs a little with the pedals.
+- **Size**: 200 world units high (the boy is 165), standing on the quay at y = 574, with a soft shadow; flipped for riders going left.
 - They're removed once they're 400 px outside the view.
 
 ## Known limits / next steps
 
 - A bike bell ("tring tring") when they pass would add a lot; it needs the audio to be started.
-- A painted cyclist sprite (4–6 frames on white) would match the art style better than the code drawing.
+- The wheels are drawn flat, while the painted full drawings show them very slightly oval.
+- The lady's skirt is one stiff piece; it doesn't move with the knees.

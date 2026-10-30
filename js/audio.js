@@ -23,9 +23,11 @@ export function initAudio() {
   if (loading) return loading;
   loading = (async () => {
     await Tone.start();
-    const reverb = new Tone.Reverb({ decay: 2.4, wet: 0.16 }).toDestination();
+    // The samples are quiet on their own: boost them, and let a limiter catch loud chords so nothing clips.
+    const limiter = new Tone.Limiter(-1).toDestination();
+    const reverb = new Tone.Reverb({ decay: 2.4, wet: 0.16 }).connect(limiter);
     tone = new Tone.Filter(18000, 'lowpass').connect(reverb);
-    sampler = new Tone.Sampler({ urls: salamanderUrls(), baseUrl: SALAMANDER, release: 1.2 }).connect(tone);
+    sampler = new Tone.Sampler({ urls: salamanderUrls(), baseUrl: SALAMANDER, release: 1.2, volume: 8 }).connect(tone);
     await Tone.loaded();
     audioState.ready = true;
     audioState.listeners.forEach(fn => fn());

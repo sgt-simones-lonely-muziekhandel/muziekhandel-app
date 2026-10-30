@@ -24,9 +24,13 @@ class Game {
     this.resize();
   }
 
-  setPlace(text) { document.getElementById('hud-place').textContent = text; }
+  // The place name is only used as the page title: the pictures show where you are.
+  setPlace(text) { document.title = `${text} · Muziekhandel 1900`; }
 
   start() {
+    // the browser's back button (or a keyboard's back key) also steps back inside the game
+    history.pushState({ game: true }, '');
+    addEventListener('popstate', () => { if (this.back()) history.pushState({ game: true }, ''); });
     this.scene.enter();
     this.running = true;
     let last = performance.now();
@@ -49,6 +53,15 @@ class Game {
       this.scene.enter(from);
       this.switching = false;
     });
+  }
+
+  // One step back: from the listening corner to the shop, from the shop out onto the street.
+  back() {
+    if (this.ui.isOpen) { this.ui.close(); return true; }
+    const to = { corner: 'shop', shop: 'street' }[Object.keys(this.scenes).find(k => this.scenes[k] === this.scene)];
+    if (!to) return false;
+    this.goTo(to);
+    return true;
   }
 
   fade(mid) {
@@ -108,6 +121,7 @@ class Game {
       this.idleTime = 0;
       if (!this.running) return;
       if (this.ui.isOpen) { this.ui.key(e); return; }
+      if (e.code === 'Backspace' || e.code === 'Escape') { e.preventDefault(); this.back(); return; }
       if (keyDir[e.code]) { this.input[keyDir[e.code]] = true; e.preventDefault(); }
       if (['ArrowUp', 'Enter', 'KeyE', 'Space', 'KeyW'].includes(e.code)) { e.preventDefault(); this.scene.interact(); }
     });
@@ -139,7 +153,7 @@ document.fonts.load('700 20px "Cinzel Decorative"').catch(() => {});
 document.getElementById('btn-start').addEventListener('click', () => {
   const status = document.getElementById('piano-status');
   status.hidden = false;
-  initAudio().catch(() => { status.textContent = '🎹 Piano niet geladen (geen internet?)'; });
+  initAudio().catch(() => { status.textContent = 'Piano niet geladen (geen internet?)'; });
   onAudioReady(() => { status.hidden = true; });
   document.getElementById('title-screen').classList.add('gone');
   game.start();

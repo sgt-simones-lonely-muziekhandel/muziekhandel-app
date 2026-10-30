@@ -35,36 +35,63 @@ export function speak(text) {
  * The standard paper frame around a view: back button, title, body, keeper tip.
  * With `closeup` (an image in public/art/closeups) the panel is a dark wooden frame around that picture
  * instead, and `stage` is a box with the picture's proportions to position things on in percentages.
+ * With `full` as well, there is no frame at all: the picture fills the screen (the edges that don't fit
+ * are filled with a blurred copy), with only small Terug / ✕ buttons and the place name on top, so it
+ * feels like the camera moved in rather than a window opening. `body` is then the stage.
  */
-export function frame(ui, { title, cls = '', tip, wide = false, closeup = null }) {
-  const el = h(`
+export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, full = false }) {
+  const tipHtml = tip ? `<button class="keeper-tip" title="Vraag het Meneer Van der Velde"><span class="keeper-face"></span></button>
+      <div class="tip-bubble paper" hidden><p></p><button class="btn wood small speak">Voorlezen</button></div>` : '';
+  const buttons = {
+    back: '<button class="btn wood back" data-act="back"><span class="ico">‹</span> Terug</button>',
+    close: '<button class="btn wood close" data-act="close" title="Terug naar de winkel">✕</button>',
+  };
+  const el = full && closeup ? h(`
+    <div class="view full ${cls}">
+      <div class="full-bg"></div>
+      <div class="stage"></div>
+      <header class="full-hud">${buttons.back}<h2 class="full-title visually-hidden">${esc(title)}</h2>${buttons.close}</header>
+      ${tipHtml}
+    </div>`) : h(`
     <div class="view ${cls}">
       <div class="panel ${closeup ? 'closeup' : 'paper'} ${wide ? 'wide' : ''}">
-        <header class="panel-head">
-          <button class="btn wood back" data-act="back"><span class="ico">◀</span> Terug</button>
-          <h2>${esc(title)}</h2>
-          <button class="btn wood close" data-act="close" title="Terug naar de winkel">✕</button>
-        </header>
+        <header class="panel-head">${buttons.back}<h2>${esc(title)}</h2>${buttons.close}</header>
         <div class="panel-body"></div>
       </div>
-      ${tip ? `<button class="keeper-tip" title="Vraag het Meneer Van der Velde"><span class="keeper-face"></span></button>
-      <div class="tip-bubble paper" hidden><p></p><button class="btn wood small speak">🔊 Voorlezen</button></div>` : ''}
+      ${tipHtml}
     </div>`);
   el.querySelector('[data-act=back]').onclick = () => ui.close();
   el.querySelector('[data-act=close]').onclick = () => ui.closeAll();
   if (tip) {
     const bubble = el.querySelector('.tip-bubble');
     bubble.querySelector('p').textContent = tip;
-    el.querySelector('.keeper-tip').onclick = () => { bubble.hidden = !bubble.hidden; };
+    // An open tip goes away with any key or any click elsewhere (Escape/Backspace then only close the tip).
+    const hideTip = () => {
+      bubble.hidden = true;
+      removeEventListener('keydown', onTipKey, true);
+      removeEventListener('pointerdown', onTipDown, true);
+    };
+    const onTipKey = e => {
+      if (['Escape', 'Backspace'].includes(e.code)) { e.preventDefault(); e.stopImmediatePropagation(); }
+      hideTip();
+    };
+    const onTipDown = e => { if (!e.target.closest('.speak, .keeper-tip')) hideTip(); };
+    el.querySelector('.keeper-tip').onclick = () => {
+      if (!bubble.hidden) return hideTip();
+      bubble.hidden = false;
+      addEventListener('keydown', onTipKey, true);
+      addEventListener('pointerdown', onTipDown, true);
+    };
+    el.hideTip = hideTip;
     bubble.querySelector('.speak').onclick = () => speak(tip);
   }
-  const body = el.querySelector('.panel-body');
-  let stage = null;
+  let stage = el.querySelector('.stage');
   if (closeup) {
-    stage = h('<div class="stage"></div>');
+    if (!stage) { stage = h('<div class="stage"></div>'); el.querySelector('.panel-body').appendChild(stage); }
     stage.style.backgroundImage = `url(${closeup})`;
-    body.appendChild(stage);
+    el.querySelector('.full-bg')?.style.setProperty('background-image', `url(${closeup})`);
   }
+  const body = full ? stage : el.querySelector('.panel-body');
   return { el, body, stage, panel: el.querySelector('.panel') };
 }
 
@@ -78,39 +105,63 @@ export class UI {
   get isOpen() { return this.stack.length > 0; }
   get top() { return this.stack[this.stack.length - 1]; }
 
-  open(name, opts = {}) {
+  // Full-screen views come and go with the same fade to black as a scene change.
+  withFade(isFull, fn) {
+    if (isFull) this.game.fade(fn); else fn();
+  }
+
+  open(name, opts = {}, replacing = null) {
     const view = VIEWS[name](this, opts);
     view.name = name;
-    if (this.top) { this.top.el.hidden = true; this.top.onHide?.(); }
+    const below = this.top;
     this.stack.push(view);
-    this.root.appendChild(view.el);
-    this.root.hidden = false;
-    requestAnimationFrame(() => view.el.classList.add('in'));
-    view.onShow?.();
+    const isFull = view.el.classList.contains('full');
+    this.withFade(isFull || replacing?.el.classList.contains('full'), () => {
+      replacing?.el.remove();
+      // a paper card over a full-screen close-up keeps the close-up visible, dimmed, behind it
+      if (below && (isFull || !below.el.classList.contains('full'))) { below.el.hidden = true; below.onHide?.(); }
+      this.root.appendChild(view.el);
+      this.root.hidden = false;
+      requestAnimationFrame(() => view.el.classList.add('in'));
+      view.onShow?.();
+    });
     return view;
   }
 
   // Replace the top view (e.g. library → sheet when picking a scroll).
   replace(name, opts = {}) {
     const old = this.stack.pop();
-    if (old) { old.destroy?.(); old.el.remove(); }
-    if (this.top) this.top.el.hidden = true;
-    return this.open(name, opts);
+    old?.destroy?.();
+    return this.open(name, opts, old);
   }
 
+  // The stack changes at once (so keys and clicks go to the right view); what's on screen
+  // changes after the fade when a full-screen view is involved.
   close() {
     const v = this.stack.pop();
     if (!v) return;
+    v.el.hideTip?.();
     v.destroy?.();
-    v.el.remove();
-    if (this.top) { this.top.el.hidden = false; this.top.onShow?.(); }
-    else this.root.hidden = true;
+    const next = this.top;
+    const isFull = v.el.classList.contains('full') || next?.el.classList.contains('full');
+    this.withFade(isFull, () => {
+      v.el.remove();
+      if (next && this.top === next) { next.el.hidden = false; next.onShow?.(); }
+      if (!this.stack.length) this.root.hidden = true;
+    });
   }
 
-  closeAll() { while (this.stack.length) this.close(); }
+  closeAll() {
+    const views = this.stack.splice(0);
+    views.forEach(v => { v.el.hideTip?.(); v.destroy?.(); });
+    this.withFade(views.some(v => v.el.classList.contains('full')), () => {
+      views.forEach(v => v.el.remove());
+      if (!this.stack.length) this.root.hidden = true;
+    });
+  }
 
   key(e) {
-    if (e.code === 'Escape') { e.preventDefault(); this.close(); return; }
+    if (e.code === 'Escape' || e.code === 'Backspace') { e.preventDefault(); this.close(); return; }
     this.top?.onKey?.(e);
   }
 
