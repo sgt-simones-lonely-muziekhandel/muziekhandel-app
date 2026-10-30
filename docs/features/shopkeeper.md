@@ -13,7 +13,7 @@ The third object in the shop: Meneer Van der Velde, the friendly owner with the 
   | *Hoe speel ik piano?* | Keys, *Speel mee*, plus the [keyboard guide](piano.md#the-keyboard-guide-the-picture-for-learners) | 🎹 Naar de piano |
   | *Waar is de bladmuziek?* | The cabinet, ← →, Space | 📜 Naar de kast |
   | *Wie zijn die mensen aan de muur?* | Composers | 🖼️ Naar de schilderijen |
-  | *Mag ik muziek luisteren?* | The gramophone | 🎵 Naar de grammofoon |
+  | *Mag ik muziek luisteren?* | The gramophone, in the listening corner to the right | 🎵 Naar de grammofoon |
 
   The button takes the player straight there.
 - **🔊 Voorlezen** reads his answer aloud, for kids who can't read yet.
@@ -24,10 +24,11 @@ The third object in the shop: Meneer Van der Velde, the friendly owner with the 
 - `js/ui/keeper.js`: `keeperView({ greeting })`, the `TOPICS` list, the typewriter effect.
 - `frame()` in `js/ui/ui.js` adds the tip medallion to any view that passes a `tip` text.
 - `speak()` in `js/ui/ui.js` uses the browser's speech synthesis with a Dutch (`nl-NL`) voice when available, and strips emoji first.
-- His face is cut from the shop background with CSS (`background-position` on `assets/shop-interior.jpg`), so no extra image is needed.
+- His answers describe the room as it is: the piano with the portraits above it, the cabinet right of the counter, the gramophone in the listening corner.
+- In the shop he stands behind the counter (`public/art/characters/shopkeeper/full.webp`, see [shop](shop.md)). His face in the medallions is `public/art/characters/shopkeeper/head.webp`.
 
 ## Known limits / next steps
 
-- He can't move or animate (he's painted into the background). Cut-out poses would let him wave, point at objects and "talk".
+- He doesn't move yet. The separate body parts in `public/art/characters/shopkeeper/` could be rigged to make him wave, point at objects and "talk".
 - Speech quality depends on the voices installed on the device.
 - He could give hints based on what the player hasn't tried yet.

@@ -26,7 +26,7 @@ export class Cyclist {
     const L = this.look, R = 30;
     ctx.save();
     ctx.translate(this.x, groundY);
-    ctx.scale(this.dir * 1.1, 1.1);
+    ctx.scale(this.dir * 1.3, 1.3);
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
     const rear = [-46, -R], front = [46, -R], crank = [-4, -R - 2];

@@ -8,7 +8,8 @@ One document per feature: what it does for the player, how it's built, where the
 | Real-time sky | [sky.md](sky.md) | `js/sky.js` |
 | Cyclists | [cyclists.md](cyclists.md) | `js/cyclist.js` |
 | Player character | [player.md](player.md) | `js/boy.js` |
-| Shop interior | [shop.md](shop.md) | `js/shop.js` |
+| Shop interior | [shop.md](shop.md) | `js/shop.js`, `js/hotspots.js` |
+| Listening corner | [listening-corner.md](listening-corner.md) | `js/corner.js` |
 | Sheet music cabinet and viewer | [sheet-music.md](sheet-music.md) | `js/ui/library.js`, `js/ui/sheet.js`, `js/notation.js` |
 | Piano | [piano.md](piano.md) | `js/ui/piano.js`, `js/music.js` |
 | Audio (Salamander Grand Piano) | [audio.md](audio.md) | `js/audio.js` |

@@ -75,8 +75,13 @@ export const KEYMAP = {
   Digit6: 68, KeyY: 69, Digit7: 70, KeyU: 71, KeyI: 72, Digit9: 73, KeyO: 74, Digit0: 75,
   KeyP: 76, BracketLeft: 77, Equal: 78, BracketRight: 79,
 };
-export const PIANO_LOW = 48;  // C3
-export const PIANO_HIGH = 79; // G5
+// The computer keyboard covers C3–G5; it can be shifted whole octaves to reach the rest of the piano.
+export const KEYS_LOW = 48;   // C3
+export const KEYS_HIGH = 79;  // G5
+export const MAX_SHIFT = 3;   // octaves up or down
+// A full 88-key grand piano.
+export const PIANO_LOW = 21;  // A0
+export const PIANO_HIGH = 108; // C8
 
 const DEFAULT_LABELS = {
   KeyZ: 'Z', KeyS: 'S', KeyX: 'X', KeyD: 'D', KeyC: 'C', KeyV: 'V', KeyG: 'G', KeyB: 'B', KeyH: 'H',
@@ -100,7 +105,9 @@ export async function loadKeyLabels() {
 }
 
 // The key we show on each piano key: top row from C4 up, bottom row below C4.
-export function keyCodeForMidi(midi) {
+// `shift` is the octave shift of the computer keyboard.
+export function keyCodeForMidi(midi, shift = 0) {
+  midi -= shift * 12;
   const codes = Object.keys(KEYMAP).filter(c => KEYMAP[c] === midi);
   if (!codes.length) return null;
   if (midi >= 60) return codes.find(c => !['Comma', 'KeyL', 'Period', 'Semicolon', 'Slash'].includes(c)) || codes[0];

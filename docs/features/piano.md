@@ -5,6 +5,9 @@ The second object in the shop, and the heart of the game: play freely, or load a
 ## For the player
 
 - **Play** with the computer keyboard, the mouse, a finger on a touch screen, or a real keyboard over USB (*MIDI* button).
+- **All 88 keys** of a grand piano (A0–C8) are on screen and can be clicked or touched.
+- **Octaves**: the computer keyboard plays 2½ octaves at a time, marked by a brass bar above those keys. **← / →** or the *◀ Lager* / *Hoger ▶* buttons slide it one octave down or up (3 octaves each way), so every key can be reached; the current range is shown between the buttons (e.g. *C3 – G5*). Keys outside the range are slightly dimmed.
+- **Pedaal** (sustain pedal): hold **Shift**, or click the brass pedal to lock it down (click again to lift it). While it's down, released notes keep ringing; they stop when the pedal comes up. A real MIDI keyboard's sustain pedal works too.
 - **Kies bladmuziek** opens the [sheet music cabinet](sheet-music.md); the chosen piece appears above the keys.
 - **👂 Luister** (or Space): the piano plays the piece. The note that sounds lights up on the sheet *and* on its key at the same time.
 - **🎯 Speel mee**: the piano waits. The next note glows on the sheet, and its key glows and gets a bouncing ▼ with the computer key to press. The right key turns green and moves on; a wrong key shakes. At the end: 1–3 stars, depending on mistakes.
@@ -14,18 +17,20 @@ The second object in the shop, and the heart of the game: play freely, or load a
 
 ## The keyboard guide (the picture for learners)
 
-A drawing of the computer keyboard with every key that plays a note painted in that note's colour and labelled with the note name, plus four short rules:
+A drawing of the computer keyboard with every key that plays a note painted in that note's colour and labelled with the note name, plus six short rules:
 
 1. Letters are the white keys.
 2. Digits (and the keys between them) are the black keys.
 3. Top letter row (Q W E…) = high notes, bottom row (Z X C…) = low notes.
-4. In *Speel mee*, the note that lights up on the sheet lights up on the piano too: press that key.
+4. ← and → shift the keyboard an octave lower or higher, to reach all 88 keys.
+5. Hold Shift for the pedal.
+6. In *Speel mee*, the note that lights up on the sheet lights up on the piano too: press that key.
 
 The same picture is shown by the [shopkeeper](shopkeeper.md) when asked *Hoe speel ik piano?*.
 
 ## Key mapping
 
-The piano covers C3–G5 (19 white keys). Keys are matched by **physical position** (`KeyboardEvent.code`), so the layout works the same on QWERTY, AZERTY, QWERTZ or Italian keyboards. In Chrome/Edge the labels on the piano show the letters printed on the player's own keyboard (`navigator.keyboard.getLayoutMap()`); other browsers show QWERTY labels.
+Without an octave shift the computer keyboard covers C3–G5 (19 white keys); each shift moves every key 12 semitones (`KEYS_LOW`, `KEYS_HIGH`, `MAX_SHIFT` in `js/music.js`). Notes that would fall outside A0–C8 do nothing. Keys are matched by **physical position** (`KeyboardEvent.code`), so the layout works the same on QWERTY, AZERTY, QWERTZ or Italian keyboards. In Chrome/Edge the labels on the piano show the letters printed on the player's own keyboard (`navigator.keyboard.getLayoutMap()`); other browsers show QWERTY labels.
 
 | Row | Keys (QWERTY) | Notes |
 |---|---|---|
@@ -33,6 +38,8 @@ The piano covers C3–G5 (19 white keys). Keys are matched by **physical positio
 | Top letters | Q W E R T Y U I O P [ ] | C4 D4 E4 F4 G4 A4 B4 C5 D5 E5 F5 G5 |
 | Home row | S D · G H J · L ; | C#3 D#3 · F#3 G#3 A#3 · C#4 D#4 |
 | Bottom letters | Z X C V B N M , . / | C3 D3 E3 F3 G3 A3 B3 C4 D4 E4 |
+| ← / → | | octave down / up |
+| Shift (hold) | | sustain pedal |
 
 Middle C (C4) has a small star.
 
@@ -45,7 +52,9 @@ C red · D orange · E yellow · F green · G teal · A blue · B purple. Sharps
 ## How it's built
 
 - `js/ui/piano.js`, `pianoView()`:
-  - Keys are DOM elements; black keys are positioned over the gaps between white keys. Pointer events use pointer capture so a key releases even if the finger slides off.
+  - Keys are DOM elements for the full range `PIANO_LOW`–`PIANO_HIGH` (A0–C8); black keys are positioned over the gaps between white keys. `buildKeys()` redraws them (key caps, dimming, the brass `.kb-window` bar) whenever the octave shift or note names change.
+  - **Octave shift**: `shift` is added (× 12) to the `KEYMAP` note of each computer key. `codeNotes` remembers which note each held computer key started, so shifting while a key is down still releases the right note. In *Speel mee* the keyboard slides along by itself when the next note is out of reach.
+  - **Pedal**: `setPedal()`. While it's down, `release()` puts notes in `sustained` instead of stopping them; when it comes up, every sustained note that isn't still held is stopped. Shift holds it, the pedal button latches it, MIDI control change 64 drives it from a real keyboard. Pointer events use pointer capture so a key releases even if the finger slides off.
   - Modes: `free`, `listen`, `follow`. *Luister* uses `playPiece()` from [audio](audio.md) with an `onNote` callback that highlights the note and key. *Speel mee* keeps an index into the piece, skips rests, and compares each pressed MIDI number with the target.
   - The score shows one line (4 bars) and turns the page automatically when the highlighted note moves to the next line.
   - Leaving the view (opening the cabinet, *Terug*, Esc) stops playback and releases all keys.
@@ -56,4 +65,5 @@ C red · D orange · E yellow · F green · G teal · A blue · B purple. Sharps
 
 - Only one note at a time is checked in *Speel mee*; chords would need the data and the check to support them.
 - No tempo-based scoring (playing along in rhythm), only right/wrong notes.
-- No sustain pedal.
+- One pedal only (sustain); no soft or sostenuto pedal.
+- On small screens 88 keys are narrow; the note names on white keys are hidden there except middle C and the target note.

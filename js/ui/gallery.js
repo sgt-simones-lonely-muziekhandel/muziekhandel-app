@@ -1,25 +1,45 @@
-// Portrait gallery, and a composer card with biography and family tree.
+// Portrait gallery on the empty wall close-up (public/art/closeups/gallery-wall), and a composer
+// card with biography and family tree.
 import { frame, h, esc, speak } from './ui.js';
 import { COMPOSERS, composerById, piecesBy } from '../data.js';
+import { FRAME_TYPES, FRAME_SRC, COMPOSER_FRAME } from '../frames.js';
+
+// Where the frames hang on the close-up (1672 × 941): centre x, top y and height, in image pixels.
+// Two rows of three between the pillars, under the picture lamp and above the wainscot.
+const BG_W = 1672, BG_H = 941;
+const HANG = [
+  { cx: 420, top: 120, h: 210 }, { cx: 836, top: 104, h: 226 }, { cx: 1252, top: 120, h: 210 },
+  { cx: 420, top: 392, h: 214 }, { cx: 836, top: 386, h: 220 }, { cx: 1252, top: 400, h: 200 },
+];
+const pct = (v, of) => `${v / of * 100}%`;
 
 export function galleryView(ui) {
-  const { el, body } = frame(ui, {
+  const { el, stage } = frame(ui, {
     title: 'De componisten',
     cls: 'gallery',
     wide: true,
+    closeup: 'public/art/closeups/gallery-wall.webp',
     tip: 'Dit zijn beroemde componisten: mensen die muziek bedenken en opschrijven. Klik op een schilderij om hun verhaal en hun familie te zien.',
   });
-  const wall = h('<div class="wall"></div>');
   COMPOSERS.forEach((c, i) => {
+    const spot = HANG[i % HANG.length];
+    const t = FRAME_TYPES[COMPOSER_FRAME[c.id]];
+    const w = spot.h * t.w / t.h;
+    const [l, tp, r, b] = t.inner;
     const f = h(`
-      <button class="portrait" style="--tilt:${[-1.2, 0.8, -0.4, 1, -0.8, 0.5][i % 6]}deg">
-        <span class="gilt"><img src="${c.portrait}" alt="${esc(c.name)}" loading="lazy"></span>
-        <span class="plaque"><b>${esc(c.name)}</b><small>${esc(c.title)} (${esc(c.years.replace(/ /g, ''))})</small></span>
+      <button class="gframe" title="${esc(c.name)}" style="--tilt:${[-1.2, 0.8, -0.4, 1, -0.8, 0.5][i % 6]}deg">
+        <img class="face ${t.oval ? 'oval' : ''}" src="${c.portrait}" alt="${esc(c.name)}"
+          style="left:${pct(l, t.w)};top:${pct(tp, t.h)};width:${pct(r - l, t.w)};height:${pct(b - tp, t.h)}">
+        <img class="gilt-frame" src="${FRAME_SRC(COMPOSER_FRAME[c.id])}" alt="">
+        <span class="wall-plaque">${esc(c.short)}</span>
       </button>`);
+    Object.assign(f.style, {
+      left: pct(spot.cx - w / 2, BG_W), top: pct(spot.top, BG_H),
+      width: pct(w, BG_W), height: pct(spot.h, BG_H),
+    });
     f.onclick = () => ui.open('composer', { composerId: c.id });
-    wall.appendChild(f);
+    stage.appendChild(f);
   });
-  body.appendChild(wall);
   return { el };
 }
 

@@ -3,7 +3,7 @@ import { frame, h, esc } from './ui.js';
 import { pieceById, composerById } from '../data.js';
 import {
   parsePiece, midiInfo, labelFor, noteNames, NOTE_COLORS,
-  KEYMAP, keyLabels, keyCodeForMidi, PIANO_LOW, PIANO_HIGH,
+  KEYMAP, keyLabels, keyCodeForMidi, PIANO_LOW, PIANO_HIGH, KEYS_LOW, KEYS_HIGH, MAX_SHIFT,
 } from '../music.js';
 import { renderPage, pageOfNote } from '../notation.js';
 import { noteOn, noteOff, playPiece, audioState, onAudioReady } from '../audio.js';
@@ -35,6 +35,8 @@ export function keyboardGuide() {
         <li><span class="step-ico white"></span><span><b>Letters</b> zijn de <b>witte</b> toetsen.</span></li>
         <li><span class="step-ico black"></span><span><b>Cijfers</b> en de toetsen ertussen zijn de <b>zwarte</b> toetsen.</span></li>
         <li><span class="step-ico">⬆</span><span>Bovenste rij (Q W E…) = <b>hoge</b> noten. Onderste rij (Z X C…) = <b>lage</b> noten.</span></li>
+        <li><span class="step-ico">↔</span><span>Met <b>←</b> en <b>→</b> schuif je het toetsenbord een <b>octaaf</b> lager of hoger. Zo kun je alle 88 toetsen spelen.</span></li>
+        <li><span class="step-ico">🦶</span><span>Houd <b>Shift</b> ingedrukt voor het <b>pedaal</b>: de noten klinken dan door.</span></li>
         <li><span class="step-ico">✨</span><span>Kies <b>Speel mee</b>: de noot die oplicht op het blad, licht ook op de piano op. Druk op die toets!</span></li>
       </ol>
     </div>`);
@@ -45,7 +47,7 @@ export function pianoView(ui, { pieceId } = {}) {
     title: 'De piano',
     cls: 'piano',
     wide: true,
-    tip: 'Speel met je toetsenbord, je muis of je vinger. Kies bladmuziek en druk op "Speel mee": druk dan steeds op de toets die oplicht. Met "Luister" speelt de piano het stuk eerst voor.',
+    tip: 'Speel met je toetsenbord, je muis of je vinger. Met ← en → ga je een octaaf lager of hoger, met Shift trap je het pedaal in. Kies bladmuziek en druk op "Speel mee": druk dan steeds op de toets die oplicht.',
   });
 
   body.appendChild(h(`
@@ -65,6 +67,14 @@ export function pianoView(ui, { pieceId } = {}) {
       <div class="piano-body">
         <div class="piano-lid"><span>Van der Velde · Amsterdam</span></div>
         <div class="keys"></div>
+        <div class="piano-foot">
+          <div class="octave">
+            <button class="btn wood small oct-down" title="Een octaaf lager (←)"><span class="ico">◀</span> Lager</button>
+            <span class="oct-range"></span>
+            <button class="btn wood small oct-up" title="Een octaaf hoger (→)">Hoger <span class="ico">▶</span></button>
+          </div>
+          <button class="pedal" title="Pedaal: houd Shift ingedrukt, of klik om het vast te zetten"><span class="pedal-foot"></span><span class="pedal-label">Pedaal</span></button>
+        </div>
       </div>
       <div class="guide-pop paper" hidden></div>
       <div class="celebrate paper" hidden></div>
@@ -79,13 +89,16 @@ export function pianoView(ui, { pieceId } = {}) {
   const whites = [];
   for (let m = PIANO_LOW; m <= PIANO_HIGH; m++) if (!midiInfo(m).black) whites.push(m);
   const ww = 100 / whites.length;
+  let shift = 0; // octave shift of the computer keyboard
   const buildKeys = () => {
     keysEl.innerHTML = '';
     keyEls.clear();
+    const lo = KEYS_LOW + shift * 12, hi = KEYS_HIGH + shift * 12;
     for (let m = PIANO_LOW; m <= PIANO_HIGH; m++) {
       const info = midiInfo(m);
-      const code = keyCodeForMidi(m);
-      const k = h(`<div class="key ${info.black ? 'black' : 'white'}" style="--c:${NOTE_COLORS[info.letter]}">
+      const code = keyCodeForMidi(m, shift);
+      const inWin = m >= lo && m <= hi;
+      const k = h(`<div class="key ${info.black ? 'black' : 'white'} ${inWin ? 'inwin' : ''}" style="--c:${NOTE_COLORS[info.letter]}">
         <span class="kname">${labelFor(info.letter, info.acc)}${!info.black && info.letter === 'C' ? `<sub>${info.oct}</sub>` : ''}</span>
         ${code ? `<span class="kcap">${esc(keyLabels[code])}</span>` : ''}
       </div>`);
@@ -101,15 +114,48 @@ export function pianoView(ui, { pieceId } = {}) {
       k.addEventListener('lostpointercapture', () => release(m));
       keysEl.appendChild(k);
       keyEls.set(m, k);
+      held.has(m) && k.classList.add('down');
     }
+    // brass bar over the keys the computer keyboard plays now
+    const first = whites.indexOf(Math.max(lo, PIANO_LOW) + (midiInfo(Math.max(lo, PIANO_LOW)).black ? 1 : 0));
+    const last = whites.indexOf(Math.min(hi, PIANO_HIGH) - (midiInfo(Math.min(hi, PIANO_HIGH)).black ? 1 : 0));
+    const bar = h('<div class="kb-window"></div>');
+    Object.assign(bar.style, { left: `${first * ww}%`, width: `${(last - first + 1) * ww}%` });
+    keysEl.appendChild(bar);
+    $('.oct-range').textContent = `${noteLabel(Math.max(lo, PIANO_LOW))} – ${noteLabel(Math.min(hi, PIANO_HIGH))}`;
+    $('.oct-down').disabled = shift <= -MAX_SHIFT;
+    $('.oct-up').disabled = shift >= MAX_SHIFT;
   };
-  buildKeys();
+  const noteLabel = m => { const i = midiInfo(m); return labelFor(i.letter, i.acc) + i.oct; };
 
   // --- state
   let parsed = null, page = -1, noteEls = new Map();
   let mode = 'free';           // free | listen | follow
   let player = null, idx = 0, mistakes = 0, slow = false;
   const held = new Set();
+  const codeNotes = new Map(); // computer key → the note it started, so a shift while holding still releases it
+  let pedal = false, pedalLatched = false;
+  const sustained = new Set();
+  buildKeys();
+
+  function setShift(s) {
+    s = Math.max(-MAX_SHIFT, Math.min(MAX_SHIFT, s));
+    if (s === shift) return;
+    shift = s;
+    buildKeys();
+    if (mode === 'follow') nextTarget();
+  }
+
+  // Sustain pedal: released notes keep sounding until the pedal comes up.
+  function setPedal(on) {
+    if (pedal === on) return;
+    pedal = on;
+    $('.pedal').classList.toggle('down', on);
+    if (!on) {
+      sustained.forEach(m => { if (!held.has(m)) noteOff(m); });
+      sustained.clear();
+    }
+  }
 
   const setStatus = t => { statusEl.textContent = t; };
 
@@ -186,9 +232,14 @@ export function pianoView(ui, { pieceId } = {}) {
     if (idx >= notes.length) return finish();
     const n = notes[idx];
     markNote(n);
+    // slide the computer keyboard along when the note is out of its reach
+    let s = shift;
+    while (n.midi < KEYS_LOW + s * 12 && s > -MAX_SHIFT) s--;
+    while (n.midi > KEYS_HIGH + s * 12 && s < MAX_SHIFT) s++;
+    if (s !== shift) { shift = s; buildKeys(); }
     const k = keyEls.get(n.midi);
     k?.classList.add('target');
-    const code = keyCodeForMidi(n.midi);
+    const code = keyCodeForMidi(n.midi, shift);
     setStatus(`Speel ${labelFor(n.letter, n.acc)}${code ? ` — toets ${keyLabels[code]}` : ''}`);
   }
 
@@ -211,6 +262,7 @@ export function pianoView(ui, { pieceId } = {}) {
   function press(midi) {
     if (held.has(midi)) return;
     held.add(midi);
+    if (sustained.delete(midi)) noteOff(midi);
     noteOn(midi);
     const k = keyEls.get(midi);
     k?.classList.add('down');
@@ -232,12 +284,16 @@ export function pianoView(ui, { pieceId } = {}) {
 
   function release(midi) {
     if (!held.delete(midi)) return;
-    noteOff(midi);
+    if (pedal) sustained.add(midi);
+    else noteOff(midi);
     keyEls.get(midi)?.classList.remove('down');
   }
 
   // --- toolbar
   $('.choose').onclick = () => { stopAll(); ui.open('library', { forPiano: true }); };
+  $('.oct-down').onclick = () => setShift(shift - 1);
+  $('.oct-up').onclick = () => setShift(shift + 1);
+  $('.pedal').onclick = () => { pedalLatched = !pedalLatched; setPedal(pedalLatched); };
   $('.listen').onclick = listen;
   $('.follow').onclick = follow;
   $('.slow').onclick = () => { slow = !slow; $('.slow').classList.toggle('on', slow); };
@@ -267,6 +323,7 @@ export function pianoView(ui, { pieceId } = {}) {
     const cmd = st & 0xf0;
     if (cmd === 0x90 && vel > 0) press(note);
     else if (cmd === 0x80 || (cmd === 0x90 && vel === 0)) release(note);
+    else if (cmd === 0xb0 && note === 64) setPedal(vel >= 64 || pedalLatched); // sustain pedal
   };
   if (navigator.requestMIDIAccess) {
     const midiBtn = h('<button class="btn wood midi" title="Sluit een echte piano of keyboard aan via USB"><span class="ico">🔌</span> MIDI</button>');
@@ -288,24 +345,34 @@ export function pianoView(ui, { pieceId } = {}) {
   return {
     el,
     loadPiece,
-    onHide() { stopAll(); held.forEach(release); },
+    onHide() { stopAll(); held.forEach(release); codeNotes.clear(); pedalLatched = false; setPedal(false); },
     onKey(e) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const midi = KEYMAP[e.code];
-      if (midi != null) {
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { setPedal(true); return; }
+      if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
         e.preventDefault();
-        if (!e.repeat) press(midi);
+        if (!e.repeat) setShift(shift + (e.code === 'ArrowLeft' ? -1 : 1));
+        return;
+      }
+      if (KEYMAP[e.code] != null) {
+        e.preventDefault();
+        const midi = KEYMAP[e.code] + shift * 12;
+        if (e.repeat || codeNotes.has(e.code) || midi < PIANO_LOW || midi > PIANO_HIGH) return;
+        codeNotes.set(e.code, midi);
+        press(midi);
         return;
       }
       if (e.code === 'Space' && parsed) { e.preventDefault(); mode === 'follow' ? stopAll() : listen(); }
     },
     onKeyUp(e) {
-      const midi = KEYMAP[e.code];
-      if (midi != null) release(midi);
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { if (!e.shiftKey) setPedal(pedalLatched); return; }
+      const midi = codeNotes.get(e.code);
+      if (midi != null) { codeNotes.delete(e.code); release(midi); }
     },
     destroy() {
       stopAll();
       held.forEach(m => noteOff(m));
+      sustained.forEach(m => noteOff(m));
       midiAccess?.inputs.forEach(i => { i.onmidimessage = null; });
     },
   };

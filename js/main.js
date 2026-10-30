@@ -1,5 +1,6 @@
 import { Street } from './street.js';
 import { Shop } from './shop.js';
+import { Corner } from './corner.js';
 import { UI } from './ui/ui.js';
 import { initAudio, onAudioReady } from './audio.js';
 import { loadKeyLabels } from './music.js';
@@ -15,7 +16,7 @@ class Game {
     this.camX = 0;
     this.viewW = 1280;
     this.ui = new UI(this);
-    this.scenes = { street: new Street(this), shop: new Shop(this) };
+    this.scenes = { street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
     this.scene = this.scenes.street;
     this.running = false;
     this.bindInput();
@@ -41,7 +42,7 @@ class Game {
   goTo(name) {
     if (this.switching) return;
     this.switching = true;
-    const from = this.scene === this.scenes.shop ? 'shop' : 'street';
+    const from = Object.keys(this.scenes).find(k => this.scenes[k] === this.scene);
     this.fade(() => {
       this.scene = this.scenes[name];
       this.fit();
@@ -122,7 +123,7 @@ class Game {
     });
     this.canvas.addEventListener('pointermove', e => {
       if (!this.running) return;
-      const hit = this.scene === this.scenes.shop ? this.scene.hoverAt(...this.toWorld(e)) : this.scene.hover(...this.toWorld(e));
+      const hit = this.scene.hover(...this.toWorld(e));
       this.canvas.style.cursor = hit ? 'pointer' : 'default';
     });
     document.getElementById('btn-help').addEventListener('click', () => this.ui.open('keeper'));
@@ -149,6 +150,7 @@ const qs = new URLSearchParams(location.search);
 if (qs.get('autostart') != null) {
   document.getElementById('title-screen').classList.add('gone');
   game.start();
-  if (qs.get('scene') === 'shop') { game.scenes.shop.greeted = qs.get('greet') == null; game.scene = game.scenes.shop; game.fit(); game.scene.enter(); }
+  const sc = qs.get('scene');
+  if (game.scenes[sc] && sc !== 'street') { game.scenes.shop.greeted = qs.get('greet') == null; game.scene = game.scenes[sc]; game.fit(); game.scene.enter(); }
   if (qs.get('open')) setTimeout(() => game.ui.open(qs.get('open'), { pieceId: qs.get('piece'), composerId: qs.get('composer') }), 300);
 }

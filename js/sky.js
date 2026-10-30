@@ -44,7 +44,16 @@ export function skyAt(hour) {
     sun: dayT > -0.05 && dayT < 1.05 ? dayT : null,
     moon: dayT <= 0 || dayT >= 1 ? nightT : null,
     lampsOn: dark > 0.3,
+    painted: paintedWeight(hour),
   };
+}
+
+// How much of the painted sunset sky (public/art/past-street/sky.webp) to show.
+function paintedWeight(h) {
+  const ramp = (a, b) => Math.min(1, Math.max(0, (h - a) / (b - a)));
+  const dusk = ramp(17.3, 18.5) * (1 - ramp(20.4, 21.4));
+  const dawn = 0.8 * ramp(5.4, 6.3) * (1 - ramp(7.2, 8.2));
+  return Math.max(dusk, dawn);
 }
 
 export function hourLabel(hour) {

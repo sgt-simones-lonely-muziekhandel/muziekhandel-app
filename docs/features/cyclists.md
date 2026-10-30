@@ -17,7 +17,7 @@ After about 4 seconds without input, a cyclist rides in from one side and out th
   - Wheels with 8 spokes rotate with the distance travelled.
   - The pedal crank turns with the wheels; each leg is placed with two-bone inverse kinematics (hip → knee → foot on the pedal), so the knees bend naturally.
   - The far leg is drawn first in a darker tone, then the bike, then the near leg and the body.
-- Cyclists ride on the front lane (y = 704), in front of the boy.
+- Cyclists ride along the front edge of the quay (y = 574), in front of the boy, drawn at 1.3× so adults are taller than the boy.
 - They're removed once they're 400 px outside the view.
 
 ## Known limits / next steps

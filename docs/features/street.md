@@ -1,31 +1,34 @@
 # Street outside the shop
 
-The first scene. The player stands on a canal street in Amsterdam around 1900: a canal crossing with a bridge on the left, a row of canal houses on the right, and *Muziekhandel Van der Velde* among them.
+The first scene. The player stands on a canal quay in Amsterdam around 1900: the canal in front, a view down a second canal with an arched bridge and a church tower behind, and the music shop on the right.
 
 ## For the player
 
-- Walk with ← → (or A / D), or click/tap anywhere on the street to walk there.
-- At the shop door a label says **↑ Naar binnen**; press ↑, Enter, E or Space, or click the shop front, to go inside.
+- Walk with ← → (or A / D), or click/tap anywhere on the quay to walk there.
+- At the shop door a label says **↑ Naar binnen**; press ↑, Enter, E or Space, or click the shop front, to go inside. The boy walks to the door, steps up onto the doorstep and fades into the doorway; coming back out, he steps out of the door the same way.
+- The pavement follows the painting: along the railing, then a little lower in front of the shop, so the boy walks along the shop front instead of over it.
 - Until the player reaches the door, a yellow arrow bounces above it so even a five-year-old knows where to go.
 - Standing still for a few seconds brings out [cyclists](cyclists.md).
+- The sky and the light follow the real time of day (see [sky](sky.md)).
 
 ## How it's built
 
-`js/street.js`, class `Street`. Everything is drawn live on the canvas every frame; there's no background image.
+`js/street.js`, class `Street`. The scene is made of four painted layers from `public/art/past-street/`:
 
-- **World**: 3400 × 720 virtual pixels. The ground line is at y = 640. The canvas scales the virtual height to the window height (see [game shell](game-shell.md)), and the camera follows the boy.
-- **Layers, back to front**, each with its own parallax factor:
-  1. Sky, sun/moon, stars, clouds (screen space; see [sky](sky.md))
-  2. Distant skyline with a Westertoren-like tower (0.25)
-  3. Canal: far-bank houses, trees, water with shimmer, a moored boat (0.55)
-  4. Main layer (1.0): bridge railing, houses, shop, cobbles, bridge front with arches, street lamps, the boy, cyclists
-  5. Foreground silhouettes: a tree top-left and grass tufts at the bottom (1.3), for the *Valiant Hearts* framing from the design guide
-- **Hand-drawn look**: `wobPath()` draws polygons whose edges are split into short segments with a small random jitter, then filled and inked with a thick dark outline. The jitter comes from a seeded random generator (`rng(seed)`), re-created each frame, so the wobble is the same every frame and doesn't flicker.
-- **Houses** are generated once by `buildHouses()` from a fixed seed: width, height, gable type (`step`, `neck`, `bell`, `spout`, `cornice`), brick or plaster colour, arched windows, shutters. The range left of the shop is filled exactly up to the shop, so the row has no gaps.
-- **The shop** (`drawShop`) is a fixed, hand-placed facade: green shopfront, gold sign in Cinzel Decorative, two warmly lit display windows (sheet music, a violin, a gramophone horn), the door and a hanging sign with a note. The door is at `DOOR_X` (exported).
-- **Cobbles** are a pattern tile rendered once into an offscreen canvas.
-- **Night**: when the sky is dark, a blue overlay goes over the main layer, then lit windows, display windows and lamp glows are added with `globalCompositeOperation = 'lighter'`. The boy and cyclists are drawn after the overlay with a canvas brightness filter, so they stay readable.
-- **Amsterdammertjes**: the red-brown street posts along the pavement.
+| Layer | File | Size | Drawn |
+|---|---|---|---|
+| Sky | `sky.webp` | 1672 × 941, opaque sunset | Screen space, blended with the real-time sky gradient (see [sky](sky.md)) |
+| Far | `far.webp` | 2172 × 724, transparent sky | Parallax 0.6: houses, trees, bridge and tower across the canal |
+| Walk | `walk.webp` | 2172 × 724, transparent above | Parallax 1: the quay the boy walks on, with lamps, bench, bike, flower boxes and the shop |
+| Foreground | `foreground.webp` | 2172 × 724, transparent middle | Parallax 1, on top of everything: black silhouettes (lamp, trees, posts) framing the left and right ends |
+
+- **World size**: the layers are scaled from 724 to 720 px high, so the world is 2160 × 720 units. The camera follows the boy and stops at the edges; on very wide screens the scene is centred.
+- **Start position**: the boy starts at x = 1150, so on a normal screen the shop is already in view on the right.
+- **Order**: sky → far → walk → night lights → door hint → boy → cyclists → foreground.
+- **Positions** measured on `walk.webp` (in world units): the boy's feet at y = 556 along the railing and `SHOP_FOOT_Y` = 570 in front of the shop (`footAt(x)` blends between them from x = 1640 to 1780), the doorstep at `DOOR_SILL`, cyclists at y = 574, the shop door at `DOOR_X = 2072`, the clickable shop front in `SHOP`, the two street lamps in `LAMPS`, the shop windows in `SHOP_LIGHTS`. If the art is replaced, these numbers need to be measured again.
+- **Canal water** (`drawWater()`): the water at the bottom of `walk.webp` (from `WATER_TOP`) is drawn a second time in 2-pixel rows, each shifted sideways by two slow sine waves, more towards the front. The reflections wobble while the painting stays the same. Right of `WATER_X0` the stone steps go into the water, so there only the rows below `WATER_STEPS` move. On top, 70 glints (white by day, warm at night) appear and fade on the water.
+- **Gas lamps**: every lamp flickers in its own rhythm (`flicker()`: a few fast sine waves and now and then a short dip). By day the two quay lamps and the six lamps across the canal (`FAR_LAMPS`, drawn in the far layer so they move with it) glow softly; in the evening the glow grows, lights a pool on the pavement and throws a wobbling column of light into the canal.
+- **Night**: when the sky gets dark, the far and walk layers are tinted dark blue only where they have pixels (`nightTinted()`). The tinted copy is cached and only redrawn when the darkness changes by 2% or more, so it costs nothing per frame. Then lamp glows, light pools on the pavement and the shop window glow are added with `globalCompositeOperation = 'lighter'`. The boy and cyclists get a canvas brightness filter.
 
 ## Interface with the game
 
@@ -33,6 +36,6 @@ The first scene. The player stands on a canal street in Amsterdam around 1900: a
 
 ## Known limits / next steps
 
-- The street is drawn in code, not painted. A layered illustration (sky, far, middle, foreground as separate transparent images) would look closer to the mood boards and still keep the dynamic sky and parallax.
-- No pedestrians, birds or sounds yet.
-- The canal crossing is decorative; the player can't go anywhere but the shop.
+- The painted layers are lit for golden hour (warm lamps, lit windows) at every time of day; the tint only darkens them at night. A daytime version of the far and walk layers could be cross-faded in by day.
+- The sign on the shop in the art says **MUZIEKHANDEL SIMONE**, while the game text says *Muziekhandel Van der Velde*. One of the two needs to change.
+- The scene is one screen-and-a-half wide: there's only one place to go (the shop).

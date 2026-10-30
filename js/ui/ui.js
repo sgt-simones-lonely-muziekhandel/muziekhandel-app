@@ -31,11 +31,15 @@ export function speak(text) {
   speechSynthesis.speak(u);
 }
 
-/** The standard paper frame around a view: back button, title, body, keeper tip. */
-export function frame(ui, { title, cls = '', tip, wide = false }) {
+/**
+ * The standard paper frame around a view: back button, title, body, keeper tip.
+ * With `closeup` (an image in public/art/closeups) the panel is a dark wooden frame around that picture
+ * instead, and `stage` is a box with the picture's proportions to position things on in percentages.
+ */
+export function frame(ui, { title, cls = '', tip, wide = false, closeup = null }) {
   const el = h(`
     <div class="view ${cls}">
-      <div class="panel paper ${wide ? 'wide' : ''}">
+      <div class="panel ${closeup ? 'closeup' : 'paper'} ${wide ? 'wide' : ''}">
         <header class="panel-head">
           <button class="btn wood back" data-act="back"><span class="ico">◀</span> Terug</button>
           <h2>${esc(title)}</h2>
@@ -54,7 +58,14 @@ export function frame(ui, { title, cls = '', tip, wide = false }) {
     el.querySelector('.keeper-tip').onclick = () => { bubble.hidden = !bubble.hidden; };
     bubble.querySelector('.speak').onclick = () => speak(tip);
   }
-  return { el, body: el.querySelector('.panel-body'), panel: el.querySelector('.panel') };
+  const body = el.querySelector('.panel-body');
+  let stage = null;
+  if (closeup) {
+    stage = h('<div class="stage"></div>');
+    stage.style.backgroundImage = `url(${closeup})`;
+    body.appendChild(stage);
+  }
+  return { el, body, stage, panel: el.querySelector('.panel') };
 }
 
 export class UI {

@@ -5,7 +5,7 @@ import { keyboardGuide } from './piano.js';
 const TOPICS = [
   {
     q: 'Wat kan ik hier doen?',
-    a: 'In mijn winkel kun je van alles ontdekken! Links staat de kast met bladmuziek in kokers. Daarnaast de piano, waar je zelf kunt spelen. Aan de muur hangen de schilderijen van beroemde componisten. En helemaal rechts staat de grammofoon om naar muziek te luisteren.',
+    a: 'In mijn winkel kun je van alles ontdekken! Daar staat de piano, waar je zelf kunt spelen. Boven de piano hangen de schilderijen van beroemde componisten. Rechts van mijn toonbank staat de kast met bladmuziek in kokers. En loop je nog verder naar rechts, dan kom je in de luisterhoek met de grammofoon.',
   },
   {
     q: 'Hoe speel ik piano?',
@@ -15,7 +15,7 @@ const TOPICS = [
   },
   {
     q: 'Waar is de bladmuziek?',
-    a: 'In de grote kast, links bij de deur! In elke koker zit een opgerold muziekstuk. Haal er maar eentje uit. Met de pijltjes blader je, en met de spatiebalk speel je het op de piano.',
+    a: 'In de grote kast, rechts naast mijn toonbank! In elke koker zit een opgerold muziekstuk. Haal er maar eentje uit. Met de pijltjes blader je, en met de spatiebalk speel je het op de piano.',
     go: ['library', '📜 Naar de kast'],
   },
   {
@@ -25,7 +25,7 @@ const TOPICS = [
   },
   {
     q: 'Mag ik muziek luisteren?',
-    a: 'Natuurlijk! Mijn grammofoon is gloednieuw, de nieuwste uitvinding! Kies een plaat en luister maar.',
+    a: 'Natuurlijk! Mijn grammofoon is gloednieuw, de nieuwste uitvinding! Hij staat in de luisterhoek: loop maar helemaal naar rechts. Kies een cilinder en luister maar.',
     go: ['gramophone', '🎵 Naar de grammofoon'],
   },
 ];

@@ -1,0 +1,26 @@
+# Listening corner
+
+A small room to the right of the shop, where the [gramophone](gramophone.md) stands. The player gets there by walking on to the right past the sheet-music cabinet.
+
+## For the player
+
+- A cosy corner: a big window over the canal, a crate full of records, a round table with the brass gramophone on it, and a green armchair.
+- **Gramophone** (*Grammofoon*) and the **crate** (*Cilinders*) both open the gramophone, where you pick a music cylinder and listen.
+- **Back to the shop**: keep walking left, or click the left edge (*Terug naar de winkel*). The boy comes back in at the right side of the shop.
+- Objects glow and get a paper label like in the shop; ↑ / Enter / E / Space uses the nearest one.
+
+## How it's built
+
+`js/corner.js`, class `Corner`, scene name `corner`.
+
+- **Background**: `public/art/closeups/gramophone-corner.webp` (1672 × 941), drawn at 720 units high, so the room is 1279 units wide. The scene sets `fitWidth` to that width, so on most screens the whole corner is visible.
+- **Gramophone**: `public/art/shop/gramophone.webp` shows the gramophone on its own cabinet; only the top 560 source rows (horn and box) are drawn, 300 units wide, standing on the table top (`GRAMO`).
+- **Boy**: drawn bigger than in the shop (360 units high, feet at y = 706) because the corner is a close-up. He can walk from x = 60 to 260 units before the right edge (the armchair).
+- **Hotspots** (`HOTSPOTS`): same format and helpers as the shop (`js/hotspots.js`).
+- **Scene changes**: in `update`, holding ← at the left edge calls `game.goTo('shop')`; the shop's right edge calls `game.goTo('corner')`.
+
+## Known limits / next steps
+
+- The crate in the painting holds records, while the game uses cylinders; the art could be repainted with cylinders.
+- Nothing turns on the gramophone in the scene itself, only in the overlay.
+- The armchair could be a place to sit and listen.

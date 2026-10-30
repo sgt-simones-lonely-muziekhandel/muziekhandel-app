@@ -1,5 +1,7 @@
-// The gramophone: pick a record and listen, with an old-fashioned crackly sound.
+// The gramophone: pick a music cylinder (public/art/items/cylinder) and listen, with an
+// old-fashioned crackly sound.
 import { frame, h, esc } from './ui.js';
+import { CYLINDER_ART, cylinderColor } from './library.js';
 import { PIECES, pieceById, composerById } from '../data.js';
 import { parsePiece } from '../music.js';
 import { playPiece, setGramophone, audioState } from '../audio.js';
@@ -9,7 +11,7 @@ export function gramophoneView(ui, { pieceId } = {}) {
     title: 'De grammofoon',
     cls: 'gramophone',
     wide: true,
-    tip: 'Kies een plaat uit de platenkast. De grammofoon speelt hem af, met het geknisper van vroeger!',
+    tip: 'Kies een cilinder uit de kist. De grammofoon draait hem rond en speelt de muziek, met het geknisper van vroeger!',
   });
   body.appendChild(h(`
     <div class="gramo-grid">
@@ -19,22 +21,22 @@ export function gramophoneView(ui, { pieceId } = {}) {
       </div>
       <div class="gramo-side">
         <div class="now paper-inner">
-          <div class="record"><div class="record-label"></div></div>
+          <div class="mandrel"><img class="now-cyl" alt="" hidden><span class="empty-mandrel"></span></div>
           <div class="now-text">
             <small>Nu speelt</small>
-            <b class="now-title">— kies een plaat —</b>
+            <b class="now-title">— kies een cilinder —</b>
             <span class="now-comp"></span>
             <div class="progress"><i></i></div>
           </div>
           <button class="btn brass round stop" title="Stop" disabled>■</button>
         </div>
-        <h3 class="hand">De platenkast</h3>
-        <ul class="records"></ul>
+        <h3 class="hand">De cilinderkist</h3>
+        <ul class="cylinders"></ul>
       </div>
     </div>`));
 
   const $ = s => body.querySelector(s);
-  const list = $('.records');
+  const list = $('.cylinders');
   let player = null, raf = 0, noteTimer = 0;
 
   const stop = () => {
@@ -45,7 +47,10 @@ export function gramophoneView(ui, { pieceId } = {}) {
     el.classList.remove('playing');
     $('.stop').disabled = true;
     $('.progress i').style.width = '0';
-    list.querySelectorAll('li').forEach(li => li.classList.remove('on'));
+    list.querySelectorAll('li.on').forEach(li => {
+      li.classList.remove('on');
+      li.querySelector('.cyl').src = `${CYLINDER_ART}${li.dataset.color}.webp`;
+    });
   };
 
   const play = id => {
@@ -54,8 +59,14 @@ export function gramophoneView(ui, { pieceId } = {}) {
     const comp = composerById(piece.composer);
     $('.now-title').textContent = piece.title;
     $('.now-comp').textContent = comp.name;
-    $('.record-label').style.setProperty('--hue', (piece.title.length * 37) % 360);
-    list.querySelector(`[data-id="${id}"]`)?.classList.add('on');
+    // the cylinder comes out of its box (the open one stays behind) and goes on the gramophone
+    const color = cylinderColor(piece);
+    const nowCyl = $('.now-cyl');
+    nowCyl.src = `${CYLINDER_ART}${color}.webp`;
+    nowCyl.hidden = false;
+    $('.empty-mandrel').hidden = true;
+    const li = list.querySelector(`[data-id="${id}"]`);
+    if (li) { li.classList.add('on'); li.querySelector('.cyl').src = `${CYLINDER_ART}open.webp`; }
     if (!audioState.ready) { $('.now-comp').textContent = 'De grammofoon wordt nog opgewonden… probeer het zo nog eens.'; return; }
     setGramophone(true);
     el.classList.add('playing');
@@ -81,8 +92,10 @@ export function gramophoneView(ui, { pieceId } = {}) {
 
   for (const p of PIECES) {
     const comp = composerById(p.composer);
-    const li = h(`<li data-id="${p.id}"><button><span class="mini-record" style="--hue:${(p.title.length * 37) % 360}"></span>
-      <span><b>${esc(p.title)}</b><small>${esc(comp.name)}</small></span><span class="play-ico">▶</span></button></li>`);
+    const color = cylinderColor(p);
+    const li = h(`<li data-id="${p.id}" data-color="${color}"><button title="${esc(p.title)}">
+      <img class="cyl" src="${CYLINDER_ART}${color}.webp" alt="">
+      <span class="tube-label"><strong>${esc(p.title)}</strong><em>${esc(comp.short)}</em></span></button></li>`);
     li.querySelector('button').onclick = () => play(p.id);
     list.appendChild(li);
   }

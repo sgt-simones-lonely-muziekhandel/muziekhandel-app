@@ -49,37 +49,6 @@ def remove_bg(img):
     return Image.fromarray(a)
 
 
-def walk_sheet():
-    src = Image.open(os.path.join(REPO, "docs/design/Eight-Frame Boy Walking Cycle.png"))
-    W, H = src.size
-    fw = W / 8
-    frames = []
-    for i in range(8):
-        crop = src.crop((int(i * fw), 40, int((i + 1) * fw), 590))
-        fr = remove_bg(crop)
-        al = np.array(fr)[:, :, 3]
-        ys, xs = np.nonzero(al > 0)
-        bottom = ys.max()
-        # horizontal anchor: centre of the head region (top 30% of the figure)
-        top = ys.min()
-        head = al[top:top + int((bottom - top) * 0.3)] > 0
-        hx = np.nonzero(head.any(axis=0))[0]
-        cx = (hx.min() + hx.max()) / 2
-        frames.append((fr, bottom, cx, top))
-    tops = min(t for _, _, _, t in frames)
-    FW, FH = 300, 0
-    FH = max(b for _, b, _, _ in frames) - tops + 6
-    sheet = Image.new("RGBA", (FW * 8, FH), (0, 0, 0, 0))
-    base = max(b for _, b, _, _ in frames)
-    for i, (fr, bottom, cx, top) in enumerate(frames):
-        ox = int(i * FW + FW / 2 - cx)
-        oy = int(base - bottom) - tops
-        sheet.paste(fr, (ox, oy), fr)
-    sheet = sheet.resize((sheet.width * 6 // 10, sheet.height * 6 // 10), Image.LANCZOS)  # 180x277 frames
-    sheet.save(os.path.join(OUT, "boy-walk.png"), optimize=True)
-    print("walk sheet", sheet.size)
-
-
 PORTRAITS = {
     # inner painting areas in Gemini_Generated_Image_ivo2oqivo2oqivo2.jpeg (1085x992)
     "beethoven": (88, 82, 318, 345),
@@ -99,8 +68,6 @@ def portraits():
 
 
 def backgrounds():
-    Image.open(os.path.join(DESK, "Gemini_Generated_Image_faywvlfaywvlfayw.jpeg")).convert("RGB").save(
-        os.path.join(OUT, "shop-interior.jpg"), quality=90)
     # crop away the baked-in Italian labels, keep the gramophone
     Image.open(os.path.join(DESK, "Gemini_Generated_Image_6n1xm46n1xm46n1x.jpeg")).convert("RGB").crop(
         (0, 140, 510, 860)).save(os.path.join(OUT, "gramophone-corner.jpg"), quality=88)
@@ -108,4 +75,4 @@ def backgrounds():
 
 
 if __name__ == "__main__":
-    walk_sheet(); portraits(); backgrounds()
+    portraits(); backgrounds()
