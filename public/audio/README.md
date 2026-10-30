@@ -2,4 +2,4 @@
 
 **Owners:** Rei, Teo (backend)
 
-MusicXML scores (from OMR or made by hand), SoundFont samples, and any real recordings used by the gramophone.
+Real recordings for the gramophone, and any scores (MusicXML) used to make the note text for pieces. The piano itself plays its notes with Tone.js (`js/audio.js`), so it doesn't need files here.
