@@ -46,10 +46,22 @@ class Game {
     requestAnimationFrame(loop);
   }
 
-  goTo(name) {
+  // `dissolve: seconds` cross-fades from the last picture of this scene into the next one,
+  // instead of fading through black.
+  goTo(name, { dissolve } = {}) {
     if (this.switching) return;
-    this.switching = true;
     const from = Object.keys(this.scenes).find(k => this.scenes[k] === this.scene);
+    if (dissolve) {
+      const c = document.createElement('canvas');
+      c.width = this.canvas.width; c.height = this.canvas.height;
+      c.getContext('2d').drawImage(this.canvas, 0, 0);
+      this.dissolve = { img: c, t: 0, dur: dissolve };
+      this.scene = this.scenes[name];
+      this.fit();
+      this.scene.enter(from);
+      return;
+    }
+    this.switching = true;
     this.fade(() => {
       this.scene = this.scenes[name];
       this.fit();
@@ -111,6 +123,18 @@ class Game {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     s.draw(this.ctx, view);
+    if (this.dissolve) {
+      const d = this.dissolve;
+      d.t += dt;
+      const p = Math.min(1, d.t / d.dur), a = 1 - p * p * (3 - 2 * p);
+      if (a <= 0) this.dissolve = null;
+      else {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.globalAlpha = a;
+        this.ctx.drawImage(d.img, 0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.globalAlpha = 1;
+      }
+    }
   }
 
   toWorld(e) {

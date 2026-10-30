@@ -2,6 +2,13 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-30 — Story: hands in the corner, the boy on the quay, a soft ending
+
+Changed:
+
+- [Story](story.md): the hands with the tube come in from the bottom-left corner instead of the middle, so the sleeves run off the edges. In the time travel the boy stands on the quay (pinned to the painting) instead of floating over the canal. The shot of the boy walking to the shop is gone: after the swirl the camera drifts towards the sunset and the picture dissolves slowly into the [street](street.md). Captions moved to the bottom right.
+- [Game shell](game-shell.md): `game.goTo(name, { dissolve: seconds })` cross-fades into the next scene instead of fading through black.
+
 ## 2026-10-30 — The time-travel story
 
 Added:

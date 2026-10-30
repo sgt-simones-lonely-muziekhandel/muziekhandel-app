@@ -1,11 +1,12 @@
 // The story between the future and the past, played after the boy opens the crate on the
-// future street. Four painted shots from public/art/intro, like a slow anime opening: every
+// future street. Three painted shots from public/art/intro, like a slow anime opening: every
 // shot drifts and zooms a little, shots dissolve into each other, and small things keep moving
 // (rain, dust in the light, the boy breathing, sheet music and notes flying).
 //   1. crate   the crate in the rubble, closed; a golden flash and it is open
 //   2. tube    the boy's hands lift a cylinder tube, the lid pops off, light and music pour out
-//   3. travel  the flooded street; a swirl of light sweeps across and the past appears behind it
-//   4. arrive  the shop in the past, the boy walks towards it; then the game goes to the street
+//   3. travel  the flooded street; a swirl of light sweeps across and the past appears behind it,
+//              then the camera drifts towards the sunset and the picture dissolves into the street
+// The boy is seen from behind here and has no walk for that, so he only stands and breathes.
 // A click, tap or ↑ / Enter / Space jumps to the next shot.
 
 const ART = 'public/art/intro/';
@@ -15,7 +16,7 @@ const IMG = {
   tubeBg: load('tube-background'), hands: load('hands-tube'), lid: load('tube-lid'),
   burst: load('light-burst'), swirl: load('swirl'),
   future: load('future-street'), futureFrame: load('future-frame'), past: load('past-street'),
-  shop: load('shop-front'), kidFuture: load('kid-back/future'), kidPast: load('kid-back/past'),
+  kidFuture: load('kid-back/future'), kidPast: load('kid-back/past'),
 };
 const PAPERS = [1, 2, 3, 4, 5, 6, 7].map(n => load(`flying/paper-${n}`));
 const NOTES = [1, 2, 3, 4, 5, 6].map(n => load(`flying/note-${n}`));
@@ -23,17 +24,22 @@ const STRIP = (() => { const i = new Image(); i.src = 'public/art/ui/paper-strip
 
 const H = 720;
 const XF = 1.6;        // seconds two shots dissolve into each other
-const EDGE = 1.6;      // fade in from black at the start, out to black at the end
+const EDGE = 1.6;      // fade in from black at the start
+const OUT = 2.8;       // the last picture dissolves into the street
 const INK = '#2a1d12';
 // The opening of the tube in hands-tube.webp, in its own pixels.
 const TUBE_TOP = [560, 70], TUBE_W = 265;
+// Where the boy stands in the two street paintings (0–1 of the picture): on the quay bottom left,
+// solid ground in both the future and the past. His height as a part of the picture's height.
+const KID_AT = [0.3, 0.985], KID_H = 0.42;
+// The setting sun in past-street.webp, where the camera drifts to at the end.
+const SUN = [0.62, 0.56];
 
 // Shots, in order. `captions` are [from, to, text] in seconds within the shot.
 const SHOTS = [
   { key: 'crate', dur: 7, captions: [[1, 6.2, 'Tussen de puinhopen staat een oude kist…']] },
   { key: 'tube', dur: 7.5, captions: [[1.2, 6.4, 'Hij maakt een rol open… en de muziek begint.']] },
-  { key: 'travel', dur: 9, captions: [[1.4, 5, '…en de wereld verandert…'], [5.4, 8.4, '…naar het verleden.']] },
-  { key: 'arrive', dur: 7.5, captions: [[1.2, 6.6, 'Amsterdam, rond 1900.']] },
+  { key: 'travel', dur: 12, captions: [[1.4, 5, '…en de wereld verandert…'], [5.6, 10, '…naar het verleden.']] },
 ];
 let at = 0;
 for (const s of SHOTS) { s.start = at; at += s.dur - XF; }
@@ -71,7 +77,7 @@ export class Story {
   interact() {
     const i = this.shotAt(this.T);
     if (i < SHOTS.length - 1) this.T = Math.max(this.T, SHOTS[i + 1].start);
-    else this.T = Math.max(this.T, TOTAL - EDGE);
+    else this.T = Math.max(this.T, TOTAL);
   }
   click() { this.interact(); }
   hover() { return true; }
@@ -86,7 +92,8 @@ export class Story {
     this.T += dt;
     if (this.T > SHOTS[2].start + SHOTS[2].dur) this.swirlX = null;
     this.updateParticles(dt);
-    if (this.T >= TOTAL && !this.done) { this.done = true; this.game.goTo('street'); }
+    // the last picture dissolves slowly into the street, as if looking ahead to a better time
+    if (this.T >= TOTAL && !this.done) { this.done = true; this.game.goTo('street', { dissolve: OUT }); }
   }
 
   draw(ctx, view) {
@@ -116,8 +123,8 @@ export class Story {
       ctx.globalCompositeOperation = 'source-over';
     }
     SHOTS.forEach(s => this.drawCaptions(ctx, T - s.start, s, vw));
-    // soft fade from and to black at the very start and end
-    const black = Math.max(1 - smooth(T / EDGE), smooth((T - (TOTAL - EDGE)) / EDGE));
+    // soft fade in from black at the start
+    const black = 1 - smooth(T / EDGE);
     if (black > 0) { ctx.fillStyle = `rgba(0,0,0,${black})`; ctx.fillRect(0, 0, vw, H); }
     ctx.restore();
   }
@@ -145,10 +152,12 @@ export class Story {
     cover(ctx, IMG.tubeBg, vw, 1.06 + 0.06 * ease(t / 7.5), 0.5, 0.6);
     ctx.fillStyle = 'rgba(8,10,18,0.25)'; ctx.fillRect(0, 0, vw, H);
     if (!ready(IMG.hands)) return;
-    const hw = Math.min(vw * 0.62, 760), k = hw / IMG.hands.naturalWidth, hh = IMG.hands.naturalHeight * k;
+    // the hands come in from the bottom-left corner: the left sleeve runs off the left edge,
+    // the right one off the bottom, as if we look through the boy's eyes
+    const hw = Math.min(vw * 0.62, 820), k = hw / IMG.hands.naturalWidth, hh = IMG.hands.naturalHeight * k;
     const rise = (1 - ease(t / 1.8)) * 300;
     const bob = Math.sin(t * 1.5) * 5 + Math.sin(t * 0.7) * 3;
-    const hx = vw / 2 - hw * 0.52, hy = H - hh + 70 + rise + bob;
+    const hx = -hw * 0.04, hy = H - hh + 150 + rise + bob;
     const top = [hx + TUBE_TOP[0] * k, hy + TUBE_TOP[1] * k];
     this.tubeTop = top;
     const open = t - 2.8; // seconds since the lid came off
@@ -180,45 +189,51 @@ export class Story {
     this.drawMotes(ctx, t, vw, top[0], top[1] - 100, 'rgba(255,220,150,', open > 0 ? 1 : 0.3);
   }
 
-  // 3. The flooded street, the boy from behind. A swirl of light sweeps across from right to left;
-  // behind it the same street appears in the past, and the boy's grey jacket turns brown.
+  // 3. The flooded street, the boy from behind on the quay. A swirl of light sweeps across from
+  // right to left; behind it the same street appears in the past, and the boy's grey jacket turns
+  // brown. Then the camera drifts slowly towards the setting sun while the light grows warmer.
   travel(ctx, t, vw) {
     const p = ease((t - 1.6) / 4.4);
     const sx = vw * 1.2 - p * vw * 1.45; // the swirl's x
     this.swirlX = p > 0 && p < 1 ? sx : null;
-    const zoom = 1.06 + 0.05 * ease(t / 9), fx = 0.5 + 0.03 * Math.sin(t * 0.2);
-    const kid = (img, breathe) => {
-      if (!ready(img)) return;
-      const kh = 330, kw = kh * img.naturalWidth / img.naturalHeight;
-      const x = vw * 0.5 - kw / 2, y = H - kh - 22;
+    const ahead = ease((t - 6) / 6); // looking ahead, after the swirl
+    const zoom = 1.06 + 0.04 * ease(t / 6) + 0.22 * ahead;
+    const fx = 0.5 + 0.03 * Math.sin(t * 0.2) + (SUN[0] - 0.5) * ahead, fy = 0.45 + (SUN[1] - 0.45) * ahead;
+    const kid = (img, at) => {
+      if (!ready(img) || !at) return;
+      // pinned to the painting, so he stays on the quay while the camera moves
+      const kh = at.h * KID_H, kw = kh * img.naturalWidth / img.naturalHeight;
+      const x = at.x + KID_AT[0] * at.w, y = Math.min(H - 6, at.y + KID_AT[1] * at.h);
       ctx.save();
-      ctx.translate(x + kw / 2, y + kh);
-      ctx.scale(1, 1 + 0.01 * Math.sin(t * 2.2 + breathe));
+      ctx.translate(x, y);
+      ctx.scale(1, 1 + 0.008 * Math.sin(t * 2.2)); // breathing
       ctx.fillStyle = 'rgba(10,8,6,0.3)';
-      ctx.beginPath(); ctx.ellipse(0, -4, kw * 0.45, 9, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, -4, kw * 0.45, kh * 0.025, 0, 0, Math.PI * 2); ctx.fill();
       ctx.drawImage(img, -kw / 2, -kh, kw, kh);
       ctx.restore();
     };
     // the future, left of the swirl
-    ctx.save();
-    ctx.beginPath(); ctx.rect(0, 0, Math.max(0, sx), H); ctx.clip();
-    cover(ctx, IMG.future, vw, zoom, fx, 0.45);
-    kid(IMG.kidFuture, 0);
-    if (ready(IMG.futureFrame)) {
-      // dark vines in front, drifting a little more than the street for depth
-      const fw = vw * 1.12, fh = H * 1.12;
-      ctx.drawImage(IMG.futureFrame, -vw * 0.06 + Math.sin(t * 0.25) * 10, -H * 0.06, fw, fh);
+    if (sx > 0) {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, sx, H); ctx.clip();
+      kid(IMG.kidFuture, cover(ctx, IMG.future, vw, zoom, fx, fy));
+      if (ready(IMG.futureFrame)) {
+        // dark vines in front, drifting a little more than the street for depth
+        ctx.drawImage(IMG.futureFrame, -vw * 0.06 + Math.sin(t * 0.25) * 10, -H * 0.06, vw * 1.12, H * 1.12);
+      }
+      this.drawRain(ctx, t, vw, 0.3);
+      ctx.restore();
     }
-    this.drawRain(ctx, t, vw, 0.3);
-    ctx.restore();
     // the past, right of the swirl
     if (sx < vw) {
       ctx.save();
       ctx.beginPath(); ctx.rect(sx, 0, vw - sx, H); ctx.clip();
-      cover(ctx, IMG.past, vw, zoom, fx, 0.45);
-      sunBeams(ctx, vw, t, 0.5);
-      kid(IMG.kidPast, 0);
-      this.drawMotes(ctx, t, vw, vw * 0.7, H * 0.35, 'rgba(255,236,170,', 0.8);
+      const at = cover(ctx, IMG.past, vw, zoom, fx, fy);
+      sunBeams(ctx, vw, t, 0.5 + 0.5 * ahead);
+      kid(IMG.kidPast, at);
+      this.drawMotes(ctx, t, vw, vw * 0.6, H * 0.4, 'rgba(255,236,170,', 0.8 + 0.4 * ahead);
+      // the sunset grows warmer and brighter, as if looking ahead to a better time
+      if (ahead > 0 && at) glow(ctx, at.x + SUN[0] * at.w, at.y + SUN[1] * at.h, 200 + 500 * ahead, `rgba(255,214,150,${0.45 * ahead})`);
       ctx.restore();
     }
     // the swirl itself, glowing over the seam
@@ -240,26 +255,6 @@ export class Story {
       }
       ctx.restore();
     }
-  }
-
-  // 4. The shop in the past: a slow pan towards it while the boy walks up the quay.
-  arrive(ctx, t, vw) {
-    cover(ctx, IMG.shop, vw, 1.08 + 0.08 * ease(t / 7.5), 0.38 + 0.2 * ease(t / 7.5), 0.5);
-    sunBeams(ctx, vw, t, 0.7);
-    this.drawMotes(ctx, t, vw, vw * 0.5, H * 0.4, 'rgba(255,236,170,', 0.9);
-    const img = IMG.kidPast;
-    if (!ready(img)) return;
-    const w = ease((t - 0.8) / 6.2);
-    const kh = 330 * (1 - 0.32 * w), kw = kh * img.naturalWidth / img.naturalHeight;
-    const step = Math.abs(Math.sin(t * 5.5)) * 7 * (w > 0 && w < 1 ? 1 : 0);
-    const x = vw * (0.42 + 0.14 * w), y = H - 20 - 70 * w - step;
-    ctx.save();
-    ctx.fillStyle = 'rgba(40,24,10,0.3)';
-    ctx.beginPath(); ctx.ellipse(x, y + step, kw * 0.45, 8, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.translate(x, y);
-    ctx.rotate(Math.sin(t * 5.5) * 0.02 * (w < 1 ? 1 : 0));
-    ctx.drawImage(img, -kw / 2, -kh, kw, kh);
-    ctx.restore();
   }
 
   // ---- living details --------------------------------------------------------------------
@@ -344,7 +339,7 @@ export class Story {
     ctx.restore();
   }
 
-  // Captions on a strip of old paper, bottom left, fading in and out with the shot.
+  // Captions on a strip of old paper, bottom right (clear of the boy and his hands), fading in and out.
   drawCaptions(ctx, t, shot, vw) {
     for (const [from, to, text] of shot.captions) {
       const a = bump(t, from, from + 0.8, to - 0.8, to);
@@ -353,7 +348,7 @@ export class Story {
       ctx.globalAlpha = a;
       ctx.font = '600 38px Caveat, "Comic Sans MS", cursive';
       const tw = ctx.measureText(text).width, w = tw + 90, h = 84;
-      const x = Math.max(24, vw * 0.06), y = H - h - 34 - (1 - a) * 8;
+      const x = vw - w - Math.max(24, vw * 0.06), y = H - h - 34 - (1 - a) * 8;
       if (ready(STRIP)) ctx.drawImage(STRIP, x, y, w, h);
       else { ctx.fillStyle = '#f4e9d7'; ctx.fillRect(x, y, w, h); }
       ctx.fillStyle = INK; ctx.textBaseline = 'middle';
@@ -364,6 +359,7 @@ export class Story {
 }
 
 // Draw a 16:9 painting so it covers the screen, zoomed around (fx, fy) (0–1 of the picture).
+// Returns where it went, to pin things to the painting.
 function cover(ctx, img, vw, zoom, fx, fy) {
   if (!ready(img)) return;
   const s = Math.max(vw / img.naturalWidth, H / img.naturalHeight) * zoom;
@@ -371,6 +367,7 @@ function cover(ctx, img, vw, zoom, fx, fy) {
   const x = Math.min(0, Math.max(vw - w, vw / 2 - fx * w));
   const y = Math.min(0, Math.max(H - h, H / 2 - fy * h));
   ctx.drawImage(img, x, y, w, h);
+  return { x, y, w, h };
 }
 
 function glow(ctx, x, y, r, rgba) {
