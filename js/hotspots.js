@@ -35,20 +35,6 @@ export function clickSpots(scene, spots, wx, wy, minX, maxX) {
   }
 }
 
-// Warm pulsing dashed outline around a spot.
-export function drawOutline(ctx, spot, time) {
-  const pulse = 0.55 + 0.45 * Math.sin(time * 4);
-  ctx.save();
-  ctx.shadowColor = 'rgba(255,214,120,0.9)';
-  ctx.shadowBlur = 18;
-  ctx.strokeStyle = `rgba(255,214,120,${0.5 + pulse * 0.4})`;
-  ctx.lineWidth = 3;
-  ctx.setLineDash([10, 7]);
-  ctx.lineDashOffset = -time * 20;
-  for (const [x, y, w, h] of spot.rects) { ctx.beginPath(); ctx.roundRect(x, y, w, h, 14); ctx.stroke(); }
-  ctx.restore();
-}
-
 // Paper label above a spot; "↑" when the boy can use it with the keyboard.
 export function drawLabel(ctx, spot, time, worldW, withKey) {
   const [rx, ry, rw] = spot.rects[0];

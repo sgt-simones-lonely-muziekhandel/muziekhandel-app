@@ -4,12 +4,13 @@ The parts that hold everything together: the page, the title screen, the game lo
 
 ## For the player
 
-- **Title screen**: a swinging brass shop sign (*Muziekhandel Van der Velde — sinds 1892*) over the dimmed empty shop room (`public/art/shop/back-wall.webp`), a big **▶ Start** button, and the controls in one line.
+- **Title screen**: a swinging brass shop sign (*Muziekhandel Simone — sinds 1892*) over the dimmed empty shop room (`public/art/shop/back-wall.webp`), a big **▶ Start** button, and the controls in one line.
 - **HUD**: only the **?** help button top-right and the piano-loading chip. There is no place name: the pictures show where you are (the place name is only the browser tab title, `setPlace()`).
 - **Scene changes** fade to black and back.
 - **Windows** (piano, cabinet, …) open on aged paper over a dimmed shop. Every window has **◀ Terug** (back one step) and **✕** (straight back to the shop); **Esc** and **Backspace** also go back.
 - **Back in the scenes**: with no window open, **Backspace** or **Esc** go one place back (listening corner → shop → street), and so does the browser's back button / a keyboard's back key (`game.back()`, with a `history` entry the game keeps refilling).
-- **Tips** from the shopkeeper (the medallion bottom-left, which stays still) close again with any key or any click outside *Voorlezen*.
+- **Tips** from the shopkeeper (the medallion bottom-left, which stays still) close again with any key or any click outside *Voorlezen*. The tip is typed out while the medallion's face talks (see [shopkeeper](shopkeeper.md)).
+- **No focus rectangles**: buttons and books no longer get a gold outline when selected; keyboard focus shows as a slightly brighter button, and the game canvas never shows a focus outline.
 - On a phone held upright, a hint asks to turn the screen.
 
 ## How it's built

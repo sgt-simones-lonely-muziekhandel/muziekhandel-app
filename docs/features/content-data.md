@@ -14,7 +14,7 @@ All composers and pieces live in one file, `js/data.js`, so content can be added
 | `born`, `died` | Date and place |
 | `portrait` | Image path |
 | `bio`, `fact` | Short biography and a *Wist je dat?* fact, in simple Dutch |
-| `tree` | Family: `grandparents?`, `parents`, `siblings`, `spouses`, `children`, `childrenNote?`; each person is `{ name, role, years, g: 'm' \| 'f' }` |
+| `tree` | Family (not shown any more since the composer card lost its family tree; kept in the data): `grandparents?`, `parents`, `siblings`, `spouses`, `children`, `childrenNote?`; each person is `{ name, role, years, g: 'm' \| 'f' }` |
 
 ## Pieces
 

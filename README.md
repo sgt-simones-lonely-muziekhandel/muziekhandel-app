@@ -33,12 +33,12 @@ The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the 
 - **Future street** (`js/future.js`): the start. The same quay far in the future: flooded, ruined, raining. The boy (in his gas mask) finds a glowing crate with cylinders and sheet music; opening it leads to the past.
 - **Story** (`js/story.js`): the time travel as a short anime-like film: the crate, the cylinder tube opening, and the swirl that turns the flooded street into the past, dissolving into the street.
 - **Street** (`js/street.js`): Amsterdam around 1900, drawn live on a canvas. Canal and bridge on the left, houses and the shop on the right. The sky follows the visitor's real local time (`js/sky.js`); windows and street lamps light up in the evening. When the player stands still, people ride past on bikes (`js/cyclist.js`).
-- **Shop** (`js/shop.js`): painted interior with hotspots: the sheet music cabinet, the piano, the portraits, Meneer Van der Velde and the gramophone. Walk with ← → or click/tap an object.
+- **Shop** (`js/shop.js`): painted interior with hotspots: the sheet music cabinet, the piano, the portraits, Meneer Simone and the gramophone. Walk with ← → or click/tap an object.
 - **Sheet music** (`js/ui/library.js`, `js/ui/sheet.js`, `js/notation.js`): pick a tube from the cabinet, flip pages with ← →, Space takes the piece to the piano. Every note has a colour and a name, matching the piano keys.
 - **Piano** (`js/ui/piano.js`): Salamander Grand Piano through Tone.js (`js/audio.js`). Play with the computer keyboard (physical key positions, so QWERTY/AZERTY/Italian layouts all work and the real key labels are shown), mouse, touch, or a USB/MIDI keyboard. *Luister* plays the piece with the notes lighting up; *Speel mee* waits for the player to press each lit-up key. *Hulp* shows a picture of the computer keyboard with the notes painted on it.
 - **Composers** (`js/ui/gallery.js`): portrait wall, biography, "Wist je dat?" and a family tree.
 - **Gramophone** (`js/ui/gramophone.js`): pick a record; it plays with a muffled, crackly old sound.
-- **Meneer Van der Velde** (`js/ui/keeper.js`): greets the player and explains each part. Texts can be read aloud (Dutch speech synthesis) for kids who can't read yet.
+- **Meneer Simone** (`js/ui/keeper.js`): greets the player and explains each part. Texts can be read aloud (Dutch speech synthesis) for kids who can't read yet.
 
 ## Adding content
 

@@ -29,6 +29,29 @@ Changed:
 
 - [Player](player.md): `new Boy(x, kit)` takes the character folder (`'kid-past'` by default, `'kid-future'` for the future); both share the same joints.
 - [Game shell](game-shell.md): the first scene is `future`; `?autostart&scene=street` starts in the past.
+## 2026-10-30 — Smaller portraits in the shop, composer card without family tree
+
+Changed:
+
+- [Shop](shop.md): the six composer portraits above the piano are about a quarter smaller and sit on the green wall between the pillars, no longer running into the pillars or the ceiling beam.
+- [Composers](composers.md): the composer card no longer shows the family tree. It has the portrait, the biography and, under it, *Muziek van …*: the composer's pieces, each with *Luister* (gramophone) and *Bladmuziek* (sheet-music book).
+- [Shopkeeper](shopkeeper.md): his answer about the portraits now mentions the story and the music instead of the family.
+
+## 2026-10-30 — Muziekhandel Simone, bigger help dialog
+
+Changed:
+
+- The shop is now **Muziekhandel Simone** (page title, title screen sign, in-game texts) and the shopkeeper is **Meneer Simone**, matching the sign painted on the shop front ([shopkeeper](shopkeeper.md), [shop](shop.md), [game shell](game-shell.md), [street](street.md)).
+- [Shopkeeper](shopkeeper.md): the dialog is bigger and every answer, including the keyboard guide, fits without scrolling on desktop and laptop screens.
+
+## 2026-10-30 — Talking shopkeeper, new help dialog, natural lady cyclist, gramophone room by the clock
+
+Changed:
+
+- [Shopkeeper](shopkeeper.md): his face (`head.webp` / `head-talk.webp` / `head-blink.webp`) talks while his words appear, in the dialog and in the tip medallions, and while *Voorlezen* reads aloud; he blinks now and then. The dialog is redesigned: speech bubble next to his portrait, questions written on the paper like notebook lines instead of white buttons, no scrollbar (long answers scroll inside the bubble with a fade).
+- [Cyclists](cyclists.md): the lady is cut in one piece out of her finished drawing, sitting on a bicycle lined up on its hubs; only her boots pedal under the skirt, so she looks like one natural drawing.
+- [Gramophone](gramophone.md) and [listening corner](listening-corner.md): the room in the gramophone view is drawn by the same code as the scene, so the window and lamps follow the clock there too; the cylinder stands beside the phonograph. The new cylinder phonograph is drawn down to its base instead of being cut off.
+- [Shop](shop.md), [listening corner](listening-corner.md), [game shell](game-shell.md): no more lit-up rectangles around hovered or selected objects and buttons.
 
 ## 2026-10-30 — Going through the shop door, keeper dialogue higher
 

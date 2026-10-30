@@ -2,7 +2,7 @@
 // a crate of records and an armchair (closeups/gramophone-corner), with the gramophone
 // (shop/gramophone, horn and box only) standing on the round table.
 import { Boy } from './boy.js';
-import { hitSpot, nearestSpot, clickSpots, drawOutline, drawLabel } from './hotspots.js';
+import { hitSpot, nearestSpot, clickSpots, drawLabel } from './hotspots.js';
 import { skyAt, currentHour } from './sky.js';
 
 const BG_W = 1672, BG_H = 941;
@@ -17,9 +17,10 @@ const IMG = {
 };
 const ready = img => img.complete && img.naturalWidth > 0;
 
-// The gramophone image is a horn and box on a cabinet; only the top part (source rows 0–TOP_ROWS) is drawn.
-const TOP_ROWS = 560;
-const GRAMO = { cx: 640, bottom: 402, w: 300 };
+// The gramophone image is a cylinder phonograph on a cabinet; only the top part (source rows
+// 0–TOP_ROWS: horn and box down to its black base) is drawn, standing on the round table.
+const TOP_ROWS = 584;
+const GRAMO = { cx: 628, bottom: 404, w: 300 };
 
 // The painted room is in daylight; by the visitor's clock it gets darker like the street outside.
 const K = W / BG_W;
@@ -80,68 +81,70 @@ export class Corner {
     ctx.fillStyle = '#120c08';
     ctx.fillRect(0, -400, view.viewW, H + 800);
     ctx.translate(-view.camX, 0);
-    if (ready(IMG.bg)) ctx.drawImage(IMG.bg, 0, 0, W, H);
-
-    const g = IMG.gramophone;
-    if (ready(g)) {
-      const s = GRAMO.w / g.naturalWidth, h = TOP_ROWS * s;
-      ctx.save();
-      ctx.fillStyle = 'rgba(20,12,6,0.35)';
-      ctx.beginPath(); ctx.ellipse(GRAMO.cx, GRAMO.bottom - 3, GRAMO.w * 0.36, 9, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.drawImage(g, 0, 0, g.naturalWidth, TOP_ROWS, GRAMO.cx - GRAMO.w / 2, GRAMO.bottom - h, GRAMO.w, h);
-      ctx.restore();
-    }
-
     const sky = skyAt(currentHour());
-    this.drawNight(ctx, sky);
+    drawCornerPicture(ctx, sky, this.time);
 
     const near = this.nearSpot;
     const lit = this.hovered || near;
-    if (lit) drawOutline(ctx, lit, this.time);
     if (sky.dark > 0) ctx.filter = `brightness(${1 - sky.dark * 0.25})`;
     this.boy.draw(ctx, FOOT_Y, BOY_H);
     ctx.filter = 'none';
     if (lit) drawLabel(ctx, lit, this.time, W, lit === near && !this.hovered);
     ctx.restore();
   }
+}
 
-  // Evening and night: the sky in the window turns the colour of the real sky, the room gets darker
-  // and bluer, the street lamps outside and a lamp over the gramophone glow (not too bright).
-  drawNight(ctx, sky) {
-    if (sky.dark <= 0.01) return;
-    const [wx, wy, ww, wh] = WINDOW;
-    ctx.save();
-    ctx.globalCompositeOperation = 'multiply';
-    const g = ctx.createLinearGradient(0, wy, 0, wy + wh);
-    g.addColorStop(0, sky.top);
-    g.addColorStop(1, sky.horizon);
-    ctx.globalAlpha = Math.min(1, sky.dark * 1.1);
-    ctx.fillStyle = g;
-    ctx.fillRect(wx, wy, ww, wh);
-    ctx.restore();
-
-    ctx.fillStyle = `rgba(14,16,40,${sky.dark * 0.5})`;
-    ctx.fillRect(0, 0, W, H);
-
-    if (!sky.lampsOn) return;
-    const a = Math.min(1, (sky.dark - 0.3) / 0.4);
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    const glow = (x, y, r, rgb, alpha) => {
-      const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, `rgba(${rgb},${alpha})`);
-      rg.addColorStop(1, `rgba(${rgb},0)`);
-      ctx.fillStyle = rg;
-      ctx.fillRect(x - r, y - r, r * 2, r * 2);
-    };
-    WINDOW_LAMPS.forEach(([x, y], i) => {
-      const f = 0.9 + 0.1 * Math.sin(this.time * 7 + i * 2) * Math.sin(this.time * 2.3 + i);
-      glow(x, y, 9, '255,236,180', 0.8 * a * f);
-      glow(x, y, 40, '255,190,100', 0.3 * a * f);
-    });
-    const f = 0.95 + 0.05 * Math.sin(this.time * 1.7);
-    glow(ROOM_LAMP[0], ROOM_LAMP[1], 520, '255,170,80', 0.16 * a * f);
-    glow(ROOM_LAMP[0], FOOT_Y - 120, 380, '255,160,70', 0.08 * a);
-    ctx.restore();
+// The room with the gramophone on its table, lit for the time of day (W × H scene units). Also
+// drawn in the gramophone close-up (ui/gramophone.js), so the window there matches the clock too.
+export function drawCornerPicture(ctx, sky, time) {
+  if (ready(IMG.bg)) ctx.drawImage(IMG.bg, 0, 0, W, H);
+  const g = IMG.gramophone;
+  if (ready(g)) {
+    const s = GRAMO.w / g.naturalWidth, h = TOP_ROWS * s;
+    ctx.fillStyle = 'rgba(20,12,6,0.35)';
+    ctx.beginPath(); ctx.ellipse(GRAMO.cx, GRAMO.bottom - 3, GRAMO.w * 0.36, 9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.drawImage(g, 0, 0, g.naturalWidth, TOP_ROWS, GRAMO.cx - GRAMO.w / 2, GRAMO.bottom - h, GRAMO.w, h);
   }
+  drawNight(ctx, sky, time);
+}
+export const CORNER_SIZE = { w: W, h: H };
+
+// Evening and night: the sky in the window turns the colour of the real sky, the room gets darker
+// and bluer, the street lamps outside and a lamp over the gramophone glow (not too bright).
+function drawNight(ctx, sky, time) {
+  if (sky.dark <= 0.01) return;
+  const [wx, wy, ww, wh] = WINDOW;
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  const g = ctx.createLinearGradient(0, wy, 0, wy + wh);
+  g.addColorStop(0, sky.top);
+  g.addColorStop(1, sky.horizon);
+  ctx.globalAlpha = Math.min(1, sky.dark * 1.1);
+  ctx.fillStyle = g;
+  ctx.fillRect(wx, wy, ww, wh);
+  ctx.restore();
+
+  ctx.fillStyle = `rgba(14,16,40,${sky.dark * 0.5})`;
+  ctx.fillRect(0, 0, W, H);
+
+  if (!sky.lampsOn) return;
+  const a = Math.min(1, (sky.dark - 0.3) / 0.4);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const glow = (x, y, r, rgb, alpha) => {
+    const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
+    rg.addColorStop(0, `rgba(${rgb},${alpha})`);
+    rg.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.fillStyle = rg;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  WINDOW_LAMPS.forEach(([x, y], i) => {
+    const f = 0.9 + 0.1 * Math.sin(time * 7 + i * 2) * Math.sin(time * 2.3 + i);
+    glow(x, y, 9, '255,236,180', 0.8 * a * f);
+    glow(x, y, 40, '255,190,100', 0.3 * a * f);
+  });
+  const f = 0.95 + 0.05 * Math.sin(time * 1.7);
+  glow(ROOM_LAMP[0], ROOM_LAMP[1], 520, '255,170,80', 0.16 * a * f);
+  glow(ROOM_LAMP[0], FOOT_Y - 120, 380, '255,160,70', 0.08 * a);
+  ctx.restore();
 }

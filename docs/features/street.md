@@ -38,5 +38,4 @@ The past: after the [future street](future-street.md), the player stands on the 
 ## Known limits / next steps
 
 - The painted layers are lit for golden hour (warm lamps, lit windows) at every time of day; the tint only darkens them at night. A daytime version of the far and walk layers could be cross-faded in by day.
-- The sign on the shop in the art says **MUZIEKHANDEL SIMONE**, while the game text says *Muziekhandel Van der Velde*. One of the two needs to change.
 - The scene is one screen-and-a-half wide: there's only one place to go (the shop).
