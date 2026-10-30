@@ -15,7 +15,7 @@ Art direction for the game, taken from the two Gemini mood boards in this folder
 1. **De toekomst**: the player starts in a ruined, flooded future version of a Dutch canal street. Dark, silent, no music, but never gory or scary (audience is 5–15).
 2. **De ontdekking**: in the rubble they find a glowing wooden box with old sheet music and phonograph cylinders in cardboard tubes.
 3. **De tijdreis**: opening a cylinder tube starts the music and pulls the player into the past.
-4. **Het verleden (1890–1915)**: the same street, alive and sunny. The player walks to *Muziekhandel Van der Velde* and enters.
+4. **Het verleden (1890–1915)**: the same street, alive and sunny. The player walks to *Muziekhandel Simone* and enters.
 5. **In de winkel**: piano (hear, see and play along with the notes), sheet music cabinet, portrait gallery, gramophone, and the clerk with the moustache. Every view links to the others (piece → composer → their other pieces → related composers).
 
 All in-game text is Dutch.
@@ -23,6 +23,13 @@ All in-game text is Dutch.
 ## Art style
 
 Hand-drawn European comic style, inspired by *Valiant Hearts: The Great War* but warm and kid-friendly.
+
+What the final art actually uses (chosen after the first rounds of generated images):
+
+- **Streets (past and future): painterly, semi-realistic.** The past and future street share the same layout (same bridge, tower, quay and shop position) so kids recognise it as one place in two times.
+- **Shop interior, objects and characters: the comic ink style** described below.
+- **Close-ups** (piano, cabinet, gallery wall) are a little more painted than the shop; the gramophone corner is in the comic style.
+- **Team portraits** on the gallery wall (easter egg) are realistic oil paintings, since they hang in the game as paintings.
 
 - **Lines**: 2–5 px depending on object size; irregular, brush-pen look; no perfectly straight lines.
 - **Fill**: flat colour with hand-drawn shading and cross-hatching for shadows.
@@ -96,7 +103,7 @@ The UI is part of the world, not modern buttons.
 
 - **Cards**: aged paper, drawn edges, drop shadow, stains (e.g. the composer info card).
 - **Buttons**: wood or brass, always icon + text.
-- **Plaques**: brass, with screws or ornament (shop sign: *Muziekhandel Van der Velde, sinds 1892*).
+- **Plaques**: brass, with screws or ornament (shop sign: *Muziekhandel Simone*).
 - **Icons**: simple and clear, same ink style. Core set: *Lees meer* (book), *Speel mee* (note), *Ontdek* (magnifier), *Verzamel* (star).
 - **Text bars**: old paper with subtle tears.
 - **Inventory**: *Briefje* (note, action), cylinder tubes (collectibles).
@@ -108,3 +115,29 @@ The UI is part of the world, not modern buttons.
 - Composers and titles on the boards (Mozart, *Tulpenwals*, …) are placeholders. Real pieces and people come from the Muziekschatten data.
 - The board calls the cylinders *muziekrollen*, but in Dutch that usually means a pianola roll. Use **fonograafrollen** (or *wasrollen*) in the game text.
 - Watch for typos generated in the boards (e.g. "De gramelier") when copying text.
+
+## Game art
+
+All game-ready images are in [`public/art/`](../../public/art/) as WebP (about 4.5 MB in total). [`public/art/manifest.json`](../../public/art/manifest.json) lists every image with its size, so the game can load them by key (e.g. `shop/piano`).
+
+| Folder | Contents |
+|---|---|
+| `past-street/`, `future-street/` | Parallax layers, back to front: `sky`, `far`, `walk` (the quay the player walks on, with the shop on the right), `foreground` (dark silhouettes). Layers are full-width and line up with each other. `future-street/crate` is the box with the cylinders. |
+| `shop/` | `back-wall`, `foreground`, and the clickable objects `piano`, `counter`, `cabinet`, `gramophone`; `frames/` holds the empty golden picture frames. |
+| `closeups/` | Full-screen views: `piano` (empty music stand and keyboard strip, filled by the game), `cabinet` (empty slots), `gallery-wall`, `gramophone-corner`. |
+| `characters/` | `kid-past`, `kid-future` (gas mask), `shopkeeper`: each has `full` plus separate puppet parts (`head`, `torso`, arms, legs). Parts ending in `-1` were on the left of the sheet. `sheetX`/`sheetY` in the manifest give each part's position on the original sheet, as a starting point for putting the puppet together. All characters share one scale. |
+| `items/cylinder/` | Phonograph cylinder tubes (`cream`, `red`, `blue`, `green`, `open`). |
+| `ui/` | Empty `card`, `plaque`, `button`, `paper-strip`; `icons/` with `read`, `music`, `discover`, `collect`, `play`, `back`, `sound`, `close`. |
+| `fx/` | `glow-yellow`, `glow-orange`, `fog`, `rain`, `ash` (light on transparency, works with additive blending), `sheet-music`, `note` (for the time-travel swirl). |
+| `portraits/` | `team-1` to `team-4`: the team as oil paintings for the gallery. |
+
+### Adding or replacing art
+
+The source images (with magenta backgrounds) live outside the repo in the `design` folder. [`scripts/import_art.py`](../../scripts/import_art.py) removes the magenta, cuts the sheets into parts, shrinks everything and writes `public/art/`:
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements-art.txt
+.venv/bin/python scripts/import_art.py ../design
+```
+
+To add an image, put it in the design folder, add a line for it in `ASSETS` at the top of the script and run it again. Generate new art with a flat magenta (`#FF00FF`) background, or black for glows and other light effects.
