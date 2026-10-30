@@ -54,14 +54,14 @@ ASSETS = [
     ("music_store_internal/Sleeping Cat on an Ornate Piano.png", "object", "shop/piano", {"max": 1024}),
     ("music_store_internal/Vintage Shop Counter on Magenta.png", "object", "shop/counter", {"max": 1024}),
     ("music_store_internal/Antique Music Cabinet with Sheet Music.png", "object", "shop/cabinet", {"max": 1024}),
-    ("music_store_internal/Antique Gramophone on Ornate Cabinet.png", "object", "shop/gramophone", {"max": 1024}),
+    ("music_store_internal/Antique Gramophone on Wooden Stand.png", "object", "shop/gramophone", {"max": 1024}),
     ("music_store_internal/Ornate Golden Frames on Magenta.png", "sheet", "shop/frames",
      {"max": 768, "dilate": 6, "row": True, "names": ["oval-large", "rect-large", "oval-small", "rect-medium", "rect-small"]}),
     # Close-ups
-    ("past/Antique Piano with Blank Sheet Music.png", "opaque", "closeups/piano", {}),
-    ("past/Antique Wooden Display Cabinet Interior.png", "opaque", "closeups/cabinet", {}),
+    ("music_store_internal/Antique Piano with Blank Sheet Music.png", "opaque", "closeups/piano", {}),
+    ("music_store_internal/Antique Wooden Display Cabinet Interior.png", "opaque", "closeups/cabinet", {}),
     ("music_store_internal/Vintage Green Damask Gallery Wall.png", "opaque", "closeups/gallery-wall", {}),
-    ("past/Edwardian Canal-Side Music Nook.png", "opaque", "closeups/gramophone-corner", {}),
+    ("music_store_internal/Sunlit Vintage Music Room.png", "opaque", "closeups/gramophone-corner", {}),
     # Characters (cut-out puppets; "1" is the part on the left of the sheet)
     ("characters/Vintage Boy Character Sprite Sheet.png", "sheet", "characters/kid-past",
      {"scale": CHAR_SCALE, "names": ["head", "full", *ARM_LEG, "lower-leg-1", "lower-leg-2"]}),
@@ -82,6 +82,10 @@ ASSETS = [
     # Items
     ("music_store_internal/Vintage Phonograph Cylinder Collection.png", "sheet", "items/cylinder",
      {"max": 512, "dilate": 6, "row": True, "names": ["cream", "red", "blue", "green", "open"]}),
+    # The same four tubes opened, with their lids separate (lift the lid off a closed tube, then swap in the open one)
+    ("music_store_internal/Antique Phonograph Cylinder Collection.png", "sheet", "items/cylinder",
+     {"scale": 0.868, "dilate": 6, "names": ["cream-open", "red-open", "blue-open", "green-open",
+                                        "cream-lid", "red-lid", "blue-lid", "green-lid"]}),
     # Sheet music: placeholder covers, and the pieces for the opening animation
     ("details/Vintage Art Nouveau Music Covers.png", "sheet", "items/sheet-music",
      {"max": 512, "dilate": 6, "row": True, "names": ["cover-1", "cover-2", "cover-3", "cover-4", "cover-5", "cover-6"]}),

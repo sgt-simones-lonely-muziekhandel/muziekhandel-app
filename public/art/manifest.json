@@ -71,7 +71,7 @@
   },
   "shop/gramophone": {
     "file": "art/shop/gramophone.webp",
-    "width": 631,
+    "width": 594,
     "height": 1024
   },
   "shop/frames/oval-large": {
@@ -556,6 +556,62 @@
     "file": "art/items/cylinder/open.webp",
     "width": 430,
     "height": 512
+  },
+  "items/cylinder/cream-open": {
+    "file": "art/items/cylinder/cream-open.webp",
+    "width": 251,
+    "height": 550,
+    "sheetX": 85,
+    "sheetY": 23
+  },
+  "items/cylinder/red-open": {
+    "file": "art/items/cylinder/red-open.webp",
+    "width": 251,
+    "height": 551,
+    "sheetX": 383,
+    "sheetY": 23
+  },
+  "items/cylinder/blue-open": {
+    "file": "art/items/cylinder/blue-open.webp",
+    "width": 249,
+    "height": 553,
+    "sheetX": 690,
+    "sheetY": 22
+  },
+  "items/cylinder/green-open": {
+    "file": "art/items/cylinder/green-open.webp",
+    "width": 249,
+    "height": 550,
+    "sheetX": 998,
+    "sheetY": 23
+  },
+  "items/cylinder/cream-lid": {
+    "file": "art/items/cylinder/cream-lid.webp",
+    "width": 248,
+    "height": 291,
+    "sheetX": 87,
+    "sheetY": 578
+  },
+  "items/cylinder/red-lid": {
+    "file": "art/items/cylinder/red-lid.webp",
+    "width": 246,
+    "height": 289,
+    "sheetX": 386,
+    "sheetY": 577
+  },
+  "items/cylinder/blue-lid": {
+    "file": "art/items/cylinder/blue-lid.webp",
+    "width": 240,
+    "height": 288,
+    "sheetX": 689,
+    "sheetY": 578
+  },
+  "items/cylinder/green-lid": {
+    "file": "art/items/cylinder/green-lid.webp",
+    "width": 247,
+    "height": 289,
+    "sheetX": 1005,
+    "sheetY": 576
   },
   "items/sheet-music/cover-1": {
     "file": "art/items/sheet-music/cover-1.webp",
