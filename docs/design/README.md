@@ -131,6 +131,7 @@ All game-ready images are in [`public/art/`](../../public/art/) as WebP (about 4
 | `items/sheet-music/` | `cover-1` to `cover-6`: placeholder covers with an empty title label (the real title is drawn by the game). `cover-inside`, `page-left`, `page-right` (empty staves) for the opening animation: the cover folds open from the left edge and the two pages show side by side, with the notes drawn on the staves by the game. |
 | `ui/` | Empty `card`, `plaque`, `button`, `paper-strip`; `icons/` with `read`, `music`, `discover`, `collect`, `play`, `back`, `sound`, `close`. |
 | `fx/` | `glow-yellow`, `glow-orange`, `fog`, `rain`, `ash` (light on transparency, works with additive blending), `sheet-music`, `note` (for the time-travel swirl). |
+| `intro/` | The opening cutscene, slow pans and fades between shots. 1: `future-street` (extra sky for a tilt down), `future-frame` (vine silhouettes in front), `kid-back/future` and `kid-back/past` (the boy from behind). 2: `crate-closed`, `crate-open` (they don't line up exactly, so switch between them behind a golden flash). 3: `tube-background`, `hands-tube`, `tube-lid` (pops off), `light-burst`. 4: `swirl`, `flying/paper-1..7`, `flying/note-1..6`, and `past-street`, which lines up with `future-street` so the past can be wiped in behind the swirl. 5: `shop-front`. Full backgrounds are 16:9; `light-burst` and `swirl` are light on transparency (additive blending). |
 | `portraits/` | `team-1` to `team-4`: the team as oil paintings for the gallery. |
 
 ### Adding or replacing art
