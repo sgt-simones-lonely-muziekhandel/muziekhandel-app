@@ -25,7 +25,7 @@ const TOPICS = [
   },
   {
     q: 'Wie zijn die mensen aan de muur?',
-    a: 'Dat zijn de makers van dit spel! Ze hebben zich laten schilderen in kleren van vroeger, met hoge hoed en pruik en al. Klik op een schilderij en je ziet ze allemaal.',
+    a: 'Dat zijn de makers van dit spel! Ze hebben zich laten schilderen in kleren van vroeger, met hoge hoed en pruik en al. Klik op de schilderijen en je komt bij de beroemde componisten: mensen die muziek bedenken en opschrijven. Daar lees je hun verhaal en hoor je hun muziek.',
     go: ['gallery', 'Naar de schilderijen'],
   },
   {

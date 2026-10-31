@@ -2,6 +2,29 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Two sheet-music cabinets, a gramophone chest that glides
+
+Added:
+
+- [Sheet music](sheet-music.md): a second cabinet, *Muziek van de componisten*, beside *Liedjes uit de SOM-collectie*: 20 pieces in all. Brass arrows, ← / → or a swipe switch between them with a short sideways slide; a sign names the cabinet.
+
+Changed:
+
+- [Gramophone](gramophone.md): no scrollbar; only the chest of cylinders scrolls, gliding with the wheel, draggable with the mouse, fading at the edges.
+
+## 2026-10-31 — Learning a song on the piano, composers back on the wall, a better close button
+
+Added:
+
+- [Piano](piano.md): learning a song step by step. *Speel mee* shows the next note too, the accompaniment answers each right note, and a wrong key twice gives a hint (higher / lower, which key). New **In de maat**: a count-in, then the accompaniment in time while the player plays the melody, every note judged on time, early, late or missed. **Oefenen**: tempo 50–100%, practise four bars at a time (or the whole piece), repeat, accompaniment, metronome. The result card gives stars, details, a tip and the next step; stars are kept per piece and stretch.
+- [Audio](audio.md): `playPiece()` plays a stretch, counts in, ticks a metronome and can leave the melody to the player; the lights follow what is heard (the audio clock minus the speakers' latency) instead of running 0.1 s early.
+
+Changed:
+
+- [Piano](piano.md): the *MIDI* and *C D E* buttons are gone. The empty music desk asks *Wat wil je doen?*: *Een liedje leren* (choose sheet music) or *Gewoon spelen*. The instrument plaque reads *Instrument · Piano ▾*, without flashing (not when it first appears, nor while an instrument loads).
+- [Composers](composers.md): the shop wall keeps the team's paintings; the wall close-up shows the six composers again, with their name plaques, biographies and music, all with the standard silhouette (we have no portraits of them). The *De makers van dit spel* card is gone.
+- [Shopkeeper](shopkeeper.md): the ✕ is a round brass button on the paper's corner instead of a small cross on the speech bubble.
+
 ## 2026-10-31 — Painted sun, real moon phases, a few stars
 
 Changed:

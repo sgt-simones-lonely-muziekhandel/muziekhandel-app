@@ -8,6 +8,8 @@ import { SOM_PIECES } from './som-scores.js';
 // The portrait for a composer we have no picture of (or whose picture won't load): a silhouette
 // in a wig, no one in particular.
 export const NO_PORTRAIT = 'public/art/portraits/unknown.webp';
+// We have no portraits of the composers yet: every one gets the standard silhouette; a composer
+// with a `portrait` would show it.
 export const portraitOf = c => c?.portrait || NO_PORTRAIT;
 
 export const COMPOSERS = [
@@ -19,7 +21,6 @@ export const COMPOSERS = [
     title: 'Meester van de kerkmuziek',
     born: '21 maart 1685, Eisenach (Duitsland)',
     died: '28 juli 1750, Leipzig (Duitsland)',
-    portrait: 'assets/portraits/bach.jpg',
     bio: 'Bach kwam uit een enorme muzikantenfamilie: bijna alle Bachs maakten muziek. Hij speelde orgel in grote kerken en schreef meer dan 1000 stukken. Elke week maakte hij nieuwe muziek voor de kerk in Leipzig. Zijn muziek is als een puzzel: melodieën die precies in elkaar passen.',
     fact: 'Bach had twintig kinderen! Vier van zijn zonen werden zelf ook beroemde componisten.',
     tree: {
@@ -49,7 +50,6 @@ export const COMPOSERS = [
     title: 'Het wonderkind',
     born: '27 januari 1756, Salzburg (Oostenrijk)',
     died: '5 december 1791, Wenen (Oostenrijk)',
-    portrait: 'assets/portraits/mozart.jpg',
     bio: 'Mozart was een wonderkind. Toen hij vijf was, schreef hij al zijn eerste stukjes. Met zijn vader en zus reisde hij door heel Europa om te spelen voor koningen en keizers. Hij schreef meer dan 600 stukken: opera\'s, symfonieën en vrolijke pianomuziek.',
     fact: 'Als kind gaf Mozart ook concerten in Nederland: in 1765 en 1766 speelde hij in Den Haag en Amsterdam!',
     tree: {
@@ -77,7 +77,6 @@ export const COMPOSERS = [
     title: 'De componist die niet opgaf',
     born: '17 december 1770, Bonn (Duitsland)',
     died: '26 maart 1827, Wenen (Oostenrijk)',
-    portrait: 'assets/portraits/beethoven.jpg',
     bio: 'Beethoven groeide op in Bonn en verhuisde later naar Wenen. Hij werd steeds slechter horen en was op het laatst helemaal doof. Toch bleef hij componeren: hij hoorde de muziek in zijn hoofd. Zijn negende symfonie, met de "Ode an die Freude", schreef hij toen hij niets meer kon horen.',
     fact: 'Zijn opa kwam uit Mechelen in België. Daarom heet hij "van" Beethoven en niet "von".',
     tree: {
@@ -107,7 +106,6 @@ export const COMPOSERS = [
     title: 'Dichter van de piano',
     born: '1 maart 1810, Żelazowa Wola (Polen)',
     died: '17 oktober 1849, Parijs (Frankrijk)',
-    portrait: 'assets/portraits/chopin.jpg',
     bio: 'Chopin werd geboren in Polen en verhuisde later naar Parijs. Hij schreef bijna alleen muziek voor de piano. Zijn muziek klinkt soms als zingen, soms als dansen: walsen, mazurka\'s en nocturnes (nachtmuziek).',
     fact: 'Chopin schreef zijn eerste stukjes toen hij zeven was, en gaf op zijn achtste zijn eerste openbare concert.',
     tree: {
@@ -133,7 +131,6 @@ export const COMPOSERS = [
     title: 'Meester van de opera',
     born: '10 oktober 1813, Le Roncole (Italië)',
     died: '27 januari 1901, Milaan (Italië)',
-    portrait: 'assets/portraits/verdi.jpg',
     bio: 'Verdi kwam uit een klein dorp in Italië, waar zijn ouders een herberg hadden. Hij werd de beroemdste operacomponist van Italië. In zijn opera\'s zingen mensen over liefde, verdriet en vrijheid. Zijn muziek werd zo bekend dat mensen de liedjes op straat zongen.',
     fact: 'Een maand na zijn dood stonden er in Milaan zo\'n 300.000 mensen langs de straat om afscheid te nemen.',
     tree: {
@@ -162,7 +159,6 @@ export const COMPOSERS = [
     title: 'Meester van de melodie',
     born: '7 mei 1840, Votkinsk (Rusland)',
     died: '6 november 1893, Sint-Petersburg (Rusland)',
-    portrait: 'assets/portraits/tchaikovsky.jpg',
     bio: 'Tsjaikovski werkte eerst als ambtenaar, maar wilde alleen maar muziek maken. Hij werd de beroemdste Russische componist. Hij schreef de muziek voor de balletten Het Zwanenmeer, De Schone Slaapster en De Notenkraker.',
     fact: 'De Notenkraker speelt zich af op kerstavond. Elk jaar wordt het ballet over de hele wereld opgevoerd.',
     tree: {

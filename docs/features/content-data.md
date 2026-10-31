@@ -12,7 +12,7 @@ All composers and pieces live in one file, `js/data.js`, so content can be added
 | `name`, `short` | Full name, and the short name for plaques and shelves |
 | `years`, `title` | "1756 – 1791", and a nickname ("Het wonderkind") |
 | `born`, `died` | Date and place |
-| `portrait` | Image path |
+| `portrait` | Image path (optional; none of the composers has one now, so they all get the standard silhouette `NO_PORTRAIT`, see `portraitOf()`) |
 | `bio`, `fact` | Short biography and a *Wist je dat?* fact, in simple Dutch |
 | `tree` | Family (not shown any more since the composer card lost its family tree; kept in the data): `grandparents?`, `parents`, `siblings`, `spouses`, `children`, `childrenNote?`; each person is `{ name, role, years, g: 'm' \| 'f' }` |
 

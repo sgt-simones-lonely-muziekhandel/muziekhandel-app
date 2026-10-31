@@ -9,6 +9,7 @@ A brass-horned gramophone and a cabinet of records to listen to. It stands on it
 - ■ stops the music; leaving the view stops it too.
 - A composer card can open the gramophone with a cylinder already playing.
 - Each piece has the same cylinder colour here as in the [sheet music cabinet](sheet-music.md).
+- **Scrolling the chest**: only the chest scrolls (the showcase and *Nu speelt* stay put), without a scrollbar. A mouse wheel glides instead of jumping, the mouse can drag the list and fling it, a trackpad or finger scrolls as usual, and the list fades out at the edge where there is more (`smoothScroll()` in `js/ui/ui.js`: `.more-up` / `.more-down`).
 
 ## How it's built
 

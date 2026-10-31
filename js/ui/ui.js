@@ -2,20 +2,81 @@
 import { libraryView } from './library.js';
 import { sheetView } from './sheet.js';
 import { pianoView } from './piano.js';
-import { galleryView, composerView, teamView } from './gallery.js';
+import { galleryView, composerView } from './gallery.js';
 import { gramophoneView } from './gramophone.js';
 import { keeperView } from './keeper.js';
 import { lessonsView } from './lessons.js';
 
 const VIEWS = {
   library: libraryView, sheet: sheetView, piano: pianoView,
-  gallery: galleryView, team: teamView, composer: composerView, gramophone: gramophoneView, keeper: keeperView, lessons: lessonsView,
+  gallery: galleryView, composer: composerView, gramophone: gramophoneView, keeper: keeperView, lessons: lessonsView,
 };
 
 export function h(html) {
   const t = document.createElement('template');
   t.innerHTML = html.trim();
   return t.content.firstElementChild;
+}
+
+// Smooth scrolling for a list without a scrollbar: a mouse wheel glides there instead of jumping
+// (a trackpad already glides, so its small steps are left alone), the mouse can drag the list and
+// fling it, and `.more-up` / `.more-down` say whether there is more to see above or below.
+export function smoothScroll(el) {
+  let target = 0, raf = 0, drag = null, dragged = false;
+  const max = () => el.scrollHeight - el.clientHeight;
+  const clamp = v => Math.max(0, Math.min(max(), v));
+  const edges = () => {
+    el.classList.toggle('more-up', el.scrollTop > 2);
+    el.classList.toggle('more-down', el.scrollTop < max() - 2);
+  };
+  const glide = () => {
+    if (raf) return;
+    const step = () => {
+      const d = target - el.scrollTop;
+      if (Math.abs(d) < 0.5) { el.scrollTop = target; raf = 0; return; }
+      el.scrollTop += d * 0.16;
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  el.addEventListener('wheel', e => {
+    if (e.ctrlKey || max() <= 0) return;
+    const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * el.clientHeight : e.deltaY;
+    if (e.deltaMode === 0 && Math.abs(dy) < 40) return; // a trackpad: native scrolling glides already
+    e.preventDefault();
+    if (!raf) target = el.scrollTop;
+    target = clamp(target + dy * 1.2);
+    glide();
+  }, { passive: false });
+  el.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    cancelAnimationFrame(raf); raf = 0;
+    drag = { y: e.clientY, top: el.scrollTop, v: 0, t: performance.now(), last: e.clientY };
+    dragged = false;
+  });
+  el.addEventListener('pointermove', e => {
+    if (!drag) return;
+    if (!dragged && Math.abs(e.clientY - drag.y) < 6) return;
+    if (!dragged) { dragged = true; el.classList.add('dragging'); el.setPointerCapture(e.pointerId); }
+    const now = performance.now();
+    drag.v = (e.clientY - drag.last) / Math.max(1, now - drag.t);
+    drag.last = e.clientY; drag.t = now;
+    el.scrollTop = clamp(drag.top - (e.clientY - drag.y));
+  });
+  const end = () => {
+    if (!drag) return;
+    if (dragged) { target = clamp(el.scrollTop - drag.v * 320); glide(); }
+    drag = null;
+    el.classList.remove('dragging');
+  };
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+  el.addEventListener('lostpointercapture', end);
+  // a drag is not a click on what it started on
+  el.addEventListener('click', e => { if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; } }, true);
+  el.addEventListener('scroll', edges, { passive: true });
+  new ResizeObserver(edges).observe(el);
+  requestAnimationFrame(edges);
 }
 
 export const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

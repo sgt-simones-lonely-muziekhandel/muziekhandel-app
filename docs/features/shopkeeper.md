@@ -23,6 +23,7 @@ The third object in the shop: Meneer Simone, the friendly owner with the moustac
 ## How it's built
 
 - `js/ui/keeper.js`: `keeperView({ greeting })`, the `TOPICS` list and the dialog. The speech bubble gets `.more` (a `mask-image` fade) while it can still scroll down, checked on scroll and with a `ResizeObserver`.
+- **Close button**: a round brass ✕ on the paper's top-right corner (`.keeper-close`), clear of the speech bubble; it turns a quarter on hover.
 - **Talking face** (`js/ui/ui.js`): every `.keeper-face` shows `head.webp`; `.talking` swaps in `head-talk.webp` (mouth open) and `.blink` `head-blink.webp` (same framing, so nothing jumps). `talk(face)` opens and closes the mouth at an irregular speaking rhythm until stopped; a shared timer blinks faces that aren't talking. `typeText(p, text, face)` writes the text with `talk()` running, pausing (mouth shut) after `.` `!` `?` and `,`. Letters are due at fixed times (28 ms each), so a busy frame makes it catch up instead of slowing down. `speak(text, face)` also talks while the voice speaks (`onstart` / `onend`).
 - `frame()` in `js/ui/ui.js` adds the tip medallion to any view that passes a `tip` text.
 - `speak()` uses the browser's speech synthesis with a Dutch (`nl-NL`) voice when available, and strips emoji first.

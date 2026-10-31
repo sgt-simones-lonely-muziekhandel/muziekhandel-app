@@ -1,6 +1,6 @@
 // The gramophone: pick a music cylinder (public/art/items/cylinder) and listen, with an
 // old-fashioned crackly sound.
-import { frame, h, esc } from './ui.js';
+import { frame, h, esc, smoothScroll } from './ui.js';
 import { CYLINDER_ART, cylinderColor } from './library.js';
 import { PIECES, pieceById, creditFor } from '../data.js';
 import { parsePiece } from '../music.js';
@@ -41,6 +41,7 @@ export function gramophoneView(ui, { pieceId } = {}) {
 
   const $ = s => body.querySelector(s);
   const list = $('.cylinders');
+  smoothScroll(list);
   $('.now-cyl').addEventListener('animationend', e => { if (e.animationName === 'put-on') e.target.classList.remove('put'); });
   let player = null, raf = 0;
 

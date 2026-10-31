@@ -20,6 +20,9 @@ All music in the game is played on the **Salamander Grand Piano** (a free sample
   - Returns `{ stop, duration }`.
 - `setInstrument(id)`: what `noteOn`, `noteOff`, `strike` and new `playPiece` calls sound on (`voice`). `'piano'` is the Salamander sampler; any other id from `js/instruments.js` gets its own `Tone.Sampler` from `https://nbrosowsky.github.io/tonejs-instruments/samples/<id>/` (sharps written `s`, e.g. `Fs3.mp3`) into the same filter/reverb/limiter chain, built on first use and cached (a failed load is forgotten so it can be tried again). Returns a promise; rejects when audio isn't ready yet. A playing piece keeps the voice it started with.
 - `rustle(seconds)`: the sound of a page being turned in the [sheet-music book](sheet-music.md): pink noise through a band-pass filter that brightens and darkens, under a short envelope, straight to the speakers.
+- `playPiece()` for practising: `from` / `to` (beats of the melody) play only that stretch (from the start including the introduction); `countIn` beats of ticks come first and `metronome` ticks through the music (`onBeat({ count, accent })` on every tick; ticks follow the bars, a higher one on the first beat); `melody: 0` leaves the melody to the player. It returns `timeOf(note)` too, when the note sounds.
+- The lights follow what is **heard**: `heard()` is the audio clock (`Tone.context.currentTime`) minus the speakers' `outputLatency`, not `Tone.now()`, which runs 0.1 s ahead (its look-ahead). `audioNow()` gives the same clock to the piano, to judge playing in time.
+- The metronome tick: a short triangle-wave *tick* (1760 Hz on the first beat, 1175 Hz on the others), straight to the speakers.
 - `setGramophone(on)`: lowers the filter to 3.2 kHz and adds pink-noise hiss and random clicks; turning it off removes them.
 
 ## Credits
