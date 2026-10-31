@@ -27,7 +27,8 @@ const RIGS = {
   },
   // The lady's long skirt can't be built from pieces convincingly, so her whole body (hat, head,
   // arms, skirt down to the hem) is cut straight out of full.webp (`body.outline`); only her boots
-  // and stockings move under the hem, on the pedals. The bicycle is lined up on the drawing's hubs.
+  // and stockings move under the hem, on the pedals. The outline follows the hem closely: the boot
+  // drawn in full.webp peeks out under it, and any of it left in the cut-out reads as a third leg. The bicycle is lined up on the drawing's hubs.
   woman: {
     dir: 'cyclist-woman', H: 549,
     bicycle: { at: [86, 447], pivot: [47, 219], s: 1.12, r: -0.048, rearHub: [47, 219], frontHub: [324, 235], bb: [162, 242] },
@@ -35,7 +36,8 @@ const RIGS = {
     crank: { pivot: [80, 34], s: 1.12, r: 60 },
     body: {
       outline: [[121, 66], [148, 14], [279, 21], [269, 48], [266, 103], [231, 128], [248, 172], [297, 217], [338, 228],
-        [331, 259], [297, 272], [303, 324], [307, 414], [228, 429], [166, 433], [114, 431], [117, 324], [128, 238],
+        [331, 259], [297, 272], [303, 324], [307, 412], [240, 417], [210, 417], [178, 418], [170, 432], [114, 431],
+        [117, 324], [128, 238],
         [155, 207], [155, 138], [141, 103]],
       patch: [[172, 145, 9, [184, 166]]],
     },

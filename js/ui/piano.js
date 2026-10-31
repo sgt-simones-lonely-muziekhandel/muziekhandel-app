@@ -1,14 +1,18 @@
-// The piano: free play, or load a piece and listen / play along with the lit-up notes.
+// The piano: free play, or load a piece and learn it the way a piano teacher would: listen to it,
+// find the notes (Speel mee: the piano waits for each note, the accompaniment answers), then play it
+// in time (In de maat: count-in, metronome, the accompaniment runs and every note is judged early,
+// on time or late). Practise slower and a few bars at a time (Oefenen), and the stars you earn are
+// kept per piece and per stretch.
 // Full screen on the close-up of the piano (public/art/closeups/piano.webp): the music stands on
 // the blank sheet on the music desk, the keys sit in the key slot, the buttons on the wood.
 import { frame, h, esc } from './ui.js';
 import { pieceById, creditFor } from '../data.js';
 import {
-  parsePiece, midiInfo, labelFor, noteNames, NOTE_COLORS,
+  parsePiece, midiInfo, labelFor, NOTE_COLORS,
   KEYMAP, keyLabels, keyCodeForMidi, PIANO_LOW, PIANO_HIGH, KEYS_LOW, KEYS_HIGH, MAX_SHIFT,
 } from '../music.js';
 import { renderPage, pageOfNote } from '../notation.js';
-import { noteOn, noteOff, playPiece, audioState, onAudioReady, setInstrument } from '../audio.js';
+import { noteOn, noteOff, playPiece, audioState, audioNow, onAudioReady, setInstrument } from '../audio.js';
 import { INSTRUMENTS, instrumentById } from '../instruments.js';
 import { skyAt, currentHour } from '../sky.js';
 
@@ -47,6 +51,22 @@ export function keyboardGuide() {
 }
 
 const SYSTEMS = 2; // lines of music on the sheet
+const SECTION_BARS = 4; // a stretch to practise: one line of the sheet
+const TEMPOS = [0.5, 0.6, 0.7, 0.8, 0.9, 1];
+
+// The stars earned, per piece and per stretch ('all' or the stretch's first bar), for Speel mee
+// (`follow`) and In de maat (`rhythm`). Kept in this browser only.
+const PROGRESS_KEY = 'muziekhandel.piano.progress';
+const loadProgress = () => { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch { return {}; } };
+function saveStars(pieceId, part, kind, stars) {
+  const all = loadProgress();
+  const p = ((all[pieceId] ??= {})[part] ??= {});
+  if ((p[kind] || 0) >= stars) return;
+  p[kind] = stars;
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(all)); } catch { /* private mode: not kept */ }
+}
+const starsOf = (pieceId, part, kind) => loadProgress()[pieceId]?.[part]?.[kind] || 0;
+const starText = n => '★'.repeat(n) + '☆'.repeat(3 - n);
 
 export function pianoView(ui, { pieceId } = {}) {
   const { el, body } = frame(ui, {
@@ -54,7 +74,7 @@ export function pianoView(ui, { pieceId } = {}) {
     cls: 'piano',
     closeup: 'public/art/closeups/piano.webp',
     full: true,
-    tip: 'Speel met je toetsenbord, je muis of je vinger. Met ← en → ga je een octaaf lager of hoger, met Shift trap je het pedaal in. Kies bladmuziek en druk op "Speel mee": druk dan steeds op de toets die oplicht.',
+    tip: 'Zo leer je een liedje: 1. Luister. 2. Speel mee: de piano wacht tot je de toets speelt die oplicht. 3. In de maat: de piano telt af en speelt mee, en jij speelt op tijd. Met Oefenen kies je een stukje en speel je langzamer. Met ← en → ga je een octaaf lager of hoger, met Shift trap je het pedaal in.',
   });
 
   body.appendChild(h(`
@@ -62,16 +82,20 @@ export function pianoView(ui, { pieceId } = {}) {
       <div class="candle" style="left:7.54%"><span class="candle-glow"></span><span class="flame"></span></div>
       <div class="candle" style="left:92.05%"><span class="candle-glow"></span><span class="flame"></span></div>
       <div class="night-shade"></div>
-      <div class="score"><div class="staff-host"></div><p class="score-hint">Kies bladmuziek, of speel maar!</p></div>
+      <div class="score"><div class="staff-host"></div><div class="desk-welcome">
+          <p class="dw-title hand">Wat wil je doen?</p>
+          <button class="dw-choice learn"><b>Een liedje leren</b><span>Kies bladmuziek: de piano laat je zien welke toetsen je moet spelen.</span></button>
+          <div class="dw-choice free"><b>Gewoon spelen</b><span>Druk op de toetsen, met je muis, je vinger of je toetsenbord, en speel wat je wilt!</span></div>
+        </div><div class="count-in" hidden></div></div>
       <div class="piano-bar">
         <button class="btn wood choose">Kies muziek</button>
         <button class="btn wood read" hidden title="Bekijk de bladmuziek van dit stuk">Bladmuziek</button>
         <span class="piece-name"></span>
         <span class="spacer"></span>
         <button class="btn brass listen" hidden>Luister</button>
-        <button class="btn brass follow" hidden>Speel mee</button>
-        <button class="btn wood slow" hidden title="Langzamer luisteren">Langzaam</button>
-        <button class="btn wood names" title="Notennamen: letters of do-re-mi">C D E</button>
+        <button class="btn brass follow" hidden title="De piano wacht tot je de goede toets speelt">Speel mee</button>
+        <button class="btn brass rhythm" hidden title="Speel op tijd mee: de piano telt af en speelt de begeleiding">In de maat</button>
+        <button class="btn wood practice-btn" hidden title="Kies een stukje, het tempo en meer">Oefenen</button>
         <button class="btn wood lesson-btn" title="Leer hoe noten werken">Notenles</button>
         <button class="btn wood guide-btn">Hulp</button>
       </div>
@@ -84,7 +108,7 @@ export function pianoView(ui, { pieceId } = {}) {
             <span class="oct-range"></span>
             <button class="btn wood small oct-up" title="Een octaaf hoger (→)">Hoger <span class="ico">›</span></button>
           </div>
-          <button class="btn wood small instr-btn" title="Kies een ander instrument"><span class="ico">♫</span> <span class="instr-name">Piano</span></button>
+          <button class="btn wood small instr-btn" title="Klik hier en kies een ander instrument: viool, fluit, trompet, harp…"><span class="ico">♫</span><span class="instr-text"><small>Instrument</small><b class="instr-name">Piano</b></span><span class="caret">▾</span></button>
           <button class="pedal" title="Pedaal: houd Shift ingedrukt, of klik om het vast te zetten"><span class="pedal-foot"></span><span class="pedal-label">Pedaal</span></button>
         </div>
       </div>
@@ -93,6 +117,7 @@ export function pianoView(ui, { pieceId } = {}) {
         <h3 class="hand">Op welk instrument wil je spelen?</h3>
         <div class="instr-families"></div>
       </div>
+      <div class="practice-pop paper" hidden></div>
       <div class="celebrate paper" hidden></div>
     </div>`));
 
@@ -149,8 +174,21 @@ export function pianoView(ui, { pieceId } = {}) {
 
   // --- state
   let parsed = null, page = -1, noteEls = new Map();
-  let mode = 'free';           // free | listen | follow
-  let player = null, idx = 0, mistakes = 0, slow = false;
+  let mode = 'free';           // free | listen | follow | rhythm
+  let player = null, idx = 0, mistakes = 0;
+  // practice settings: tempo, which stretch (-1: the whole piece), repeat it, accompaniment in
+  // Speel mee, metronome
+  let tempo = 1, section = -1, loop = false, withAccomp = true, metro = false;
+  let sections = [];
+  let wrongInRow = 0;
+  const later = [];            // timers of accompaniment answering in Speel mee
+  const answering = new Set(); // its keys sounding now
+  // stop the accompaniment's answer: pending notes don't come, sounding ones stop
+  const hush = () => {
+    later.splice(0).forEach(clearTimeout);
+    answering.forEach(m => { if (!held.has(m)) noteOff(m); keyEls.get(m)?.classList.remove('accomp'); });
+    answering.clear();
+  };
   let along = 0;               // free play: the next note of the piece on the desk
   const held = new Set();
   const codeNotes = new Map(); // computer key → the note it started, so a shift while holding still releases it
@@ -193,10 +231,26 @@ export function pianoView(ui, { pieceId } = {}) {
     if (!parsed || p === page) return;
     page = p;
     noteEls = renderPage($('.staff-host'), parsed, page, SYSTEMS);
+    // the notes outside the stretch being practised fade back
+    if (section >= 0) for (const [i, g] of noteEls) g.classList.toggle('out', !inStretch(parsed.notes[i]));
   };
+  // the stretch being practised, in beats of the melody
+  const stretch = () => (section < 0 ? { from: 0, to: Infinity } : sections[section]);
+  const inStretch = n => { const r = stretch(); return n.start >= r.from - 1e-6 && n.start < r.to - 1e-6; };
+  const playable = n => n && !n.rest && !n.tied;
+  const partKey = () => (section < 0 ? 'all' : `m${sections[section].bar}`);
   const clearMarks = () => {
-    keyEls.forEach(k => k.classList.remove('target', 'active', 'accomp', 'good', 'wrong'));
-    noteEls.forEach(g => g.classList.remove('active'));
+    keyEls.forEach(k => k.classList.remove('target', 'next', 'active', 'accomp', 'good', 'wrong'));
+    noteEls.forEach(g => g.classList.remove('active', 'next'));
+  };
+  // a word floating up from a key: Goed!, Te vroeg, Te laat
+  const say = (midi, text, cls) => {
+    const k = keyEls.get(midi);
+    if (!k) return;
+    const w = h(`<span class="key-word ${cls}">${esc(text)}</span>`);
+    w.style.left = `${k.offsetLeft + k.offsetWidth / 2}px`;
+    w.addEventListener('animationend', () => w.remove());
+    keysEl.appendChild(w);
   };
   // a short glow on a note of the sheet, in its colour
   const flash = g => {
@@ -219,22 +273,45 @@ export function pianoView(ui, { pieceId } = {}) {
     parsed = parsePiece(piece);
     page = -1;
     along = 0;
-    $('.score-hint').hidden = true;
-    $('.piece-name').innerHTML = `<b>${esc(piece.title)}</b> · ${esc(creditFor(piece).short)}`;
-    ['.read', '.listen', '.follow', '.slow'].forEach(s => { $(s).hidden = false; });
+    $('.desk-welcome').hidden = true;
+    // the stretches to practise: every line of the sheet (four bars)
+    sections = [];
+    for (let b = 0; b < parsed.measures.length; b += SECTION_BARS) {
+      const first = parsed.measures[b][0], lastBar = parsed.measures[Math.min(b + SECTION_BARS, parsed.measures.length) - 1];
+      const last = lastBar[lastBar.length - 1];
+      if (parsed.measures.slice(b, b + SECTION_BARS).flat().some(playable)) {
+        sections.push({ bar: b + 1, from: first.start, to: last.start + last.dur, label: `Maat ${b + 1}–${Math.min(b + SECTION_BARS, parsed.measures.length)}` });
+      }
+    }
+    section = -1;
+    $('.practice-pop').hidden = true;
+    ['.read', '.listen', '.follow', '.rhythm', '.practice-btn'].forEach(s => { $(s).hidden = false; });
+    showName();
     showPage(0);
-    setStatus('Druk op Luister om het stuk te horen, of op Speel mee om het zelf te spelen.');
+    setStatus('Begin met Luister. Speel dan mee: de piano wacht op jou. Kun je het? Probeer het dan In de maat!');
   }
+  // the piece's name, with the stretch and tempo being practised
+  function showName() {
+    const piece = parsed.piece;
+    const extra = [section >= 0 ? sections[section].label : '', tempo < 1 ? `${Math.round(tempo * 100)}%` : ''].filter(Boolean);
+    $('.piece-name').innerHTML = `<b>${esc(piece.title)}</b> · ${esc(creditFor(piece).short)}${extra.length ? ` <span class="practising">${esc(extra.join(' · '))}</span>` : ''}`;
+  }
+  const firstPage = () => {
+    const n = parsed.notes.find(inStretch);
+    return n ? pageOfNote(parsed, n, SYSTEMS) : 0;
+  };
 
   function stopAll() {
     player?.stop(); player = null;
+    hush();
+    clearInterval(judgeTimer);
     mode = 'free';
     along = 0;
     clearMarks();
-    noteEls.forEach(g => g.classList.remove('done'));
-    $('.listen').classList.remove('on');
-    $('.follow').classList.remove('on');
+    noteEls.forEach(g => g.classList.remove('done', 'early', 'late', 'missed'));
+    ['.listen', '.follow', '.rhythm'].forEach(s => $(s).classList.remove('on'));
     $('.celebrate').hidden = true;
+    $('.count-in').hidden = true;
   }
 
   function listen() {
@@ -247,8 +324,11 @@ export function pianoView(ui, { pieceId } = {}) {
     setStatus(parsed.offset ? 'Eerst speelt de piano een inleiding. Kijk naar de toetsen!' : hint);
     // every key that sounds lights up: the melody in its full colour, the accompaniment softer
     const lit = new Map();
+    if (section >= 0) setStatus(`Luister naar ${sections[section].label.toLowerCase()}${loop ? ' (steeds opnieuw)' : ''}.`);
     player = playPiece(parsed, {
-      tempoScale: slow ? 0.65 : 1,
+      ...stretch(),
+      tempoScale: tempo,
+      metronome: metro,
       onNote(n) {
         if (n.i === 0 && parsed.offset) setStatus(hint);
         markNote(n);
@@ -259,7 +339,11 @@ export function pianoView(ui, { pieceId } = {}) {
         keyEls.get(midi)?.classList.toggle(part === 'melody' ? 'active' : 'accomp', count > 0);
         if (on && part === 'melody') spark(midi);
       },
-      onEnd() { stopAll(); setStatus('Klaar! Probeer het nu zelf met Speel mee.'); },
+      onEnd() {
+        stopAll();
+        if (loop) { listen(); return; }
+        setStatus('Klaar! Probeer het nu zelf met Speel mee: de piano wacht op jou.');
+      },
     });
   }
 
@@ -267,19 +351,35 @@ export function pianoView(ui, { pieceId } = {}) {
     if (mode === 'follow') { stopAll(); setStatus(''); return; }
     stopAll();
     mode = 'follow';
-    idx = 0; mistakes = 0;
+    idx = parsed.notes.findIndex(inStretch);
+    mistakes = 0; wrongInRow = 0;
     $('.follow').classList.add('on');
-    setStatus('Druk op de toets die oplicht!');
+    setStatus('Druk op de toets die oplicht! De piano wacht op je.');
     nextTarget();
   }
 
+  // the next note to play from note index i on, inside the stretch (or -1)
+  const nextPlayable = i => {
+    const notes = parsed.notes;
+    while (i < notes.length && inStretch(notes[i]) && !playable(notes[i])) i++;
+    return i < notes.length && inStretch(notes[i]) ? i : -1;
+  };
+
   function nextTarget() {
     const notes = parsed.notes;
-    while (idx < notes.length && (notes[idx].rest || notes[idx].tied)) idx++;
-    keyEls.forEach(k => k.classList.remove('target'));
-    if (idx >= notes.length) return finish();
+    keyEls.forEach(k => k.classList.remove('target', 'next'));
+    noteEls.forEach(g => g.classList.remove('next'));
+    const i = idx < 0 ? -1 : nextPlayable(idx);
+    if (i < 0) return finish('follow');
+    idx = i;
     const n = notes[idx];
     markNote(n);
+    // the note after it shows faintly, so the hand can get ready
+    const j = nextPlayable(idx + 1);
+    if (j >= 0) {
+      noteEls.get(notes[j].i)?.classList.add('next');
+      if (notes[j].midi !== n.midi) keyEls.get(notes[j].midi)?.classList.add('next');
+    }
     // slide the computer keyboard along when the note is out of its reach
     let s = shift;
     while (n.midi < KEYS_LOW + s * 12 && s > -MAX_SHIFT) s--;
@@ -291,20 +391,149 @@ export function pianoView(ui, { pieceId } = {}) {
     setStatus(`Speel ${labelFor(n.letter, n.acc)}${code ? ` — toets ${keyLabels[code]}` : ''}`);
   }
 
-  function finish() {
-    const stars = mistakes <= 2 ? 3 : mistakes <= 6 ? 2 : 1;
+  // The end of a run: stars, what went well, and the next step a teacher would give.
+  function finish(kind, result = {}) {
+    const stars = kind === 'follow'
+      ? (mistakes <= 2 ? 3 : mistakes <= 6 ? 2 : 1)
+      : (result.score >= 0.85 ? 3 : result.score >= 0.6 ? 2 : 1);
+    clearInterval(judgeTimer);
     mode = 'free';
-    $('.follow').classList.remove('on');
+    ['.follow', '.rhythm'].forEach(s => $(s).classList.remove('on'));
+    $('.count-in').hidden = true;
+    keyEls.forEach(k => k.classList.remove('target', 'next'));
+    saveStars(pieceIdNow, partKey(), kind, stars);
+    const what = section >= 0 ? `${sections[section].label.toLowerCase()}` : 'het hele stuk';
+    const detail = kind === 'follow'
+      ? (mistakes === 0 ? 'Geen enkele fout!' : `${mistakes} ${mistakes === 1 ? 'foutje' : 'foutjes'}: oefening baart kunst.`)
+      : `<span class="res good">${result.good} op tijd</span> <span class="res ok">${result.early} te vroeg</span> <span class="res ok">${result.late} te laat</span> <span class="res miss">${result.missed} gemist</span>`;
+    // the next step: the same in time, faster, the next stretch, or the whole piece
+    const steps = [];
+    if (kind === 'follow' && stars >= 2) steps.push(['rhythm', 'Nu in de maat']);
+    if (kind === 'rhythm' && stars === 3 && tempo < 1) steps.push(['faster', `Sneller (${Math.round(Math.min(1, tempo + 0.1) * 100)}%)`]);
+    if (stars >= 2 && section >= 0 && section < sections.length - 1) steps.push(['nextpart', `Volgend stukje: ${sections[section + 1].label}`]);
+    if (stars >= 2 && section >= 0 && section === sections.length - 1) steps.push(['whole', 'Nu het hele stuk']);
+    const tip = kind === 'rhythm' && stars < 3
+      ? (result.early > result.late + 1 ? 'Je speelt soms te vroeg: wacht op de tik van de metronoom.' : result.late > result.early + 1 ? 'Je bent soms te laat: probeer het eens langzamer (Oefenen).' : result.missed > 2 ? 'Probeer het eerst langzamer, of oefen de noten met Speel mee.' : '')
+      : '';
     const c = $('.celebrate');
     c.innerHTML = `<div class="stars">${'★'.repeat(stars)}<span>${'★'.repeat(3 - stars)}</span></div>
-      <h3>${stars === 3 ? 'Prachtig gespeeld!' : stars === 2 ? 'Goed gedaan!' : 'Je hebt het hele stuk gespeeld!'}</h3>
-      <p>${mistakes === 0 ? 'Geen enkele fout!' : `${mistakes} ${mistakes === 1 ? 'foutje' : 'foutjes'} — oefening baart kunst.`}</p>
+      <h3>${stars === 3 ? 'Prachtig gespeeld!' : stars === 2 ? 'Goed gedaan!' : `Je hebt ${what} gespeeld!`}</h3>
+      <p class="detail">${detail}</p>
+      ${tip ? `<p class="tip">${esc(tip)}</p>` : ''}
       <div class="row"><button class="btn brass again">Nog een keer</button>
+      ${steps.map(([id, label]) => `<button class="btn brass step" data-step="${id}">${esc(label)}</button>`).join('')}
       <button class="btn wood other">Ander stuk</button></div>`;
     c.hidden = false;
-    c.querySelector('.again').onclick = follow;
+    c.querySelector('.again').onclick = () => (kind === 'follow' ? follow() : rhythm());
+    c.querySelectorAll('.step').forEach(b => {
+      b.onclick = () => {
+        const st = b.dataset.step;
+        if (st === 'faster') setTempo(tempo + 0.1);
+        if (st === 'nextpart') setSection(section + 1);
+        if (st === 'whole') setSection(-1);
+        (st === 'rhythm' || kind === 'rhythm') ? rhythm() : follow();
+      };
+    });
     c.querySelector('.other').onclick = () => { c.hidden = true; ui.open('library', { forPiano: true }); };
     setStatus('');
+  }
+
+  // Speel mee, with the accompaniment: once the right note is played, the accompaniment from that
+  // note up to the next one sounds, at the practice tempo, so the song grows under your fingers.
+  function answer(n) {
+    if (!withAccomp || !parsed.accomp.length) return;
+    const j = nextPlayable(n.i + 1);
+    const off = parsed.offset, spb = parsed.secPerBeat / tempo;
+    const from = off + n.start, to = off + (j >= 0 ? parsed.notes[j].start : stretch().to === Infinity ? n.start + n.dur : stretch().to);
+    for (const a of parsed.accomp) {
+      if (a.start < from - 1e-6 || a.start >= to - 1e-6) continue;
+      const k = keyEls.get(a.midi);
+      later.push(setTimeout(() => { noteOn(a.midi, 0.38); answering.add(a.midi); k?.classList.add('accomp'); }, (a.start - from) * spb * 1000));
+      later.push(setTimeout(() => { answering.delete(a.midi); if (!held.has(a.midi)) noteOff(a.midi); k?.classList.remove('accomp'); }, (a.start - from + a.dur * 0.95) * spb * 1000));
+    }
+  }
+
+  // In de maat: the piano counts in a bar, then plays the accompaniment (and the metronome, when on)
+  // in time. The player plays the melody; each note is judged on time, early, late or missed.
+  let judgeTimer = 0;
+  function rhythm() {
+    if (mode === 'rhythm') { stopAll(); setStatus(''); return; }
+    stopAll();
+    if (!audioState.ready) { setStatus('De piano wordt nog gestemd… even geduld!'); return; }
+    mode = 'rhythm';
+    $('.rhythm').classList.add('on');
+    mistakes = 0;
+    const spb = parsed.secPerBeat / tempo;
+    const good = Math.max(0.09, 0.2 * spb), ok = Math.max(0.2, 0.5 * spb);
+    const todo = parsed.notes.filter(n => inStretch(n) && playable(n)).map(n => ({ n, judged: false }));
+    const result = { good: 0, early: 0, late: 0, missed: 0, total: todo.length };
+    const counter = $('.count-in');
+    showPage(firstPage());
+    setStatus('Luister naar de tikken en tel mee…');
+    const lit = new Map();
+    player = playPiece(parsed, {
+      ...stretch(),
+      tempoScale: tempo,
+      countIn: Math.min(4, Math.round(parsed.beatsPerMeasure)) || 4,
+      metronome: metro,
+      melody: 0,
+      onBeat({ count }) {
+        if (count == null) { counter.hidden = true; return; }
+        counter.hidden = false;
+        counter.textContent = count;
+        counter.classList.remove('beat'); void counter.offsetWidth; counter.classList.add('beat');
+      },
+      onNote(n) {
+        counter.hidden = true;
+        if (n.i === parsed.notes.find(inStretch)?.i) setStatus('Speel nu mee, op de maat!');
+        markNote(n);
+        keyEls.forEach(k => k.classList.remove('target', 'next'));
+        if (!playable(n)) return;
+        keyEls.get(n.midi)?.classList.add('target');
+        const j = nextPlayable(n.i + 1);
+        if (j >= 0 && parsed.notes[j].midi !== n.midi) keyEls.get(parsed.notes[j].midi)?.classList.add('next');
+      },
+      onKey(midi, on) {
+        const count = (lit.get(midi) || 0) + (on ? 1 : -1);
+        lit.set(midi, count);
+        keyEls.get(midi)?.classList.toggle('accomp', count > 0);
+      },
+      onEnd() {
+        const r = result;
+        r.missed += todo.filter(t => !t.judged).length;
+        r.score = r.total ? Math.max(0, (r.good + 0.6 * (r.early + r.late)) / r.total - 0.03 * mistakes) : 0;
+        // repeating: again until it's three stars
+        if (loop && r.score < 0.85) { stopAll(); rhythm(); return; }
+        finish('rhythm', r);
+      },
+    });
+    // a note nobody played in time is missed
+    judgeTimer = setInterval(() => {
+      const now = audioNow();
+      for (const t of todo) {
+        if (t.judged || player.timeOf(t.n) + ok > now) continue;
+        t.judged = true;
+        result.missed++;
+        noteEls.get(t.n.i)?.classList.add('missed');
+      }
+    }, 60);
+    // judge a key: the nearest note of that pitch not judged yet, if it is near enough in time
+    rhythm.judge = midi => {
+      const now = audioNow();
+      let best = null;
+      for (const t of todo) {
+        if (t.judged || t.n.midi !== midi) continue;
+        const dt = now - player.timeOf(t.n);
+        if (Math.abs(dt) <= ok && (!best || Math.abs(dt) < Math.abs(best.dt))) best = { t, dt };
+      }
+      if (!best) return false;
+      best.t.judged = true;
+      const g = noteEls.get(best.t.n.i);
+      if (Math.abs(best.dt) <= good) { result.good++; g?.classList.add('done'); say(midi, 'Goed!', 'good'); }
+      else if (best.dt < 0) { result.early++; g?.classList.add('early'); say(midi, 'Te vroeg', 'early'); }
+      else { result.late++; g?.classList.add('late'); say(midi, 'Te laat', 'late'); }
+      return true;
+    };
   }
 
   // Free play with a piece on the desk: the sheet plays along. The next note of the piece, when it's
@@ -312,7 +541,8 @@ export function pianoView(ui, { pieceId } = {}) {
   // that note glow wherever it is on the page, so every key shows where it is written.
   function playAlong(midi) {
     const notes = parsed.notes;
-    const skip = () => { while (along < notes.length && (notes[along].rest || notes[along].tied)) along++; };
+    const skip = () => { while (along < notes.length && (notes[along].rest || notes[along].tied || !inStretch(notes[along]))) along++; };
+    if (section >= 0 && along < notes.findIndex(inStretch)) along = notes.findIndex(inStretch);
     skip();
     const n = notes[along];
     if (n && n.midi === midi) {
@@ -322,10 +552,10 @@ export function pianoView(ui, { pieceId } = {}) {
       flash(g);
       along++;
       skip();
-      if (along >= notes.length) {
-        setStatus('Je hebt het hele stuk gespeeld! Speel het gerust nog eens.');
+      if (along >= notes.length || !inStretch(notes[along])) {
+        setStatus(section >= 0 ? `Je hebt ${sections[section].label.toLowerCase()} gespeeld! Nog eens?` : 'Je hebt het hele stuk gespeeld! Speel het gerust nog eens.');
         along = 0;
-        setTimeout(() => { if (mode === 'free') { noteEls.forEach(e => e.classList.remove('done')); showPage(0); } }, 1500);
+        setTimeout(() => { if (mode === 'free') { noteEls.forEach(e => e.classList.remove('done')); showPage(firstPage()); } }, 1500);
       }
       return;
     }
@@ -348,12 +578,25 @@ export function pianoView(ui, { pieceId } = {}) {
         noteEls.get(n.i)?.classList.add('done');
         k?.classList.add('good');
         setTimeout(() => k?.classList.remove('good'), 250);
+        wrongInRow = 0;
+        hush();
+        answer(n);
         idx++;
         nextTarget();
       } else {
         mistakes++;
+        wrongInRow++;
         k?.classList.remove('wrong'); void k?.offsetWidth; k?.classList.add('wrong');
+        // after a few tries a teacher helps: higher or lower, and which key
+        if (n && wrongInRow >= 2) {
+          const code = keyCodeForMidi(n.midi, shift);
+          setStatus(`${midi < n.midi ? 'Iets hoger!' : 'Iets lager!'} Zoek de ${labelFor(n.letter, n.acc)}${code ? `: toets ${keyLabels[code]}` : ''}. Hij licht op.`);
+        }
       }
+    }
+    if (mode === 'rhythm' && !rhythm.judge?.(midi)) {
+      mistakes++;
+      k?.classList.remove('wrong'); void k?.offsetWidth; k?.classList.add('wrong');
     }
   }
 
@@ -380,14 +623,62 @@ export function pianoView(ui, { pieceId } = {}) {
   $('.lesson-btn').onclick = () => { stopAll(); ui.open('lessons'); };
   $('.listen').onclick = listen;
   $('.follow').onclick = follow;
-  $('.slow').onclick = () => { slow = !slow; $('.slow').classList.toggle('on', slow); };
-  $('.names').onclick = () => {
-    noteNames.mode = noteNames.mode === 'letters' ? 'solfege' : 'letters';
-    $('.names').innerHTML = `${noteNames.mode === 'letters' ? 'C D E' : 'do re mi'}`;
-    buildKeys();
-    if (parsed) { const p = page; page = -1; showPage(p); }
-    if (mode === 'follow') nextTarget();
+  $('.rhythm').onclick = rhythm;
+
+  // Oefenen: the practice card — tempo, which stretch, and a few switches
+  const practicePop = $('.practice-pop');
+  function setTempo(t) {
+    tempo = TEMPOS.reduce((a, b) => (Math.abs(b - t) < Math.abs(a - t) ? b : a));
+    showName();
+    if (!practicePop.hidden) drawPractice();
+  }
+  function setSection(k) {
+    stopAll();
+    section = k;
+    page = -1;
+    along = 0;
+    showName();
+    showPage(firstPage());
+    if (!practicePop.hidden) drawPractice();
+  }
+  function drawPractice() {
+    const stars = (part, kind) => { const n = starsOf(pieceIdNow, part, kind); return n ? `<i class="pstars ${kind}" title="${kind === 'follow' ? 'Speel mee' : 'In de maat'}">${kind === 'follow' ? '♪' : '♩'} ${starText(n)}</i>` : ''; };
+    const chip = (k, label, part) => `<button class="psec ${section === k ? 'on' : ''}" data-k="${k}"><b>${esc(label)}</b>${stars(part, 'follow')}${stars(part, 'rhythm')}</button>`;
+    const toggle = (id, on, label) => `<button class="ptoggle ${on ? 'on' : ''}" data-t="${id}"><span class="box">${on ? '✓' : ''}</span>${esc(label)}</button>`;
+    practicePop.innerHTML = `
+      <h3 class="hand">Oefenen</h3>
+      <div class="prow"><span class="plabel">Tempo</span>
+        <button class="btn wood small pslower" ${tempo <= TEMPOS[0] ? 'disabled' : ''} title="Langzamer">−</button>
+        <b class="ptempo">${Math.round(tempo * 100)}%</b>
+        <button class="btn wood small pfaster" ${tempo >= 1 ? 'disabled' : ''} title="Sneller">+</button>
+        <span class="pnote">${tempo < 1 ? 'Langzaam oefenen is slim: daarna gaat het vanzelf sneller.' : 'Het echte tempo.'}</span></div>
+      <div class="prow wrap"><span class="plabel">Welk stukje?</span>
+        <div class="psecs">${chip(-1, 'Het hele stuk', 'all')}${sections.map((sec, k) => chip(k, sec.label, `m${sec.bar}`)).join('')}</div></div>
+      <div class="prow"><span class="plabel">Extra</span>
+        ${toggle('loop', loop, 'Herhalen')}
+        ${parsed.accomp.length ? toggle('accomp', withAccomp, 'Begeleiding bij Speel mee') : ''}
+        ${toggle('metro', metro, 'Metronoom')}</div>
+      <div class="row"><button class="btn brass pdone">Klaar</button></div>`;
+    practicePop.querySelector('.pslower').onclick = () => setTempo(tempo - 0.1);
+    practicePop.querySelector('.pfaster').onclick = () => setTempo(tempo + 0.1);
+    practicePop.querySelectorAll('.psec').forEach(b => { b.onclick = () => setSection(+b.dataset.k); });
+    practicePop.querySelectorAll('.ptoggle').forEach(b => {
+      b.onclick = () => {
+        const t = b.dataset.t;
+        if (t === 'loop') loop = !loop;
+        if (t === 'accomp') withAccomp = !withAccomp;
+        if (t === 'metro') metro = !metro;
+        drawPractice();
+      };
+    });
+    practicePop.querySelector('.pdone').onclick = () => { practicePop.hidden = true; };
+  }
+  $('.practice-btn').onclick = () => {
+    guidePop.hidden = true; instrPop.hidden = true;
+    if (practicePop.hidden) drawPractice();
+    practicePop.hidden = !practicePop.hidden;
   };
+
   const guidePop = $('.guide-pop');
   $('.guide-btn').onclick = () => {
     if (guidePop.hidden) {
@@ -398,6 +689,7 @@ export function pianoView(ui, { pieceId } = {}) {
       guidePop.appendChild(close);
     }
     instrPop.hidden = true;
+    practicePop.hidden = true;
     guidePop.hidden = !guidePop.hidden;
   };
 
@@ -442,33 +734,13 @@ export function pianoView(ui, { pieceId } = {}) {
     });
   }
   markInstrument();
-  $('.instr-btn').onclick = () => { guidePop.hidden = true; instrPop.hidden = !instrPop.hidden; };
-
-  // A real (USB/MIDI) piano keyboard, when the browser supports it.
-  let midiAccess = null;
-  const onMidi = e => {
-    const [st, note, vel] = e.data;
-    const cmd = st & 0xf0;
-    if (cmd === 0x90 && vel > 0) press(note);
-    else if (cmd === 0x80 || (cmd === 0x90 && vel === 0)) release(note);
-    else if (cmd === 0xb0 && note === 64) setPedal(vel >= 64 || pedalLatched); // sustain pedal
-  };
-  if (navigator.requestMIDIAccess) {
-    const midiBtn = h('<button class="btn wood midi" title="Sluit een echte piano of keyboard aan via USB">MIDI</button>');
-    midiBtn.onclick = () => navigator.requestMIDIAccess().then(acc => {
-      midiAccess = acc;
-      const hook = () => acc.inputs.forEach(i => { i.onmidimessage = onMidi; });
-      hook();
-      acc.onstatechange = hook;
-      midiBtn.classList.add('on');
-      setStatus(acc.inputs.size ? 'Je keyboard is aangesloten. Speel maar!' : 'Geen keyboard gevonden. Sluit er een aan via USB.');
-    }).catch(() => setStatus('Je browser geeft geen toegang tot MIDI.'));
-    $('.guide-btn').before(midiBtn);
-  }
+  $('.instr-btn').onclick = () => {
+    guidePop.hidden = true; practicePop.hidden = true; instrPop.hidden = !instrPop.hidden; };
 
   if (pieceId) loadPiece(pieceId);
-  else setStatus('Speel maar! Of kies bladmuziek om mee te spelen.');
-  onAudioReady(() => { if (!parsed && mode === 'free') setStatus('De piano is gestemd. Speel maar!'); });
+  else setStatus('Speel wat je wilt, of kies bladmuziek om een liedje te leren.');
+  onAudioReady(() => { if (!parsed && mode === 'free') setStatus('De piano is gestemd. Speel wat je wilt, of kies bladmuziek!'); });
+  $('.dw-choice.learn').onclick = () => ui.open('library', { forPiano: true });
 
   return {
     el,
@@ -492,7 +764,7 @@ export function pianoView(ui, { pieceId } = {}) {
         press(midi);
         return;
       }
-      if (e.code === 'Space' && parsed) { e.preventDefault(); mode === 'follow' ? stopAll() : listen(); }
+      if (e.code === 'Space' && parsed) { e.preventDefault(); mode === 'follow' || mode === 'rhythm' ? stopAll() : listen(); }
     },
     onKeyUp(e) {
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { if (!e.shiftKey) setPedal(pedalLatched); return; }
@@ -504,7 +776,6 @@ export function pianoView(ui, { pieceId } = {}) {
       if (audioState.ready) setInstrument('piano').catch(() => {});
       held.forEach(m => noteOff(m));
       sustained.forEach(m => noteOff(m));
-      midiAccess?.inputs.forEach(i => { i.onmidimessage = null; });
     },
   };
 }

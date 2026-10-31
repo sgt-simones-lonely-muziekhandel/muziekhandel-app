@@ -2,6 +2,43 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — One back button, ↓ goes back, every book bends, a calmer voice, two legs and two arms
+
+Changed:
+
+- [Game shell](game-shell.md): every window has one round brass back button, top left (like the shopkeeper's ✕); the ✕ in the corner of the windows is gone. **↓** goes back everywhere: out of a window, out of the corner, out of the shop (also S in the scenes). The game can be played with the keyboard alone.
+- [Sheet music](sheet-music.md): every book opens like a real book with bending pages, the composers' books too (their cover bends only a little, like board). A song whose scan has no printed cover keeps the cover it had in the cabinet, so it no longer disappears on the desk.
+- [Shopkeeper](shopkeeper.md), [composers](composers.md): *Voorlezen* uses the most natural Dutch voice the browser has and reads a sentence at a time. While reading, the button says *Stoppen*; leaving the card or the window stops the voice.
+- [Shop](shop.md): the four paintings hang a little lower and behind the hanging lamp (the lamp is cut out of the wall and drawn over them, `scripts/cut_shop_lamp.py`).
+
+Fixed:
+
+- [Cyclists](cyclists.md): the lady had a third leg: a piece of the boot drawn in her picture stayed in her cut-out body, still, while her two boots pedalled.
+- [Player](player.md): the boy had four arms: his torso picture has both sleeves painted on, under the two swinging arms. He now uses an armless torso (`scripts/make_armless_torso.py`), the future boy too.
+
+## 2026-10-31 — Two sheet-music cabinets, a gramophone chest that glides
+
+Added:
+
+- [Sheet music](sheet-music.md): a second cabinet, *Muziek van de componisten*, beside *Liedjes uit de SOM-collectie*: 20 pieces in all. Brass arrows, ← / → or a swipe switch between them with a short sideways slide; a sign names the cabinet.
+
+Changed:
+
+- [Gramophone](gramophone.md): no scrollbar; only the chest of cylinders scrolls, gliding with the wheel, draggable with the mouse, fading at the edges.
+
+## 2026-10-31 — Learning a song on the piano, composers back on the wall, a better close button
+
+Added:
+
+- [Piano](piano.md): learning a song step by step. *Speel mee* shows the next note too, the accompaniment answers each right note, and a wrong key twice gives a hint (higher / lower, which key). New **In de maat**: a count-in, then the accompaniment in time while the player plays the melody, every note judged on time, early, late or missed. **Oefenen**: tempo 50–100%, practise four bars at a time (or the whole piece), repeat, accompaniment, metronome. The result card gives stars, details, a tip and the next step; stars are kept per piece and stretch.
+- [Audio](audio.md): `playPiece()` plays a stretch, counts in, ticks a metronome and can leave the melody to the player; the lights follow what is heard (the audio clock minus the speakers' latency) instead of running 0.1 s early.
+
+Changed:
+
+- [Piano](piano.md): the *MIDI* and *C D E* buttons are gone. The empty music desk asks *Wat wil je doen?*: *Een liedje leren* (choose sheet music) or *Gewoon spelen*. The instrument plaque reads *Instrument · Piano ▾*, without flashing (not when it first appears, nor while an instrument loads).
+- [Composers](composers.md): the shop wall keeps the team's paintings; the wall close-up shows the six composers again, with their name plaques, biographies and music, all with the standard silhouette (we have no portraits of them). The *De makers van dit spel* card is gone.
+- [Shopkeeper](shopkeeper.md): the ✕ is a round brass button on the paper's corner instead of a small cross on the speech bubble.
+
 ## 2026-10-31 — Gentler rain
 
 Changed:

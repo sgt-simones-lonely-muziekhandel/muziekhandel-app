@@ -61,14 +61,17 @@ const LAMPS = [[518, 160], [982, 160], [1340, 160]];
 
 // Gilded frames on the wall, each with a team portrait inside (see js/frames.js).
 const FRAME_IMG = Object.fromEntries(Object.keys(FRAME_TYPES).map(n => [n, load(FRAME_SRC(n))]));
-// A gallery wall above the piano: two by two, close together around the hanging lamp.
+// A gallery wall above the piano: two by two, close together around the hanging lamp, which hangs
+// in front of them (it is drawn again on top, see LAMP).
 // Sized to the green wall panel between the pillars (x ≈ 345–710, below the beam at y ≈ 95).
 const FRAMES = [
-  { cx: 446, top: 112, h: 80, team: 'team-1' },
-  { cx: 560, top: 112, h: 80, team: 'team-2' },
-  { cx: 446, top: 200, h: 80, team: 'team-3' },
-  { cx: 560, top: 200, h: 80, team: 'team-4' },
+  { cx: 446, top: 126, h: 80, team: 'team-1' },
+  { cx: 560, top: 126, h: 80, team: 'team-2' },
+  { cx: 446, top: 212, h: 80, team: 'team-3' },
+  { cx: 560, top: 212, h: 80, team: 'team-4' },
 ];
+// The first hanging lamp, cut out of back-wall.webp (scripts/cut_shop_lamp.py), and where it goes.
+const LAMP = { img: load(`${ART}shop/lamp.webp`), x: 474, y: 96, w: 92, h: 110 };
 for (const f of FRAMES) {
   const t = TEAM.find(m => m.id === f.team);
   f.type = TEAM_FRAME[f.team];
@@ -149,6 +152,7 @@ export class Shop {
     if (ready(IMG.wall)) ctx.drawImage(IMG.wall, 0, 0, W, H);
 
     for (const f of FRAMES) this.drawFrame(ctx, f);
+    if (ready(LAMP.img)) ctx.drawImage(LAMP.img, LAMP.x, LAMP.y, LAMP.w, LAMP.h);
     for (const item of FURNITURE) {
       const img = art(item.img);
       if (!img) continue;

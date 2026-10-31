@@ -160,9 +160,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
   width: min(100vw, 100dvh * 1672 / 941);
 }
 .full-hud { position: absolute; left: 16px; right: 16px; top: 14px; display: flex; align-items: flex-start; gap: 12px; pointer-events: none; z-index: 4; }
-.full-hud .close { margin-left: auto; }
 .full-hud > * { pointer-events: auto; }
-.full-hud .btn { min-height: 40px; padding: 6px 14px; font-size: 16px; box-shadow: 0 3px 10px rgba(0, 0, 0, .5); }
+.full-hud .btn:not(.brass-round) { min-height: 40px; padding: 6px 14px; font-size: 16px; box-shadow: 0 3px 10px rgba(0, 0, 0, .5); }
 .full-title {
   margin: 0; padding: 8px 18px; border-radius: 8px; font-family: var(--font-title); font-size: clamp(15px, 1.6vw, 22px); color: #2a1a0a;
   background: linear-gradient(#f0d58e, #b8862f); border: 2px solid #5a3d12; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 4px 12px rgba(0, 0, 0, .45);
@@ -206,6 +205,30 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .tube.pulled .cover-art { animation: wobble .5s ease; }
 @keyframes wobble { 30% { transform: rotate(-6deg); } 60% { transform: rotate(4deg); } }
 .cab-plaque { color: #8b3e2f; letter-spacing: .1em; }
+/* more than one cabinet: each is a page carrying the cabinet picture, so it can slide along the wall
+   (library.js `go()`); between them the dark wall shows */
+.library .stage { background-image: none !important; background-color: #140b06; overflow: hidden; }
+.cab-page { position: absolute; inset: 0; background: url(../public/art/closeups/cabinet.webp) 0 0 / 100% 100%; will-change: transform; }
+.cab-page[hidden] { display: none; }
+.cab-nav {
+  position: absolute; z-index: 3; top: 50%; translate: 0 -50%; width: 4.4cqw; height: 4.4cqw; border-radius: 50%; cursor: pointer;
+  font: 700 2.9cqw/1 var(--font-1900); color: #2a1a0a; padding-bottom: .35cqw;
+  background: radial-gradient(circle at 35% 30%, #f6dc96, #c99a45 60%, #8a5f1f); border: .18cqw solid #4a3216; box-shadow: 0 .4cqw .8cqw rgba(0, 0, 0, .55);
+  transition: transform .15s, opacity .25s;
+}
+.cab-nav.prev { left: 1.4cqw; } .cab-nav.next { right: 1.4cqw; }
+.cab-nav:hover:not(:disabled) { transform: scale(1.1); }
+.cab-nav:disabled { opacity: 0; pointer-events: none; }
+.cab-nav.next:not(:disabled) { animation: nav-nudge 1.8s ease-in-out infinite; }
+@keyframes nav-nudge { 50% { translate: .4cqw -50%; } }
+.cab-sign {
+  position: absolute; z-index: 3; left: 50%; bottom: 1.2cqw; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: .3cqw;
+  padding: .45cqw 1.6cqw .5cqw; border-radius: .4cqw; background: linear-gradient(#e9c97a, #a87d34); border: .15cqw solid #4a3216; box-shadow: 0 .3cqw .7cqw rgba(0, 0, 0, .5);
+}
+.cab-sign b { font: 700 1.25cqw var(--font-1900); color: #2a1a0a; white-space: nowrap; }
+.cab-dots { display: flex; gap: .45cqw; }
+.cab-dots i { width: .6cqw; height: .6cqw; border-radius: 50%; background: rgba(42, 26, 10, .35); transition: background .3s, transform .3s; }
+.cab-dots i.on { background: #2a1a0a; transform: scale(1.25); }
 
 /* ---------- Sheet music: a ring binder on a desk ---------- */
 /* Full-screen stage without a picture: a wooden desk (stage is 100cqw × 56.25cqw). */
@@ -224,6 +247,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .book {
   position: absolute; left: 50%; top: 6.1cqw; width: calc(2 * 44cqw * 566 / 768); height: 44cqw; margin-left: calc(-44cqw * 566 / 768);
   transform-style: preserve-3d; transition: transform .9s cubic-bezier(.45, .05, .2, 1);
+  --pw: calc(44cqw * 566 / 768); touch-action: none; user-select: none;
 }
 /* closed, the cover (the right half) is in the middle of the screen */
 .book.closed { transform: translateX(-25%); }
@@ -236,33 +260,27 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .leaf {
   position: absolute; left: 50%; top: 0; width: 50%; height: 100%; transform-origin: 0 50%; transform-style: preserve-3d; cursor: pointer;
   transform: translateZ(var(--z)) rotateY(0deg);
-  transition: transform 1.05s cubic-bezier(.45, .05, .2, 1);
-  will-change: transform;
 }
 .leaf.turned { transform: translateZ(var(--z)) rotateY(-180deg); }
-/* A real song's book is the original sheets: paper all through, and pages that bend while they turn
-   (sheet.js cuts each leaf into strips, `.curl`, shown instead of the flat faces while it moves). */
-.book.curly { --pw: calc(44cqw * 566 / 768); touch-action: none; user-select: none; }
-.book.curly .leaf { transition: none; }
-.book.curly .book-back { background: #e9dfc8; border-radius: 0; box-shadow: .25cqw 0 0 #ddd0b4, .5cqw 0 0 #cfc09f, .6cqw 1.2cqw 2.4cqw rgba(0, 0, 0, .55); }
-.book.curly .leaf .face.front { box-shadow: none; }
+/* Pages bend while they turn: sheet.js cuts each leaf into strips (`.curl`), each showing its slice
+   of a copy of the page, shown instead of the flat faces while it moves. A real song's book is the
+   original sheets: paper all through, down to the back. */
+.book.scanned .book-back { background: #e9dfc8; border-radius: 0; box-shadow: .25cqw 0 0 #ddd0b4, .5cqw 0 0 #cfc09f, .6cqw 1.2cqw 2.4cqw rgba(0, 0, 0, .55); }
+.book.scanned .paper-leaf .face.front { box-shadow: none; }
 .leaf.curling { transform: translateZ(var(--z)); }
 .leaf.curling > .face { visibility: hidden; }
 .curl { position: absolute; inset: 0; transform-style: preserve-3d; display: none; }
 .leaf.curling .curl { display: block; }
 .strip { position: absolute; top: 0; left: 0; width: calc(100% / var(--strips)); height: 100%; transform-origin: 0 50%; transform-style: preserve-3d; }
 .strip .strip { left: 100%; width: 100%; }
-.strip > i {
-  position: absolute; inset: 0 -1px 0 0; backface-visibility: hidden;
-  background-color: #e9dfc8; background-repeat: no-repeat; background-size: var(--pw) auto;
-  background-position: calc(var(--pw) * var(--col) / var(--strips) * -1) center;
-}
+.strip > i { position: absolute; inset: 0 -1px 0 0; backface-visibility: hidden; overflow: hidden; background: #e9dfc8; }
+.strip .slice { position: absolute; top: 0; height: 100%; width: var(--pw); left: calc(var(--pw) * var(--col) / var(--strips) * -1); }
 .strip > .sb { transform: rotateY(180deg); inset: 0 0 0 -1px; }
-.strip > i::after { content: ''; position: absolute; inset: 0; background: #1a0f05; opacity: var(--sh, 0); }
+.strip > i::after { content: ''; position: absolute; inset: 0; z-index: 1; background: #1a0f05; opacity: var(--sh, 0); }
 /* the edge of the paper catches the light */
-.strip > .sf::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 40%, rgba(255, 248, 225, calc(var(--sh, 0) * .6))); }
+.strip > .sf::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, transparent 40%, rgba(255, 248, 225, calc(var(--sh, 0) * .6))); }
 /* blank paper: the back of a cover, the inside of the last page */
-.blank-page, .strip > i.blank {
+.blank-page {
   background-color: #e9dfc8;
   background-image: radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(110, 80, 40, .16)), repeating-linear-gradient(0deg, rgba(120, 90, 50, .035) 0 2px, transparent 2px 5px);
   background-size: auto;
@@ -280,11 +298,6 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .face::before { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(90deg, rgba(40, 24, 10, .28), rgba(40, 24, 10, .06) 7%, transparent 14%); }
 .face.back::before { background: linear-gradient(270deg, rgba(40, 24, 10, .28), rgba(40, 24, 10, .06) 7%, transparent 14%); }
 .cover-leaf .face.front::before { background: linear-gradient(90deg, rgba(0, 0, 0, .35), transparent 5%); }
-/* light falls off a page while it is in the air */
-.face::after { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; background: linear-gradient(90deg, rgba(30, 18, 8, .4), rgba(30, 18, 8, .1)); }
-.face.back::after { background: linear-gradient(270deg, rgba(30, 18, 8, .4), rgba(30, 18, 8, .1)); }
-.leaf.turning .face::after { animation: leaf-shade 1.05s ease-in-out; }
-@keyframes leaf-shade { 50% { opacity: 1; } }
 /* the cover: the cover picture, with the board's edge around it */
 .cover-leaf .face { border-radius: 0 .5cqw .5cqw 0; box-shadow: 0 0 0 .45cqw #4a1c14; }
 .cover-leaf .face.back { border-radius: .5cqw 0 0 .5cqw; }
@@ -299,7 +312,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
     repeating-linear-gradient(35deg, rgba(120, 80, 40, .05) 0 .3cqw, transparent .3cqw .9cqw),
     #e7dbc0;
 }
-.face .endpaper { position: absolute; inset: 0; }
+.face .endpaper, .slice .endpaper { position: absolute; inset: 0; }
 /* the title page (cover-inside.webp): only the title and the composer change */
 .tp-img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tp-text {
@@ -383,6 +396,14 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .note.done .head { fill: #3c8a4a; stroke: #2e6b39; }
 .note.done .lbl-bg { opacity: .35; }
 @keyframes pop { 50% { transform: scale(1.35); } }
+/* learning: the note after the one to play shows faintly; notes outside the stretch fade back;
+   In de maat marks each note on time (done), early / late (amber) or missed (red) */
+.note.next .hl-box { opacity: .18; }
+.note.next .lbl-bg { transform: scale(1.12); }
+.note.out { opacity: .28; }
+.note.early .head, .note.late .head { fill: #d99a2b; stroke: #9a6612; }
+.note.missed .head { fill: none; stroke: #c0392b; stroke-width: 2.6; }
+.note.missed .lbl-bg { opacity: .35; }
 
 /* ---------- Piano ---------- */
 /* Full screen on closeups/piano.webp; everything is placed in % of the picture (1672 × 941). */
@@ -390,7 +411,17 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .piano .score { position: absolute; left: 26.6%; top: 13%; width: 46.4%; height: 38%; display: grid; place-items: center; }
 .piano .staff-host { width: 100%; height: 100%; display: grid; align-items: center; }
 .piano .score .staff-svg { width: 100%; height: 100%; max-height: 100%; }
-.score-hint { margin: 0; font-family: var(--font-hand); font-size: 2.4cqw; color: rgba(74, 54, 38, .6); text-align: center; }
+/* the empty music desk: a choice written on the sheet, learn a song or just play */
+.desk-welcome { display: flex; flex-direction: column; align-items: center; gap: .7cqw; width: 78%; text-align: center; color: #3a2614; }
+.desk-welcome[hidden] { display: none; }
+.dw-title { margin: 0; font-size: 2.6cqw; color: #6b4e36; }
+.dw-choice { display: flex; flex-direction: column; align-items: center; gap: .2cqw; width: 100%; padding: .7cqw 1.2cqw; border-radius: .6cqw; font: inherit; color: inherit; }
+.dw-choice b { font: 800 1.55cqw var(--font-1900); }
+.dw-choice span { font-size: 1.05cqw; line-height: 1.35; color: #5a4636; }
+.dw-choice.learn { cursor: pointer; border: .15cqw solid #8a5f1f; background: linear-gradient(rgba(246, 220, 150, .75), rgba(201, 154, 69, .55)); box-shadow: 0 .2cqw .5cqw rgba(74, 54, 38, .25); transition: transform .15s, filter .15s; animation: learn-glow 2.4s ease-in-out infinite; }
+.dw-choice.learn:hover { transform: translateY(-.1cqw) scale(1.02); filter: brightness(1.06); }
+@keyframes learn-glow { 50% { box-shadow: 0 0 1.2cqw rgba(242, 199, 107, .9); } }
+.dw-choice.free { border: .15cqw dashed rgba(74, 54, 38, .35); }
 /* Everything on the piano is sized in cqw only (no pixel minimums), so it shrinks and grows with the picture and stays on the wood. */
 /* The controls sit on the big flat board under the keys (y 768–930 of the picture): the buttons in a
    row at the top of it, the octave buttons, status line and pedal under them. */
@@ -518,10 +549,52 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .piano-wrap.night .night-shade { display: block; }
 
 /* the instrument button sits right, next to the pedal; while an instrument loads it breathes */
-.piano-foot .instr-btn { margin-left: auto; }
-.piano .piano-foot .instr-btn.loading { animation: instr-wait 1s ease-in-out infinite alternate; }
-@keyframes instr-wait { to { filter: brightness(1.5); } }
+/* the instrument plaque says what it is: "Instrument" over the one playing now, and a ▾ to choose */
+.piano-foot .instr-btn { margin-left: auto; gap: .5cqw; }
+.piano .piano-foot .instr-btn .instr-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.05; }
+.piano .piano-foot .instr-btn .instr-text small { font-size: .72em; opacity: .75; letter-spacing: .08em; }
+.piano .piano-foot .instr-btn .caret { font-size: .85em; opacity: .85; }
 /* the instruments, by family like in an orchestra */
+/* the next key to play shows a faint outline of its colour */
+.key.next:not(.target):not(.down) { box-shadow: inset 0 0 0 .22cqw color-mix(in srgb, var(--c) 70%, transparent); }
+.key.black.next:not(.target):not(.down) { box-shadow: inset 0 0 0 .18cqw var(--c); }
+/* a word that floats up from a key in In de maat */
+.key-word { position: absolute; bottom: 100%; z-index: 4; translate: -50% 0; pointer-events: none; white-space: nowrap; padding: .1cqw .6cqw; border-radius: .4cqw; font: 800 1.05cqw var(--font-body); color: #fff; animation: word-up 1s ease-out forwards; }
+.key-word.good { background: #3c8a4a; }
+.key-word.early, .key-word.late { background: #c27d12; }
+@keyframes word-up { from { opacity: 0; transform: translateY(.5cqw) scale(.8); } 15% { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-3cqw); } }
+/* the count-in, big on the sheet */
+.count-in { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; font: 800 9cqw var(--font-1900); color: rgba(138, 47, 28, .85); text-shadow: 0 .2cqw 0 rgba(255, 245, 220, .8); }
+.count-in.beat { animation: count-beat .45s ease-out; }
+@keyframes count-beat { from { transform: scale(1.5); opacity: .4; } }
+.piece-name .practising { margin-left: .4cqw; padding: 0 .5cqw; border-radius: .3cqw; background: rgba(242, 199, 107, .2); border: 1px solid rgba(242, 199, 107, .45); font-size: .9em; }
+/* Oefenen: the practice card */
+.practice-pop { position: absolute; z-index: 5; left: 50%; bottom: 13%; transform: translateX(-50%); width: min(900px, 94%); max-height: 80%; overflow: auto; padding: 16px 22px 18px; }
+.practice-pop h3 { margin: 0 0 8px; text-align: center; }
+.prow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1.5px solid rgba(74, 54, 38, .15); flex-wrap: wrap; }
+.prow.wrap { align-items: flex-start; }
+.plabel { flex: none; width: 120px; font: 700 15px var(--font-head); font-variant: small-caps; letter-spacing: .06em; color: #8a2f1c; }
+.ptempo { min-width: 54px; text-align: center; font: 800 22px var(--font-1900); color: #2a1a0a; }
+.pnote { font-size: 14px; color: #6b4e36; font-style: italic; }
+.psecs { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+.psec { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 11px; border-radius: 6px; border: 1.5px solid rgba(90, 61, 18, .45); background: rgba(255, 250, 235, .7); cursor: pointer; color: #2a1a0a; font: 600 15px var(--font-head); }
+.psec:hover { background: rgba(242, 199, 107, .35); }
+.psec.on { background: linear-gradient(#f6dc96, #c99a45); border-color: #5a3d12; }
+.pstars { font-style: normal; font-size: 12px; letter-spacing: .05em; color: #a8781e; white-space: nowrap; }
+.pstars.rhythm { color: #8a2f1c; }
+.ptoggle { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border: 0; border-radius: 6px; background: none; cursor: pointer; font: 600 15px var(--font-body); color: #2a1a0a; }
+.ptoggle:hover { background: rgba(242, 199, 107, .25); }
+.ptoggle .box { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 4px; border: 2px solid #6b4a2a; background: #fffaf0; font-size: 14px; font-weight: 800; color: #3c8a4a; }
+.ptoggle.on .box { background: #f6e2b2; }
+.practice-pop .row { display: flex; justify-content: center; margin-top: 10px; }
+/* the result card */
+.celebrate .detail { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.celebrate .res { padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 15px; }
+.celebrate .res.good { background: rgba(60, 138, 74, .18); color: #2e6b39; }
+.celebrate .res.ok { background: rgba(217, 154, 43, .2); color: #8a5a12; }
+.celebrate .res.miss { background: rgba(192, 57, 43, .15); color: #a03024; }
+.celebrate .tip { font-style: italic; color: #6b4e36; }
+.celebrate .row { flex-wrap: wrap; }
 .instr-pop { position: absolute; z-index: 5; left: 50%; bottom: 13%; transform: translateX(-50%); width: min(900px, 94%); padding: 16px 22px 20px; }
 .instr-pop h3 { margin: 0 0 10px; text-align: center; }
 .instr-families { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; }
@@ -581,14 +654,6 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .plaque b { font-family: var(--font-head); font-size: 16px; letter-spacing: .03em; text-transform: uppercase; }
 .plaque small { font-size: 12px; }
 
-.team-card { text-align: center; }
-.team-intro { max-width: 760px; margin: 0 auto 18px; font-size: 18px; line-height: 1.55; }
-.team-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-.team-list li { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.team-list .gilt { width: 100%; max-width: 220px; }
-.team-list .gilt img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 15%; }
-@media (max-width: 800px) { .team-list { grid-template-columns: 1fr 1fr; } }
-
 .composer-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; grid-template-areas: 'p b' 'p m'; grid-template-rows: auto 1fr; gap: 16px 26px; }
 .composer-portrait { grid-area: p; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .gilt.big { width: 100%; }
@@ -616,6 +681,21 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 
 /* ---------- Gramophone ---------- */
 .gramo-grid { display: grid; grid-template-columns: minmax(0, .8fr) 1fr; gap: 20px; }
+/* the view itself doesn't scroll: only the chest of cylinders does, without a scrollbar (smoothScroll
+   in ui.js), fading out at the edge where there is more */
+@media (min-width: 801px) {
+  .gramophone .panel-body { overflow: hidden; display: flex; flex-direction: column; }
+  .gramophone .gramo-grid { flex: 1; min-height: 0; }
+  .gramophone .gramo-side { min-height: 0; }
+  .gramophone .cylinders { flex: 1; min-height: 0; overflow-y: auto; align-content: start; }
+}
+.cylinders { scrollbar-width: none; overscroll-behavior: contain; }
+.cylinders::-webkit-scrollbar { display: none; }
+.cylinders.more-down { mask-image: linear-gradient(#000 calc(100% - 46px), transparent); }
+.cylinders.more-up { mask-image: linear-gradient(transparent, #000 46px); }
+.cylinders.more-up.more-down { mask-image: linear-gradient(transparent, #000 46px, #000 calc(100% - 46px), transparent); }
+.cylinders.dragging { cursor: grabbing; user-select: none; }
+.cylinders.dragging * { pointer-events: none; }
 /* the showcase: a dark velvet box with a warm spotlight, the chosen cylinder standing in the middle */
 .gramo-scene { position: relative; border-radius: 10px; overflow: hidden; border: 4px solid #2e2117; box-shadow: var(--shadow), inset 0 0 60px rgba(0, 0, 0, .7); min-height: 340px;
   background: radial-gradient(ellipse 60% 50% at 50% 44%, rgba(255, 214, 140, .32), rgba(255, 190, 100, .08) 55%, transparent 75%), linear-gradient(#2c1c12, #160d07); }
@@ -729,8 +809,28 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .q:hover::before { transform: scale(1.3); }
 .q.on { background: rgba(201, 154, 69, .26); color: #2a1a0a; border-bottom-color: #a87a2e; }
 .q.on::before { background: #8a2f1c; }
-.keeper-close { position: absolute; top: 10px; right: 12px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: none; cursor: pointer; font-size: 18px; color: #6b4e36; }
-.keeper-close:hover { background: rgba(74, 54, 38, .12); color: #2a1a0a; }
+/* Every close (✕) and back (‹) button in the game: a round brass button. ✕ turns a quarter when
+   pointed at, ‹ leans the way it goes. */
+.brass-round {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; padding: 0; font: 700 21px/1 var(--font-body); color: #2e1c08;
+  background: radial-gradient(circle at 35% 30%, #fff0b8, #f2c76b 45%, #c99a45 75%, #8a5f1f);
+  border: 2px solid #4a3216; box-shadow: 0 4px 10px rgba(0, 0, 0, .45), inset 0 1px 1px rgba(255, 255, 255, .6);
+  transition: transform .15s, filter .15s;
+}
+.brass-round:hover { transform: scale(1.08) rotate(90deg); filter: brightness(1.1); }
+.brass-round.back svg { width: 56%; height: 56%; }
+.brass-round.back:hover { transform: scale(1.08) translateX(-2px); }
+.brass-round:active { transform: scale(.95); }
+.brass-round:focus-visible { outline: 3px solid #fff0b8; outline-offset: 2px; }
+@media (max-width: 700px) { .brass-round { width: 40px; height: 40px; } }
+/* the title stays centred: as wide as the back button on the other side */
+.head-balance { flex: none; width: 46px; }
+@media (max-width: 700px) { .head-balance { width: 40px; } }
+/* the shopkeeper's: on the paper's top-right corner, clear of the bubble */
+.keeper-box { position: relative; }
+.keeper-close { position: absolute; z-index: 2; top: -18px; right: -18px; }
+@media (max-width: 700px) { .keeper-close { top: 6px; right: 6px; } }
 
 /* ---------- Small screens ---------- */
 .rotate-hint { display: none; }
@@ -743,7 +843,6 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
   .gramo-grid { grid-template-columns: 1fr; }
   .gramo-scene { max-height: 240px; }
   .panel { padding: 10px 12px 14px; }
-  .panel-head .back { padding: 6px 10px; }
   .keeper-main { flex-direction: column; gap: 10px; }
   .keeper-portrait { width: auto; flex-direction: row; }
   .keeper-portrait .keeper-face { width: 72px; height: 72px; }

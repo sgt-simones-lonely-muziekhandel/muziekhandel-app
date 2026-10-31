@@ -88,44 +88,72 @@ export function strike(midi, seconds = 0.6, velocity = 0.8) {
  * scheduled a little ahead of time so a stop() is near-instant. onNote(note) fires when each melody
  * note (or rest) starts; onKey(midi, down, part) fires when any key goes down or comes up, with
  * part 'melody' or 'accomp', so a keyboard on screen can show every note that sounds.
+ * For practice: `from` / `to` (beats of the melody) play only that stretch (from the start, the
+ * introduction too); `countIn` beats of metronome ticks come first, `metronome` keeps ticking
+ * through the music, and onBeat({ count, accent }) fires on every tick (`count` 1, 2, 3… while
+ * counting in). `melody: 0` leaves the melody to the player (silent, no keys, onNote still fires).
+ * Returns { stop, duration, timeOf(note) } (timeOf: when the note sounds, on the audio clock).
  */
-export function playPiece(parsed, { onNote, onKey, onEnd, tempoScale = 1 } = {}) {
-  if (!audioState.ready) { onEnd?.(); return { stop() {} }; }
+export function playPiece(parsed, {
+  onNote, onKey, onEnd, onBeat, tempoScale = 1, from = 0, to = Infinity, countIn = 0, metronome = false, melody = 0.75,
+} = {}) {
+  if (!audioState.ready) { onEnd?.(); return { stop() {}, duration: 0, timeOf: () => 0 }; }
   const spb = parsed.secPerBeat / tempoScale;
   const sampler = voice; // the instrument it started with plays it to the end
-  const t0 = Tone.now() + 0.15;
   const off = parsed.offset;
-  let next = 0, nextAcc = 0, shown = -1, stopped = false;
-  const notes = parsed.notes, accomp = parsed.accomp;
-  const beats = Math.max(off + parsed.totalBeats, ...accomp.map(a => a.start + a.dur));
-  const end = t0 + beats * spb;
-  const at = n => t0 + (off + n.start) * spb;
+  const accomp = parsed.accomp;
+  // the stretch, in beats of the music (the accompaniment's clock: the melody starts `off` in)
+  const lo = from <= 0 ? 0 : off + from;
+  const notes = parsed.notes.filter(n => n.start >= from - 1e-6 && n.start < to - 1e-6);
+  const acc = accomp.filter(a => a.start >= lo - 1e-6 && (to === Infinity || a.start < off + to - 1e-6));
+  const hi = to === Infinity
+    ? Math.max(off + parsed.totalBeats, ...accomp.map(a => a.start + a.dur))
+    : off + Math.min(to, parsed.totalBeats);
+  const t0 = Tone.now() + 0.15 + countIn * spb;
+  const time = beat => t0 + (beat - lo) * spb;
+  const end = time(hi);
+  const at = n => time(off + n.start);
   const melLen = n => n.sound * spb * 0.92, accLen = a => a.dur * spb * 0.95;
 
   // every key down / up, in time order (an up before a down at the same moment)
   const keys = [];
-  for (const n of notes) if (!n.rest && !n.tied) keys.push([at(n), true, n.midi, 'melody'], [at(n) + melLen(n), false, n.midi, 'melody']);
-  for (const a of accomp) keys.push([t0 + a.start * spb, true, a.midi, 'accomp'], [t0 + a.start * spb + accLen(a), false, a.midi, 'accomp']);
+  if (melody) for (const n of notes) if (!n.rest && !n.tied) keys.push([at(n), true, n.midi, 'melody'], [at(n) + melLen(n), false, n.midi, 'melody']);
+  for (const a of acc) keys.push([time(a.start), true, a.midi, 'accomp'], [time(a.start) + accLen(a), false, a.midi, 'accomp']);
   keys.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
   let nextKey = 0;
   const down = [];
 
+  // metronome ticks on the beat grid of the bars (the first full bar starts on a downbeat)
+  const anchor = off + (parsed.measures.length > 1 ? parsed.measures[1][0].start : 0);
+  const bpm = parsed.beatsPerMeasure;
+  const ticks = [];
+  if (countIn || metronome) {
+    const first = Math.ceil(lo - countIn - anchor - 1e-6), last = metronome ? hi : lo;
+    for (let k = first; anchor + k < last - 1e-6; k++) {
+      const beat = anchor + k;
+      ticks.push({ at: time(beat), accent: ((k % bpm) + bpm) % bpm === 0, count: beat < lo - 1e-6 ? Math.round(beat - (lo - countIn)) + 1 : null });
+    }
+  }
+  let nextTick = 0, shownTick = 0;
+
+  let next = 0, nextAcc = 0, shown = -1, stopped = false;
   const timer = setInterval(() => {
     const now = Tone.now();
     while (next < notes.length && at(notes[next]) < now + 0.3) {
       const n = notes[next++];
-      if (!n.rest && !n.tied) sampler.triggerAttackRelease(noteName(n.midi), melLen(n), at(n), 0.75);
+      if (melody && !n.rest && !n.tied) sampler.triggerAttackRelease(noteName(n.midi), melLen(n), at(n), melody);
     }
-    while (nextAcc < accomp.length && t0 + accomp[nextAcc].start * spb < now + 0.3) {
-      const a = accomp[nextAcc++];
-      sampler.triggerAttackRelease(noteName(a.midi), accLen(a), t0 + a.start * spb, 0.38);
+    while (nextAcc < acc.length && time(acc[nextAcc].start) < now + 0.3) {
+      const a = acc[nextAcc++];
+      sampler.triggerAttackRelease(noteName(a.midi), accLen(a), time(a.start), 0.38);
     }
+    while (nextTick < ticks.length && ticks[nextTick].at < now + 0.3) tick(ticks[nextTick++]);
   }, 40);
 
   let raf = 0;
-  const tick = () => {
+  const frame = () => {
     if (stopped) return;
-    const now = Tone.now();
+    const now = heard();
     let i = shown;
     while (i + 1 < notes.length && at(notes[i + 1]) <= now) i++;
     if (i !== shown && i >= 0) { shown = i; onNote?.(notes[i]); }
@@ -135,10 +163,11 @@ export function playPiece(parsed, { onNote, onKey, onEnd, tempoScale = 1 } = {})
       if (on) down.push([midi, part]); else if (j >= 0) down.splice(j, 1); else continue;
       onKey(midi, on, part);
     }
+    while (shownTick < ticks.length && ticks[shownTick].at <= now) onBeat?.(ticks[shownTick++]);
     if (now >= end + 0.2) { stop(); onEnd?.(); return; }
-    raf = requestAnimationFrame(tick);
+    raf = requestAnimationFrame(frame);
   };
-  raf = requestAnimationFrame(tick);
+  raf = requestAnimationFrame(frame);
 
   function stop() {
     if (stopped) return;
@@ -148,8 +177,22 @@ export function playPiece(parsed, { onNote, onKey, onEnd, tempoScale = 1 } = {})
     down.splice(0).forEach(([midi, part]) => onKey(midi, false, part));
     sampler.releaseAll(Tone.now() + 0.05);
   }
-  return { stop, duration: beats * spb };
+  return { stop, duration: end - t0 + countIn * spb, timeOf: at };
 }
+
+// The metronome: a short wooden tick, higher on the first beat of a bar. Straight to the speakers.
+let clicker = null;
+function tick({ at, accent }) {
+  clicker ??= new Tone.Synth({
+    oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.02 }, volume: -10,
+  }).toDestination();
+  clicker.triggerAttackRelease(accent ? 1760 : 1175, 0.03, at, accent ? 1 : 0.6);
+}
+
+// What is being heard right now, on the clock notes are scheduled on: Tone.now() runs a little
+// ahead (its look-ahead), and the speakers lag a little behind the clock.
+const heard = () => Tone.context.currentTime - (Tone.context.rawContext.outputLatency || 0);
+export const audioNow = () => (audioState.ready ? heard() : performance.now() / 1000);
 
 // Gramophone mode: narrow the sound and add surface noise.
 export function setGramophone(on) {

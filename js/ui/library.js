@@ -72,6 +72,27 @@ function flyToCentre(art, fullName, done) {
   });
 }
 
+// The cabinets: the songs of the SOM collection, and the composers' own pieces in a second one. The
+// player walks from one to the other with the arrows (or ← →, or a swipe); the cabinet in view
+// is remembered for the next visit.
+const CABINETS = [
+  { name: 'Liedjes uit de SOM-collectie', pieces: PIECES },
+  { name: 'Muziek van de componisten', pieces: ALL_PIECES.filter(p => !PIECES.includes(p)) },
+].filter(c => c.pieces.length);
+let lastCabinet = 0;
+
+// Where each piece stands: on the shelf of its level (top ★ … bottom ★★★), five to a shelf; a piece
+// whose shelf is full goes to the nearest shelf with room.
+function arrange(pieces) {
+  const rows = SHELVES.map(() => []);
+  for (const p of pieces) {
+    const want = Math.min(3, Math.max(1, p.level || 1)) - 1;
+    const row = [want, want + 1, want - 1, want + 2, want - 2].find(r => rows[r] && rows[r].length < COLS.length);
+    if (row != null) rows[row].push(p);
+  }
+  return rows;
+}
+
 export function libraryView(ui, { forPiano = false } = {}) {
   const { el, stage } = frame(ui, {
     title: forPiano ? 'Kies muziek voor de piano' : 'De bladmuziekkast',
@@ -79,33 +100,95 @@ export function libraryView(ui, { forPiano = false } = {}) {
     wide: true,
     closeup: 'public/art/closeups/cabinet.webp',
     full: true,
-    tip: 'In elk vakje staat een muziekboek. Klik erop om het open te slaan. Bovenaan staan de makkelijkste stukken, onderaan de moeilijkste.',
+    tip: CABINETS.length > 1
+      ? 'In elk vakje staat een muziekboek. Klik erop om het open te slaan. Bovenaan staan de makkelijkste stukken, onderaan de moeilijkste. Met de pijlen ga je naar de andere kast.'
+      : 'In elk vakje staat een muziekboek. Klik erop om het open te slaan. Bovenaan staan de makkelijkste stukken, onderaan de moeilijkste.',
   });
   let busy = false;
-  SHELVES.forEach((shelf, row) => {
-    const pieces = PIECES.filter(p => Math.min(3, p.level) === row + 1).slice(0, COLS.length);
-    pieces.forEach((p, col) => {
-      const composer = creditFor(p);
-      const plaque = h(`<span class="cab-plaque" title="Moeilijkheid">${'★'.repeat(p.level)}</span>`);
-      Object.assign(plaque.style, { left: X(COLS[col]), top: Y(shelf.plaque) });
-      const tube = h(`
-        <button class="tube" title="${esc(p.title)} — ${esc(composer.name)}">${coverHtml(p, composer, composer.short)}</button>`);
-      Object.assign(tube.style, { left: X(COLS[col] + TUBE_DX), top: Y(shelf.edge) });
-      tube.onclick = () => {
-        if (busy) return;
-        busy = true;
-        setTimeout(() => { busy = false; }, 1400);
-        pickUpPaper();
-        if (!forPiano) { flyToCentre(tube.querySelector('.cover-art'), composer.name, () => ui.open('sheet', { pieceId: p.id, noFade: true })); return; }
-        // for the piano: the music is pulled out of its compartment and goes onto the piano
-        tube.classList.add('pulled');
-        setTimeout(() => {
-          ui.close(); ui.top?.loadPiece?.(p.id); // close() pops at once, so top is the piano
-          tube.classList.remove('pulled');
-        }, 550);
-      };
-      stage.append(plaque, tube);
+  const pages = CABINETS.map(cab => {
+    const page = h('<section class="cab-page"></section>');
+    arrange(cab.pieces).forEach((pieces, row) => {
+      const shelf = SHELVES[row];
+      pieces.forEach((p, col) => {
+        const composer = creditFor(p);
+        const plaque = h(`<span class="cab-plaque" title="Moeilijkheid">${'★'.repeat(Math.min(3, p.level || 1))}</span>`);
+        Object.assign(plaque.style, { left: X(COLS[col]), top: Y(shelf.plaque) });
+        const tube = h(`
+          <button class="tube" title="${esc(p.title)} — ${esc(composer.name)}">${coverHtml(p, composer, composer.short)}</button>`);
+        Object.assign(tube.style, { left: X(COLS[col] + TUBE_DX), top: Y(shelf.edge) });
+        tube.onclick = () => {
+          if (busy || moving) return;
+          busy = true;
+          setTimeout(() => { busy = false; }, 1400);
+          pickUpPaper();
+          if (!forPiano) { flyToCentre(tube.querySelector('.cover-art'), composer.name, () => ui.open('sheet', { pieceId: p.id, noFade: true })); return; }
+          // for the piano: the music is pulled out of its compartment and goes onto the piano
+          tube.classList.add('pulled');
+          setTimeout(() => {
+            ui.close(); ui.top?.loadPiece?.(p.id); // close() pops at once, so top is the piano
+            tube.classList.remove('pulled');
+          }, 550);
+        };
+        page.append(plaque, tube);
+      });
     });
+    stage.appendChild(page);
+    return page;
   });
-  return { el };
+
+  // Going to another cabinet: both slide sideways together, quick and simple.
+  let current = Math.min(lastCabinet, pages.length - 1), moving = false;
+  pages.forEach((pg, k) => { pg.hidden = k !== current; });
+  if (pages.length > 1) {
+    stage.insertAdjacentHTML('beforeend', `
+      <button class="cab-nav prev" title="Vorige kast (←)">‹</button>
+      <button class="cab-nav next" title="Volgende kast (→)">›</button>
+      <div class="cab-sign"><b></b><span class="cab-dots">${pages.map(() => '<i></i>').join('')}</span></div>`);
+  }
+  const sign = () => {
+    if (pages.length < 2) return;
+    stage.querySelector('.cab-sign b').textContent = CABINETS[current].name;
+    stage.querySelectorAll('.cab-dots i').forEach((d, k) => d.classList.toggle('on', k === current));
+    stage.querySelector('.cab-nav.prev').disabled = current === 0;
+    stage.querySelector('.cab-nav.next').disabled = current === pages.length - 1;
+  };
+  sign();
+  const go = d => {
+    const to = current + d;
+    if (moving || to < 0 || to >= pages.length) return;
+    moving = true;
+    const from = pages[current], next = pages[to];
+    next.hidden = false;
+    const timing = { duration: 420, easing: 'cubic-bezier(.25, .8, .25, 1)', fill: 'forwards' };
+    const away = d > 0 ? -100 : 100;
+    from.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${away}%)` }], timing);
+    next.animate([{ transform: `translateX(${-away}%)` }, { transform: 'translateX(0)' }], timing).finished.then(() => {
+      from.hidden = true;
+      from.getAnimations().forEach(a => a.cancel());
+      next.getAnimations().forEach(a => a.cancel());
+      moving = false;
+    });
+    current = lastCabinet = to;
+    sign();
+  };
+  if (pages.length > 1) {
+    stage.querySelector('.cab-nav.prev').onclick = () => go(-1);
+    stage.querySelector('.cab-nav.next').onclick = () => go(1);
+    // a swipe across the cabinet walks along too
+    let sx = null;
+    stage.addEventListener('pointerdown', e => { sx = e.clientX; });
+    stage.addEventListener('pointerup', e => {
+      if (sx == null) return;
+      const dx = e.clientX - sx;
+      sx = null;
+      if (Math.abs(dx) > 70) go(dx < 0 ? 1 : -1);
+    });
+  }
+  return {
+    el,
+    onKey(e) {
+      if (e.code === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.code === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    },
+  };
 }

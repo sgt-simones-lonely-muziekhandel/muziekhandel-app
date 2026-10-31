@@ -1,5 +1,5 @@
 // Meneer Simone, the shopkeeper: greets the player and helps them find their way.
-import { h, esc, speak, typeText, SPEAKER } from './ui.js';
+import { h, esc, speak, stopSpeaking, typeText, SPEAKER } from './ui.js';
 import { keyboardGuide } from './piano.js';
 
 const TOPICS = [
@@ -25,7 +25,7 @@ const TOPICS = [
   },
   {
     q: 'Wie zijn die mensen aan de muur?',
-    a: 'Dat zijn de makers van dit spel! Ze hebben zich laten schilderen in kleren van vroeger, met hoge hoed en pruik en al. Klik op een schilderij en je ziet ze allemaal.',
+    a: 'Dat zijn de makers van dit spel! Ze hebben zich laten schilderen in kleren van vroeger, met hoge hoed en pruik en al. Klik op de schilderijen en je komt bij de beroemde componisten: mensen die muziek bedenken en opschrijven. Daar lees je hun verhaal en hoor je hun muziek.',
     go: ['gallery', 'Naar de schilderijen'],
   },
   {
@@ -43,7 +43,7 @@ export function keeperView(ui, { greeting = false } = {}) {
   const el = h(`
     <div class="view keeper">
       <div class="keeper-box paper">
-        <button class="keeper-close" title="Sluiten">✕</button>
+        <button class="brass-round keeper-close" title="Sluiten" aria-label="Sluiten">✕</button>
         <div class="keeper-main">
           <div class="keeper-portrait">
             <span class="keeper-face big"></span>
@@ -75,7 +75,7 @@ export function keeperView(ui, { greeting = false } = {}) {
   const say = (text, topic = null) => {
     current = text;
     stopTyping();
-    speechSynthesis?.cancel?.();
+    stopSpeaking();
     stopTyping = typeText($('.keeper-text'), text, face);
     talkBox.scrollTop = 0;
     const extra = $('.keeper-extra');
@@ -98,7 +98,7 @@ export function keeperView(ui, { greeting = false } = {}) {
     b.onclick = () => say(t.a, t);
     $('.keeper-qs').appendChild(b);
   }
-  $('.speak').onclick = () => speak(current, face);
+  $('.speak').onclick = e => speak(current, face, e.currentTarget);
   $('.keeper-close').onclick = () => ui.close();
   el.addEventListener('pointerdown', e => { if (e.target === el) ui.close(); });
 
@@ -106,6 +106,6 @@ export function keeperView(ui, { greeting = false } = {}) {
 
   return {
     el,
-    destroy() { stopTyping(); resized.disconnect(); speechSynthesis?.cancel?.(); },
+    destroy() { stopTyping(); resized.disconnect(); stopSpeaking(); },
   };
 }

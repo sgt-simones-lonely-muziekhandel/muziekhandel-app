@@ -5,7 +5,7 @@ import { Prologue } from './prologue.js';
 import { Shop } from './shop.js';
 import { Film } from './film.js';
 import { Corner } from './corner.js';
-import { UI } from './ui/ui.js';
+import { UI, BACK_KEYS } from './ui/ui.js';
 import { initAudio, onAudioReady } from './audio.js';
 import { loadKeyLabels } from './music.js';
 
@@ -158,7 +158,8 @@ class Game {
       this.idleTime = 0;
       if (!this.running) return;
       if (this.ui.isOpen) { this.ui.key(e); return; }
-      if (e.code === 'Backspace' || e.code === 'Escape') { e.preventDefault(); this.back(); return; }
+      // ↓ (or S, Esc, Backspace) steps back: out of the corner into the shop, out of the shop onto the street
+      if ([...BACK_KEYS, 'KeyS'].includes(e.code)) { e.preventDefault(); this.back(); return; }
       if (keyDir[e.code]) { this.input[keyDir[e.code]] = true; e.preventDefault(); }
       if (['ArrowUp', 'Enter', 'KeyE', 'Space', 'KeyW'].includes(e.code)) { e.preventDefault(); this.scene.interact(); }
     });
