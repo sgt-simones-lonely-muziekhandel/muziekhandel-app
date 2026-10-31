@@ -1,4 +1,6 @@
 import { Street } from './street.js';
+import { FutureStreet } from './future.js';
+import { Story } from './story.js';
 import { Shop } from './shop.js';
 import { Corner } from './corner.js';
 import { UI } from './ui/ui.js';
@@ -16,8 +18,9 @@ class Game {
     this.camX = 0;
     this.viewW = 1280;
     this.ui = new UI(this);
-    this.scenes = { street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
-    this.scene = this.scenes.street;
+    this.scenes = { future: new FutureStreet(this), story: new Story(this), street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
+    // the game starts in the future, on the flooded quay
+    this.scene = this.scenes.future;
     this.running = false;
     this.bindInput();
     addEventListener('resize', () => this.resize());
@@ -43,10 +46,22 @@ class Game {
     requestAnimationFrame(loop);
   }
 
-  goTo(name) {
+  // `dissolve: seconds` cross-fades from the last picture of this scene into the next one,
+  // instead of fading through black.
+  goTo(name, { dissolve } = {}) {
     if (this.switching) return;
-    this.switching = true;
     const from = Object.keys(this.scenes).find(k => this.scenes[k] === this.scene);
+    if (dissolve) {
+      const c = document.createElement('canvas');
+      c.width = this.canvas.width; c.height = this.canvas.height;
+      c.getContext('2d').drawImage(this.canvas, 0, 0);
+      this.dissolve = { img: c, t: 0, dur: dissolve };
+      this.scene = this.scenes[name];
+      this.fit();
+      this.scene.enter(from);
+      return;
+    }
+    this.switching = true;
     this.fade(() => {
       this.scene = this.scenes[name];
       this.fit();
@@ -108,6 +123,18 @@ class Game {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     s.draw(this.ctx, view);
+    if (this.dissolve) {
+      const d = this.dissolve;
+      d.t += dt;
+      const p = Math.min(1, d.t / d.dur), a = 1 - p * p * (3 - 2 * p);
+      if (a <= 0) this.dissolve = null;
+      else {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.globalAlpha = a;
+        this.ctx.drawImage(d.img, 0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.globalAlpha = 1;
+      }
+    }
   }
 
   toWorld(e) {
@@ -159,12 +186,12 @@ document.getElementById('btn-start').addEventListener('click', () => {
   game.start();
 });
 
-// Allow ?scene=shop for quick testing.
+// Allow ?scene=street or ?scene=shop for quick testing.
 const qs = new URLSearchParams(location.search);
 if (qs.get('autostart') != null) {
   document.getElementById('title-screen').classList.add('gone');
   game.start();
   const sc = qs.get('scene');
-  if (game.scenes[sc] && sc !== 'street') { game.scenes.shop.greeted = qs.get('greet') == null; game.scene = game.scenes[sc]; game.fit(); game.scene.enter(); }
+  if (game.scenes[sc] && game.scenes[sc] !== game.scene) { game.scenes.shop.greeted = qs.get('greet') == null; game.scene = game.scenes[sc]; game.fit(); game.scene.enter(); }
   if (qs.get('open')) setTimeout(() => game.ui.open(qs.get('open'), { pieceId: qs.get('piece'), composerId: qs.get('composer') }), 300);
 }

@@ -101,6 +101,14 @@ ASSETS = [
      {"max": 256, "dilate": 6, "row": True, "threshold": 0.1, "names": ["glow-yellow", "glow-orange", "fog", "rain", "ash"]}),
     ("details/Magenta Overlay Effects Sprite Sheet.png", "sheet", "fx",
      {"max": 256, "dilate": 6, "row": True, "names": [None, None, None, None, None, "sheet-music", "note"]}),
+    # Sky: sun and moon follow the time of day; the moon shows its phase
+    ("details/Glowing Sun in Black Space.png", "light", "sky/sun", {"max": 512}),
+    ("details/Five Moon Phases on Magenta.png", "sheet", "sky",
+     {"max": 256, "dilate": 6, "row": True, "names": ["moon-1", "moon-2", "moon-3", "moon-4", "moon-5"]}),
+    ("details/Ethereal Blue Orb in Darkness.png", "light", "sky/moon-glow", {"max": 512}),
+    ("details/Six Glowing Stars in a Black Sky.png", "glow", "sky",
+     {"max": 128, "dilate": 30, "row": True, "threshold": 0.03, "min_area": 50,
+      "names": ["star-1", "star-2", "star-3", "star-4", "star-5", "star-6"]}),
     # Opening cutscene (shots in order; future-street and past-street line up for the time-travel wipe)
     ("opening_scene/1_Rain-Soaked Ruins at Sunset.png", "opaque", "intro/future-street", {}),
     ("opening_scene/1_Overgrown Ruin Frame on Magenta.png", "layer", "intro/future-frame", {}),
@@ -140,9 +148,10 @@ def remove_magenta(img, lo=35.0, hi=140.0):
 def black_to_alpha(img):
     """Light on black: brightness becomes alpha, so it works with normal and additive blending."""
     a = np.asarray(img.convert("RGB")).astype(float)
-    alpha = a.max(-1)
-    alpha = np.where(alpha < 12, 0, alpha)  # drop compression noise in the black
-    rgb = np.clip(a * 255 / np.maximum(alpha, 1)[..., None], 0, 255)
+    bright = a.max(-1)
+    rgb = np.clip(a * 255 / np.maximum(bright, 1)[..., None], 0, 255)
+    # drop compression noise in the black with a smooth ramp, so faint glows don't end in a hard edge
+    alpha = np.clip((bright - 6) * 255 / (255 - 6), 0, 255)
     return np.dstack([rgb, alpha])
 
 
@@ -216,7 +225,8 @@ def main(src_dir):
             save(fit(to_image(trim(black_to_alpha(img))), opt.get("max")), key, manifest)
         else:
             rgba = black_to_alpha(img) if kind == "glow" else remove_magenta(img)
-            pieces = split(rgba, opt.get("dilate", 0), opt.get("threshold", 0.5), opt.get("row", False))
+            pieces = split(rgba, opt.get("dilate", 0), opt.get("threshold", 0.5), opt.get("row", False),
+                           opt.get("min_area", 1500))
             names = opt["names"]
             if len(pieces) != len(names):
                 sys.exit(f"{rel}: found {len(pieces)} pieces, expected {len(names)}")

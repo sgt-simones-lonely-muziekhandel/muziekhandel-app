@@ -725,22 +725,22 @@
   },
   "fx/glow-orange": {
     "file": "art/fx/glow-orange.webp",
-    "width": 255,
+    "width": 256,
     "height": 256
   },
   "fx/fog": {
     "file": "art/fx/fog.webp",
-    "width": 211,
+    "width": 226,
     "height": 256
   },
   "fx/rain": {
     "file": "art/fx/rain.webp",
     "width": 76,
-    "height": 256
+    "height": 253
   },
   "fx/ash": {
     "file": "art/fx/ash.webp",
-    "width": 110,
+    "width": 109,
     "height": 118
   },
   "fx/sheet-music": {
@@ -752,6 +752,71 @@
     "file": "art/fx/note.webp",
     "width": 119,
     "height": 164
+  },
+  "sky/sun": {
+    "file": "art/sky/sun.webp",
+    "width": 512,
+    "height": 502
+  },
+  "sky/moon-1": {
+    "file": "art/sky/moon-1.webp",
+    "width": 126,
+    "height": 256
+  },
+  "sky/moon-2": {
+    "file": "art/sky/moon-2.webp",
+    "width": 127,
+    "height": 256
+  },
+  "sky/moon-3": {
+    "file": "art/sky/moon-3.webp",
+    "width": 211,
+    "height": 256
+  },
+  "sky/moon-4": {
+    "file": "art/sky/moon-4.webp",
+    "width": 253,
+    "height": 256
+  },
+  "sky/moon-5": {
+    "file": "art/sky/moon-5.webp",
+    "width": 253,
+    "height": 256
+  },
+  "sky/moon-glow": {
+    "file": "art/sky/moon-glow.webp",
+    "width": 512,
+    "height": 506
+  },
+  "sky/star-1": {
+    "file": "art/sky/star-1.webp",
+    "width": 124,
+    "height": 124
+  },
+  "sky/star-2": {
+    "file": "art/sky/star-2.webp",
+    "width": 127,
+    "height": 128
+  },
+  "sky/star-3": {
+    "file": "art/sky/star-3.webp",
+    "width": 127,
+    "height": 128
+  },
+  "sky/star-4": {
+    "file": "art/sky/star-4.webp",
+    "width": 123,
+    "height": 128
+  },
+  "sky/star-5": {
+    "file": "art/sky/star-5.webp",
+    "width": 126,
+    "height": 128
+  },
+  "sky/star-6": {
+    "file": "art/sky/star-6.webp",
+    "width": 125,
+    "height": 128
   },
   "intro/future-street": {
     "file": "art/intro/future-street.webp",
@@ -800,7 +865,7 @@
   },
   "intro/light-burst": {
     "file": "art/intro/light-burst.webp",
-    "width": 957,
+    "width": 951,
     "height": 1024
   },
   "intro/swirl": {

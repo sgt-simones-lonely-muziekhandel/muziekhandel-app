@@ -28,6 +28,33 @@ Changed:
 - [Gramophone](gramophone.md): the hard-to-read *De grammofoon* title is gone (only *Terug* and ✕ remain). The title and composer tags now sit under each cylinder instead of over it. Choosing a cylinder animates its box: it jumps, the lid (`<colour>-lid`) flies off and lands next to it, and the box shows the wax cylinder inside (`<colour>-open`); choosing another one or stopping puts the lid back on.
 - [Game shell](game-shell.md): `frame()` has a `hideTitle` option.
 
+## 2026-10-30 — Story: hands in the corner, the boy on the quay, a soft ending
+
+Changed:
+
+- [Story](story.md): the hands with the tube come in from the bottom-left corner instead of the middle, so the sleeves run off the edges. In the time travel the boy stands on the quay (pinned to the painting) instead of floating over the canal. The shot of the boy walking to the shop is gone: after the swirl the camera drifts towards the sunset and the picture dissolves slowly into the [street](street.md). Captions moved to the bottom right.
+- [Game shell](game-shell.md): `game.goTo(name, { dissolve: seconds })` cross-fades into the next scene instead of fading through black.
+
+## 2026-10-30 — The time-travel story
+
+Added:
+
+- [Story](story.md): after opening the crate, a short anime-like film of four painted shots that drift, zoom and dissolve into each other: the crate opening in a golden flash, the hands opening a cylinder tube with light, notes and sheet music pouring out, a swirl of light sweeping the flooded street into the past, and the boy walking up to the shop. Captions on paper strips; a click skips to the next shot. Then the game continues on the [street](street.md).
+
+Changed:
+
+- [Future street](future-street.md): opening the crate now plays the story instead of going straight to the street.
+
+## 2026-10-30 — The game starts in the future
+
+Added:
+
+- [Future street](future-street.md): the game now starts on the flooded, ruined quay in the future, with the boy in his gas mask. Rain, distant lightning, rippling flood water. The shop can't be reached; instead a glowing crate stands on the quay, and opening it leads to the past (for now straight to the [street](street.md); the story in between comes later).
+
+Changed:
+
+- [Player](player.md): `new Boy(x, kit)` takes the character folder (`'kid-past'` by default, `'kid-future'` for the future); both share the same joints.
+- [Game shell](game-shell.md): the first scene is `future`; `?autostart&scene=street` starts in the past.
 ## 2026-10-30 — Smaller portraits in the shop, composer card without family tree
 
 Changed:

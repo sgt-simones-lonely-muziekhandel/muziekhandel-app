@@ -29,7 +29,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 - `Game` owns the canvas, the scenes (`street`, `shop`, `corner`), the camera and the input state.
 - **Scaling**: scenes are 720 virtual pixels high and scaled to the window height; the width you see depends on the screen. A scene with `fitWidth` (the shop, the listening corner) is scaled to fit its full width instead when that leaves only small bars. Rendering uses the device pixel ratio (max 2) for sharp lines.
 - **Camera** follows the boy and stops at the scene edges.
-- `goTo(name)` fades out, swaps the scene, refits the canvas and calls `scene.enter(from)` with the name of the scene the player came from (the shop uses it to put the boy at the right edge when he comes back from the corner).
+- `goTo(name, { dissolve })`: with `dissolve` (seconds) it keeps a copy of the last picture and fades it out over the new scene (used at the end of the [story](story.md)); otherwise it fades out, swaps the scene, refits the canvas and calls `scene.enter(from)` with the name of the scene the player came from (the shop uses it to put the boy at the right edge when he comes back from the corner).
 - **Input**: ← → / A D walk; ↑ / Enter / E / W / Space use the nearest object; pointer clicks walk or use; pointer hover changes the cursor. When a window is open, keys go to that window instead.
 - `idleTime` counts seconds without input (used by the [cyclists](cyclists.md)).
 
@@ -44,7 +44,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 
 ### Test URL parameters
 
-`?autostart`, `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
+`?autostart` (starts in the future), `&scene=story` / `&scene=street` / `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
 
 ## Known limits / next steps
 
