@@ -32,6 +32,16 @@ The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the 
 | `?autostart&scene=shop` | Start inside the shop |
 | `?autostart&scene=shop&open=piano&piece=ode` | Open a view: `piano`, `sheet`, `library`, `gallery`, `composer` (`&composer=mozart`), `gramophone`, `keeper` |
 
+### Deploy to a NixOS server
+
+The flake has a NixOS module that serves the game with nginx over plain HTTP. In the server's flake,
+add this repo as an input, import `muziekhandel.nixosModules.default` and set
+`services.muziekhandel.enable = true;`.
+
+This opens port 80, and the game answers on any domain name or IP address that points at the
+server. After a change to the game, `nix flake update muziekhandel` in the server's config and
+rebuild.
+
 ## What's in the game
 
 - **Prologue** (`js/prologue.js`): the start. A short anime-like film: Amsterdam today, the sea rising over the map from 2026 to 2126, and the flooded street in smoky air.

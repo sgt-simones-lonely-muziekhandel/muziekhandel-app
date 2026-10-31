@@ -38,5 +38,47 @@
           meta.description = "Serve the game on http://localhost:8765";
         };
       });
+
+      # The files the browser loads, for deploying. No build step: just a copy.
+      packages = forAllSystems (pkgs: {
+        default = pkgs.stdenvNoCC.mkDerivation {
+          pname = "muziekhandel";
+          version = "0.1.0";
+          src = nixpkgs.lib.fileset.toSource {
+            root = ./.;
+            fileset = nixpkgs.lib.fileset.unions [ ./index.html ./css ./js ./public ./assets ];
+          };
+          installPhase = "cp -r . $out";
+        };
+      });
+
+      # On a NixOS server: import this module and set services.muziekhandel.enable = true.
+      nixosModules.default = { config, lib, pkgs, ... }:
+        let cfg = config.services.muziekhandel;
+        in
+        {
+          options.services.muziekhandel = {
+            enable = lib.mkEnableOption "the Muziekhandel game, served by nginx";
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+              description = "The game files to serve.";
+            };
+          };
+
+          config = lib.mkIf cfg.enable {
+            services.nginx = {
+              enable = true;
+              recommendedGzipSettings = true;
+              recommendedOptimisation = true;
+              # The only site: it answers on any domain name or IP address.
+              virtualHosts.muziekhandel = {
+                default = true;
+                root = cfg.package;
+              };
+            };
+            networking.firewall.allowedTCPPorts = [ 80 ];
+          };
+        };
     };
 }
