@@ -79,8 +79,9 @@ export class Film {
   // Only a click or tap goes on, and only while a caption waits; keys don't skip.
   interact() {}
   // The Overslaan button (or Esc): straight on to the scene after the film.
+  // Not while the film itself is still fading in: the game would ignore the scene change.
   skip() {
-    if (this.done) return;
+    if (this.done || this.game.switching) return;
     this.done = true;
     this.holding = null;
     this.game.goTo(this.next);
