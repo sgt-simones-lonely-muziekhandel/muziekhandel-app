@@ -1,23 +1,32 @@
 // The sheet music cabinet, seen up close (public/art/closeups/cabinet): three shelves of five
 // compartments, each with a brass plaque. Every piece stands in its own compartment as a printed
-// sheet-music cover (public/art/items/sheet-music) with its title and composer in the cartouche;
+// sheet-music cover: its printed cover, a drawn one (js/ui/cover.js), or for a composer's piece one
+// of the covers in public/art/items/sheet-music with its title and composer in the cartouche;
 // the shelf says how hard it is (top ★, middle ★★, bottom ★★★), and so does the plaque.
 // Cylinders (public/art/items/cylinder) are still what the gramophone plays.
 import { frame, h, esc } from './ui.js';
-import { COMPOSERS, PIECES } from '../data.js';
+import { PIECES, ALL_PIECES, creditFor } from '../data.js';
 import { closedCoverRect } from './sheet.js';
+import { designedCover } from './cover.js';
 
 export const CYLINDER_ART = 'public/art/items/cylinder/';
 const CYLINDERS = ['red', 'blue', 'green', 'cream'];
 // Every piece keeps its own cylinder colour, in the cabinet and at the gramophone.
-export const cylinderColor = piece => CYLINDERS[PIECES.indexOf(piece) % CYLINDERS.length];
+export const cylinderColor = piece => CYLINDERS[ALL_PIECES.indexOf(piece) % CYLINDERS.length];
 
-// ...and its own sheet-music cover.
+// ...and its own sheet-music cover: a real song shows its printed cover (the first page of its scan)
+// or, when the scan has none, a cover drawn for it; a composer's piece one of six cover pictures
+// with the title and composer printed on it.
 export const SHEET_ART = 'public/art/items/sheet-music/';
-export const coverFor = piece => `${SHEET_ART}cover-${(PIECES.indexOf(piece) % 6) + 1}.webp`;
-export const coverHtml = (piece, composer, name = composer.name) => `
-  <span class="cover-art"><img src="${coverFor(piece)}" alt="">
+export const coverFor = piece => piece.scans?.cover
+  ? `${piece.scans.dir}page-${piece.scans.pages[0]}.webp`
+  : `${SHEET_ART}cover-${(ALL_PIECES.indexOf(piece) % 6) + 1}.webp`;
+export const coverHtml = (piece, composer, name = composer.name) => {
+  if (piece.scans?.cover) return `<span class="cover-art scan"><img src="${coverFor(piece)}" alt="${esc(piece.title)}"></span>`;
+  if (piece.scans) return `<span class="cover-art designed">${designedCover(piece, composer.name)}</span>`;
+  return `<span class="cover-art"><img src="${coverFor(piece)}" alt="">
     <span class="cover-text"><b>${esc(piece.title)}</b><i>${esc(name)}</i></span></span>`;
+};
 
 // Measured on the close-up (1672 × 941): plaque centres per column (the compartments are TUBE_DX
 // further right), and per shelf the y of the shelf edge the cylinders stand on and of the plaques.
@@ -45,9 +54,11 @@ function flyToCentre(art, fullName, done) {
   // print the copy's text as it is on the book on the desk (full name, same size once scaled up)
   const cq = to.height / 44; // the desk's cqw in px (a page is 44cqw high)
   const b = copy.querySelector('.cover-text b'), i = copy.querySelector('.cover-text i');
-  i.textContent = fullName;
-  Object.assign(b.style, { fontSize: `${1.9 * cq / s}px`, webkitLineClamp: 'unset' });
-  i.style.fontSize = `${1.25 * cq / s}px`;
+  if (b) {
+    i.textContent = fullName;
+    Object.assign(b.style, { fontSize: `${1.9 * cq / s}px`, webkitLineClamp: 'unset' });
+    i.style.fontSize = `${1.25 * cq / s}px`;
+  }
   const lift = 'drop-shadow(0 0 0 rgba(0,0,0,0))', high = 'drop-shadow(0 30px 30px rgba(0,0,0,.55))';
   fly.animate([
     { transform: 'none', filter: lift },
@@ -73,7 +84,7 @@ export function libraryView(ui, { forPiano = false } = {}) {
   SHELVES.forEach((shelf, row) => {
     const pieces = PIECES.filter(p => Math.min(3, p.level) === row + 1).slice(0, COLS.length);
     pieces.forEach((p, col) => {
-      const composer = COMPOSERS.find(c => c.id === p.composer);
+      const composer = creditFor(p);
       const plaque = h(`<span class="cab-plaque" title="Moeilijkheid">${'★'.repeat(p.level)}</span>`);
       Object.assign(plaque.style, { left: X(COLS[col]), top: Y(shelf.plaque) });
       const tube = h(`

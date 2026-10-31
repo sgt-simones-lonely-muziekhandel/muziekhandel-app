@@ -7,6 +7,8 @@ The images the game uses, where they come from, and how to rebuild them.
 | `assets/portraits/*.jpg` | [Composer](composers.md) portraits | `Gemini_Generated_Image_ivo2oq….jpeg` (portrait wall) |
 | `assets/gramophone-corner.jpg` | No longer used (the [gramophone](gramophone.md) view shows `closeups/gramophone-corner.webp`) | `Gemini_Generated_Image_6n1xm4….jpeg` |
 
+Scans of real sheet music are in `public/art/scores/<scan>/page-N.webp` (one folder per scanned PDF; the album's tunes share one), made by `scripts/import_scores.py` (see [real sheet music](som-scores.md)); they are not in the manifest.
+
 From `public/art/` (produced by `scripts/import_art.py`, listed in `public/art/manifest.json`):
 
 | Folder | Used for |

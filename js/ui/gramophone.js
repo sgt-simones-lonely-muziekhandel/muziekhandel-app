@@ -2,7 +2,7 @@
 // old-fashioned crackly sound.
 import { frame, h, esc } from './ui.js';
 import { CYLINDER_ART, cylinderColor } from './library.js';
-import { PIECES, pieceById, composerById } from '../data.js';
+import { PIECES, pieceById, creditFor } from '../data.js';
 import { parsePiece } from '../music.js';
 import { playPiece, setGramophone, audioState } from '../audio.js';
 
@@ -95,7 +95,7 @@ export function gramophoneView(ui, { pieceId } = {}) {
   const play = id => {
     stop();
     const piece = pieceById(id);
-    const comp = composerById(piece.composer);
+    const comp = creditFor(piece);
     $('.now-title').textContent = piece.title;
     $('.now-comp').textContent = comp.name;
     // the cylinder comes out of its box (the open one stays behind) and goes on the gramophone
@@ -137,7 +137,7 @@ export function gramophoneView(ui, { pieceId } = {}) {
   };
 
   for (const p of PIECES) {
-    const comp = composerById(p.composer);
+    const comp = creditFor(p);
     const color = cylinderColor(p);
     const li = h(`<li data-id="${p.id}" data-color="${color}"><button title="${esc(p.title)}">
       <span class="cyl-box"><img class="cyl" src="${CYLINDER_ART}${color}.webp" alt=""><img class="lid" src="${CYLINDER_ART}${color}-lid.webp" alt=""></span>

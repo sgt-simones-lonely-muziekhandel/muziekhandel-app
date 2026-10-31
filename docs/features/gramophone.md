@@ -4,7 +4,7 @@ A brass-horned gramophone and a cabinet of records to listen to. It stands on th
 
 ## For the player
 
-- Left: a **showcase**, a dark velvet box with a warm spotlight in the middle (no picture of the room any more). Once a cylinder is chosen it stands there big, in the centre of the light: the open box with the wax cylinder showing (`<colour>-open`), its lid (`<colour>-lid`) dropping in to lean beside it, and a paper label with the title and composer underneath. While it plays the cylinder trembles a little, and the spotlight breathes. Before that it says *Kies een cilinder uit de kist*. Right: *Nu speelt* (now playing) and *De cilinderkist* (the cylinder chest): one music cylinder per piece (`public/art/items/cylinder/`), each with a paper tag with the title and composer **under** the box (not over it). The view has no title bar text (*De grammofoon* is only there for screen readers), just *Terug* and ✕.
+- Left: a **showcase**, a dark velvet box with a warm spotlight in the middle (no picture of the room any more). Once a cylinder is chosen it stands there big, in the centre of the light: the open box with the wax cylinder showing (`<colour>-open`), its lid (`<colour>-lid`) dropping in to lean beside it, and a paper label with the title and composer underneath. While it plays the cylinder trembles a little, and the spotlight breathes. Before that it says *Kies een cilinder uit de kist*. Right: *Nu speelt* (now playing) and *De cilinderkist* (the cylinder chest): one music cylinder per piece (`public/art/items/cylinder/`), each with a paper tag with the title and composer (or the song's makers) **under** the box (not over it). The view has no title bar text (*De grammofoon* is only there for screen readers), just *Terug* and ✕.
 - Click a cylinder: the box gives a little jump, its **lid pops off**, flies up and lands leaning against the box, and the box now shows the black wax cylinder inside. Then the cylinder slides onto the gramophone lying on its side, and after a short spin-up the music plays with an old crackly sound. While it plays, a band of light runs over the cylinder so it looks like it's turning and a progress bar fills.
 - ■ stops the music; leaving the view stops it too.
 - A composer card can open the gramophone with a cylinder already playing.
@@ -23,5 +23,5 @@ A brass-horned gramophone and a cabinet of records to listen to. It stands on th
 
 ## Known limits / next steps
 
-- It plays the melody-only data, the same as the piano. Real early recordings would make it a true listening corner.
+- It plays the same data as the piano: melody only for the composers' pieces and the songs without a piano part, and melody with the real piano accompaniment for the [real SOM songs](som-scores.md) (the 15 songs of the cabinet; a composer's card can put one of their own pieces on too). Real early recordings would make it a true listening corner.
 - No volume control.

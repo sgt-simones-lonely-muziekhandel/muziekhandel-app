@@ -14,7 +14,7 @@ All music in the game is played on the **Salamander Grand Piano** (a free sample
 
 - `initAudio()`: starts the audio context, builds the chain *Sampler (+8 dB) → low-pass filter → reverb (light, 16% wet) → limiter (−1 dB) → speakers*: the samples are quiet on their own, so they're boosted, and the limiter keeps loud chords from clipping, and loads the samples from `https://tonejs.github.io/audio/salamander/` (notes A, C, D#, F# in every octave; Tone fills the gaps by pitch-shifting). Calls `onAudioReady` listeners when done.
 - `noteOn(midi)` / `noteOff(midi)`: for the piano keys (sound lasts while the key is held).
-- `playPiece(parsed, { onNote, onEnd, tempoScale })`: plays a whole piece.
+- `playPiece(parsed, { onNote, onKey, onEnd, tempoScale })`: plays a whole piece: the melody (velocity 0.75; a tied chain once, as long as all its notes) and, for [real songs](som-scores.md), the piano accompaniment under it (velocity 0.38), with the melody starting `parsed.offset` beats in. `duration` covers both. `onNote(note)` fires as each melody note (or rest) starts; `onKey(midi, down, part)` fires for every key going down and coming up, `part` `'melody'` or `'accomp'` (keys still down get their up on `stop()`).
   - Notes are scheduled 0.3 s ahead by a 40 ms timer, so *stop* is almost instant (nothing far in the future is already queued).
   - A `requestAnimationFrame` loop compares the audio clock with each note's start and calls `onNote(note)` exactly when it sounds, which keeps the lit-up notes in sync with what you hear.
   - Returns `{ stop, duration }`.
@@ -23,4 +23,4 @@ All music in the game is played on the **Salamander Grand Piano** (a free sample
 ## Known limits / next steps
 
 - Samples come from the Tone.js site; for production, host them yourself (they're free to redistribute) so the game doesn't depend on that server.
-- The gramophone plays the same melody-only data as the piano. Real historic recordings (public-domain 78s, e.g. from the Internet Archive) would make it much richer.
+- The gramophone plays the same data as the piano: the melody, with the real piano accompaniment for the songs that have one. Real historic recordings (public-domain 78s, e.g. from the Internet Archive) would make it much richer.

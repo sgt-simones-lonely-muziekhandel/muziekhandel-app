@@ -272,6 +272,19 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .composer-link span { font-weight: 500; font-size: .85em; color: #5a4636; }
 .composer-link:hover { text-decoration: underline; }
 /* a page of music */
+.composer-link.plain { cursor: default; text-align: center; }
+.composer-link.plain:hover { text-decoration: none; }
+/* a page of the original scan: the yellowed sheet itself, with a small caption */
+.scan-page { position: absolute; inset: 0; margin: 0; background: #e9dfc8; }
+.scan-page img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.scan-page figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: .8cqw 0 .4cqw; text-align: center; font-family: var(--font-1900); font-style: italic; font-size: .85cqw; color: #5a4636; background: linear-gradient(transparent, rgba(233, 223, 200, .9) 40%); }
+/* a real printed cover: inset like the drawn covers (which have a 10 px transparent margin), filling the
+   book's cover on the desk */
+.cover-art.scan img { inset: 2% 2.8%; width: 94.4%; height: 96%; object-fit: cover; border-radius: 2px; }
+.cover-leaf .cover-art.scan img { inset: 0; width: 100%; height: 100%; }
+/* a drawn cover (js/ui/cover.js), inset like the others */
+.cover-art.designed svg { position: absolute; inset: 2% 2.8%; width: 94.4%; height: 96%; border-radius: 2px; }
+.cover-leaf .cover-art.designed svg { inset: 0; width: 100%; height: 100%; }
 .music-page { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 2cqw 1.6cqw 1.1cqw; background: radial-gradient(ellipse at 40% 25%, #fbf5e7, #f1e7d2 70%, #e8dcc3); }
 .mp-head { display: flex; flex-direction: column; align-items: center; font-family: var(--font-1900); color: #2a1a0a; margin-bottom: .6cqw; }
 .mp-head b { font-weight: 800; font-size: 1.4cqw; }
@@ -301,6 +314,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .staff-svg { width: 100%; height: auto; display: block; overflow: visible; }
 .staff-line { stroke: #2b2118; stroke-width: 1.3; }
 .bar, .stem, .ledger { stroke: #2b2118; stroke-width: 1.8; }
+.tie { fill: none; stroke: #2b2118; stroke-width: 2; stroke-linecap: round; }
+.tuplet { font-family: var(--font-head); font-style: italic; font-weight: 700; font-size: 15px; fill: #5a4636; }
 .ink { fill: #2b2118; }
 .music { font-family: var(--font-music); }
 .timesig { font-family: var(--font-head); font-weight: 700; font-size: 26px; fill: #2b2118; }
@@ -311,11 +326,19 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .lbl-bg { opacity: .9; stroke: #2b2118; stroke-width: 1.2; }
 .lbl { font-family: var(--font-body); font-weight: 800; font-size: 13px; fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .35); stroke-width: 2px; }
 .note .hl-box { opacity: 0; transition: opacity .12s; }
-.note.active .hl-box { opacity: .35; }
+.note.active .hl-box { opacity: .5; }
 .note.active .head { fill: var(--c); filter: drop-shadow(0 0 6px var(--c)); animation: notepulse 1.1s ease-in-out infinite; }
 @keyframes notepulse { 50% { filter: drop-shadow(0 0 12px var(--c)); } }
 .note.active .head.open { fill: var(--c); }
-.note.active .lbl-bg { transform-box: fill-box; transform-origin: center; animation: pop .35s ease; }
+.note .lbl-bg { transform-box: fill-box; transform-origin: center; transition: transform .15s; }
+.note.active .lbl-bg { transform: scale(1.3); filter: drop-shadow(0 0 5px var(--c)); animation: pop .35s ease; }
+/* a key played in free play: its note(s) on the sheet glow up for a moment */
+.note.hit .hl-box { animation: hl-hit .7s ease-out; }
+.note.hit .head { animation: head-hit .7s ease-out; }
+.note.hit .lbl-bg { animation: lbl-hit .7s ease-out; }
+@keyframes hl-hit { from { opacity: .6; } to { opacity: 0; } }
+@keyframes head-hit { from { fill: var(--c); filter: drop-shadow(0 0 10px var(--c)); } }
+@keyframes lbl-hit { from { transform: scale(1.45); filter: drop-shadow(0 0 8px var(--c)); } }
 .note.done .head { fill: #3c8a4a; stroke: #2e6b39; }
 .note.done .lbl-bg { opacity: .35; }
 @keyframes pop { 50% { transform: scale(1.35); } }
@@ -328,13 +351,15 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .piano .score .staff-svg { width: 100%; height: 100%; max-height: 100%; }
 .score-hint { margin: 0; font-family: var(--font-hand); font-size: 2.4cqw; color: rgba(74, 54, 38, .6); text-align: center; }
 /* Everything on the piano is sized in cqw only (no pixel minimums), so it shrinks and grows with the picture and stays on the wood. */
-.piano-bar { position: absolute; left: 4%; right: 4%; top: 56.6%; height: 8.4%; display: flex; flex-wrap: nowrap; align-items: center; gap: .6cqw; }
+/* on the wooden ledge between the music desk and the keys (y 530–598 of the picture), inside the
+   carved sides (x ≈ 90–1590) */
+.piano-bar { position: absolute; left: 6.6%; right: 6.6%; top: 57%; height: 6.4%; display: flex; flex-wrap: nowrap; align-items: center; gap: .6cqw; }
 .piano-bar .spacer { flex: 1; }
 .piece-name { font-family: var(--font-head); font-size: 1.25cqw; color: #f0d58e; text-shadow: 0 1px 0 #1a0f08; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.piano .piano-bar .btn { min-height: 0; padding: .5cqw 1cqw; font-size: 1.15cqw; border-radius: .6cqw; white-space: nowrap; }
+.piano .piano-bar .btn { min-height: 0; padding: .4cqw .9cqw; font-size: 1.05cqw; border-radius: .5cqw; white-space: nowrap; box-shadow: 0 .2cqw 0 rgba(0, 0, 0, .45); }
 .piano .piano-bar .piece-name { width: auto; order: 0; }
 .piano .piano-bar .btn .ico { font-size: 1.1em; }
-.status { position: absolute; left: 33%; right: 21%; top: 86.5%; height: 9%; display: grid; place-items: center; text-align: center; font-weight: 800; font-size: 1.1cqw; line-height: 1.25; color: #f0d58e; text-shadow: 0 1px 2px #000; pointer-events: none; }
+.status { position: absolute; left: 33%; right: 21%; top: 85.4%; height: 7.8%; display: grid; place-items: center; text-align: center; font-weight: 800; font-size: 1.1cqw; line-height: 1.25; color: #f0d58e; text-shadow: 0 1px 2px #000; pointer-events: none; }
 .piano-body { position: absolute; inset: 0; pointer-events: none; }
 .piano-body > * { pointer-events: auto; }
 .piano .keys { position: absolute; left: 2.6%; width: 94.8%; top: 69%; height: 14.8%; }
@@ -360,7 +385,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 }
 /* brass bar over the keys the computer keyboard reaches now */
 .kb-window { position: absolute; top: -14px; height: 8px; border-radius: 4px 4px 0 0; background: #c99a45; opacity: .8; transition: left .25s ease, width .25s ease; pointer-events: none; }
-.piano-foot { position: absolute; left: 8%; right: 3.5%; top: 86.5%; height: 9%; display: flex; align-items: center; justify-content: space-between; gap: 1cqw; pointer-events: none; }
+/* on the strip under the keys (y 800–880), clear of the curved sides and the tip medallion */
+.piano-foot { position: absolute; left: 9.5%; right: 6%; top: 85.4%; height: 7.8%; display: flex; align-items: center; justify-content: space-between; gap: 1cqw; pointer-events: none; }
 .piano-foot > * { pointer-events: auto; }
 .piano .piano-foot .btn { min-height: 0; padding: .45cqw .9cqw; font-size: 1.1cqw; border-radius: .6cqw; }
 .octave { display: flex; align-items: center; gap: .7cqw; color: var(--gold); font-family: var(--font-head); font-weight: 700; font-size: 1.15cqw; }
@@ -375,6 +401,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .key.black.down, .key.black.active { background: var(--c); }
 .key.down::before, .key.active::before { opacity: 1; transform: none; transition-duration: .08s; }
 .key.down .kname, .key.active .kname, .key.target .kname { opacity: 1; }
+.key.accomp:not(.down):not(.active) { background: color-mix(in srgb, var(--c) 38%, #fff); transition-duration: 0s; }
+.key.black.accomp:not(.down):not(.active) { background: color-mix(in srgb, var(--c) 55%, #1d1816); }
 .key.target { background: color-mix(in srgb, var(--c) 45%, #fff); animation: keypulse 1.1s ease-in-out infinite; }
 .key.black.target { background: color-mix(in srgb, var(--c) 75%, #000); }
 .key.target::before { opacity: .8; transform: none; animation: beampulse 1.1s ease-in-out infinite; }

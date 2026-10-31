@@ -2,10 +2,12 @@
 // cover (it has just flown here from the cabinet, see library.js). Pages turn from right to left
 // around the spine like a real book: the cover first, then the title page
 // (items/sheet-music/cover-inside, the same for every piece, only the title and composer change),
-// then the music. ← → or a click on a page flip; Space takes the piece to the piano.
+// then the music. A real song (js/som-scores.js) is only its original: the printed cover and the
+// pages of the scan (its notes in the game's colours are on the piano). ← → or a click on a page
+// flip; Space takes the piece to the piano, on top of the book, so Terug comes back to this page.
 import { frame, h, esc } from './ui.js';
 import { coverHtml, SHEET_ART } from './library.js';
-import { pieceById, composerById } from '../data.js';
+import { pieceById, creditFor } from '../data.js';
 import { parsePiece } from '../music.js';
 import { renderPage, pageCount } from '../notation.js';
 
@@ -24,10 +26,10 @@ export function closedCoverRect() {
   return { left: W / 2 - PAGE.w / 2 * cq, top: top + PAGE.top * cq, width: PAGE.w * cq, height: PAGE.h * cq };
 }
 
-export function sheetView(ui, { pieceId, noFade = false }) {
+export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
   const piece = pieceById(pieceId);
   const parsed = parsePiece(piece);
-  const composer = composerById(piece.composer);
+  const composer = creditFor(piece);
   const musicPages = pageCount(parsed, SYSTEMS, PER_SYSTEM);
 
   const { el, body } = frame(ui, {
@@ -37,15 +39,25 @@ export function sheetView(ui, { pieceId, noFade = false }) {
     tip: 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op de spatiebalk om dit stuk op de piano te spelen.',
   });
 
-  // The pages in reading order: the title page, then the music.
-  const pages = [
+  // The pages in reading order: the title page and the music, or for a real song the pages of the
+  // original scan (without its first page when that is already the cover).
+  const scans = piece.scans;
+  const scanPages = scans ? scans.pages.slice(scans.cover ? 1 : 0) : [];
+  const maker = composer.id
+    ? `<button class="composer-link">${esc(composer.name)}<span>${esc(composer.years)}</span></button>`
+    : `<span class="composer-link plain">${esc(composer.name)}</span>`;
+  const pages = scans ? scanPages.map((k, i) => `
+      <figure class="scan-page">
+        <img src="${scans.dir}page-${k}.webp" alt="Bladzijde ${k} van het origineel" ${i > 1 ? 'loading="lazy"' : ''}>
+        <figcaption>Uit de collectie van SOM · ${i + 1} van ${scanPages.length}</figcaption>
+      </figure>`) : [
     `<img class="tp-img" src="${SHEET_ART}cover-inside.webp" alt="">
      <div class="tp-text">
        <h3>${esc(piece.title)}</h3>
        ${piece.subtitle ? `<p class="tp-sub">${esc(piece.subtitle)}</p>` : ''}
        <span class="tp-rule"></span>
        <small>muziek van</small>
-       <button class="composer-link">${esc(composer.name)}<span>${esc(composer.years)}</span></button>
+       ${maker}
      </div>`,
     ...Array.from({ length: musicPages }, (_, i) => `
       <div class="music-page">
@@ -110,11 +122,12 @@ export function sheetView(ui, { pieceId, noFade = false }) {
   };
   place();
 
-  const toPiano = () => ui.replace('piano', { pieceId });
+  // opened from the piano (its Bladmuziek button), the piano is still underneath
+  const toPiano = () => (fromPiano ? ui.close() : ui.open('piano', { pieceId }));
   body.querySelector('.prev').onclick = () => turn(-1);
   body.querySelector('.next').onclick = () => turn(1);
   body.querySelector('.play').onclick = toPiano;
-  body.querySelector('.composer-link').onclick = e => { e.stopPropagation(); ui.open('composer', { composerId: composer.id }); };
+  if (composer.id) body.querySelector('.composer-link').onclick = e => { e.stopPropagation(); ui.open('composer', { composerId: composer.id }); };
   // a click on the right-hand page turns forward, on the left-hand page back
   leaves.forEach((leaf, i) => {
     leaf.onclick = () => { if (i === turned) turn(1); else if (i === turned - 1) turn(-1); };
@@ -122,6 +135,7 @@ export function sheetView(ui, { pieceId, noFade = false }) {
 
   return {
     el,
+    pieceId,
     onKey(e) {
       if (e.code === 'ArrowLeft') { e.preventDefault(); turn(-1); }
       if (e.code === 'ArrowRight') { e.preventDefault(); turn(1); }

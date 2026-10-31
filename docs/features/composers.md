@@ -9,7 +9,7 @@ The portraits on the shop wall above the piano. Clicking them opens a close-up o
    - Large portrait with plaque.
    - Large portrait with plaque on the left.
    - **Biography** (*Het verhaal van …*) on the right, in short, simple sentences, a **Wist je dat?** (did you know?) fact, and birth/death dates and places. **Voorlezen** (speaker icon) reads it aloud in Dutch.
-   - Under it, **Muziek van …**: one card per piece of this composer in the shop, with its music cylinder, title and subtitle, and two buttons: **Luister** plays it on the [gramophone](gramophone.md), **Bladmuziek** opens the [sheet-music book](sheet-music.md). Composers without pieces yet get a short note from Meneer Simone instead.
+   - Under it, **Muziek van …**: one card per piece of this composer (their hand-written pieces, which are not in the cabinet: that holds the SOM songs), with its music cylinder, title and subtitle, and two buttons: **Luister** plays it on the [gramophone](gramophone.md), **Bladmuziek** opens the [sheet-music book](sheet-music.md). Composers without pieces yet get a short note from Meneer Simone instead.
    - The family tree that used to be here was removed.
 
 The six composers: Bach, Mozart, Beethoven, Chopin, Verdi, Tchaikovsky (*Tsjaikovski* in Dutch).

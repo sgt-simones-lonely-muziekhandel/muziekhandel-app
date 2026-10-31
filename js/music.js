@@ -2,7 +2,11 @@
 
 const LETTER_SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const LETTERS = 'CDEFGAB';
-const DURATIONS = { w: 4, 'h.': 3, h: 2, 'q.': 1.5, q: 1, '8.': 0.75, 8: 0.5, 16: 0.25 };
+// In quarter notes. A trailing "t" is a triplet (three in the time of two): ht qt 8t 16t.
+const DURATIONS = {
+  w: 4, 'h.': 3, h: 2, 'q.': 1.5, q: 1, '8.': 0.75, 8: 0.5, '16.': 0.375, 16: 0.25, 32: 0.125,
+  ht: 4 / 3, qt: 2 / 3, '8t': 1 / 3, '16t': 1 / 6,
+};
 
 // One colour per note letter, also used on the piano keys.
 export const NOTE_COLORS = {
@@ -42,14 +46,26 @@ export function parsePiece(piece) {
   const beatsPerMeasure = piece.time[0] * 4 / piece.time[1];
   let t = 0;
   const notes = tokens.map((tok, i) => {
-    const [p, d] = tok.split(':');
+    const [p, raw] = tok.split(':');
+    // "~" at the end: tied to the next note, which then only lengthens this one
+    const tieNext = raw.endsWith('~');
+    const d = tieNext ? raw.slice(0, -1) : raw;
     const dur = DURATIONS[d];
     if (dur == null) throw new Error(`Bad duration in ${piece.id}: ${tok}`);
-    const n = { i, dur, start: t, rest: p === 'r', durToken: d };
+    const n = {
+      i, dur, start: t, rest: p === 'r', durToken: d, tieNext,
+      type: d.replace(/[.t]/g, ''), dotted: d.includes('.'), triplet: d.endsWith('t'),
+    };
     if (!n.rest) Object.assign(n, parsePitch(p));
     t += dur;
     return n;
   });
+  // A tied chain sounds once, as long as all its notes together: `sound` on the first, `tied` on the rest.
+  for (let k = notes.length - 1; k >= 0; k--) {
+    const n = notes[k], next = notes[k + 1];
+    n.sound = n.dur;
+    if (n.tieNext && next && !n.rest && next.midi === n.midi) { next.tied = true; n.sound += next.sound; }
+  }
   const measures = [];
   let cur = [], acc = 0, cap = piece.pickup || beatsPerMeasure;
   for (const n of notes) {
@@ -62,7 +78,11 @@ export function parsePiece(piece) {
   }
   if (cur.length) measures.push(cur);
   const secPerBeat = 60 / piece.tempo;
-  piece._parsed = { piece, notes, measures, beatsPerMeasure, secPerBeat, totalBeats: t };
+  // A piano accompaniment (real scores, see js/som-scores.js): [onset, duration, midi] in 1/accompGrid
+  // quarters from the start of the music, which begins `introBeats` before the first written bar.
+  const g = piece.accompGrid || 1;
+  const accomp = (piece.accomp || []).map(([s, d, midi]) => ({ start: s / g, dur: d / g, midi }));
+  piece._parsed = { piece, notes, measures, beatsPerMeasure, secPerBeat, totalBeats: t, accomp, offset: piece.introBeats || 0 };
   return piece._parsed;
 }
 

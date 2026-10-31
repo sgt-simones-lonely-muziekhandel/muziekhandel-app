@@ -2,7 +2,7 @@
 // Full screen on the close-up of the piano (public/art/closeups/piano.webp): the music stands on
 // the blank sheet on the music desk, the keys sit in the key slot, the buttons on the wood.
 import { frame, h, esc } from './ui.js';
-import { pieceById, composerById } from '../data.js';
+import { pieceById, creditFor } from '../data.js';
 import {
   parsePiece, midiInfo, labelFor, noteNames, NOTE_COLORS,
   KEYMAP, keyLabels, keyCodeForMidi, PIANO_LOW, PIANO_HIGH, KEYS_LOW, KEYS_HIGH, MAX_SHIFT,
@@ -64,6 +64,7 @@ export function pianoView(ui, { pieceId } = {}) {
       <div class="score"><div class="staff-host"></div><p class="score-hint">Kies bladmuziek, of speel maar!</p></div>
       <div class="piano-bar">
         <button class="btn wood choose">Kies muziek</button>
+        <button class="btn wood read" hidden title="Bekijk de bladmuziek van dit stuk">Bladmuziek</button>
         <span class="piece-name"></span>
         <span class="spacer"></span>
         <button class="btn brass listen" hidden>Luister</button>
@@ -143,6 +144,7 @@ export function pianoView(ui, { pieceId } = {}) {
   let parsed = null, page = -1, noteEls = new Map();
   let mode = 'free';           // free | listen | follow
   let player = null, idx = 0, mistakes = 0, slow = false;
+  let along = 0;               // free play: the next note of the piece on the desk
   const held = new Set();
   const codeNotes = new Map(); // computer key → the note it started, so a shift while holding still releases it
   let pedal = false, pedalLatched = false;
@@ -186,8 +188,15 @@ export function pianoView(ui, { pieceId } = {}) {
     noteEls = renderPage($('.staff-host'), parsed, page, SYSTEMS);
   };
   const clearMarks = () => {
-    keyEls.forEach(k => k.classList.remove('target', 'active', 'good', 'wrong'));
+    keyEls.forEach(k => k.classList.remove('target', 'active', 'accomp', 'good', 'wrong'));
     noteEls.forEach(g => g.classList.remove('active'));
+  };
+  // a short glow on a note of the sheet, in its colour
+  const flash = g => {
+    if (!g) return;
+    g.classList.remove('hit'); void g.getBoundingClientRect(); g.classList.add('hit');
+    clearTimeout(g.hitTimer);
+    g.hitTimer = setTimeout(() => g.classList.remove('hit'), 700);
   };
   const markNote = (n, cls = 'active') => {
     showPage(pageOfNote(parsed, n, SYSTEMS));
@@ -195,14 +204,17 @@ export function pianoView(ui, { pieceId } = {}) {
     noteEls.get(n.i)?.classList.add(cls);
   };
 
+  let pieceIdNow = null;
   function loadPiece(id) {
     stopAll();
+    pieceIdNow = id;
     const piece = pieceById(id);
     parsed = parsePiece(piece);
     page = -1;
+    along = 0;
     $('.score-hint').hidden = true;
-    $('.piece-name').innerHTML = `<b>${esc(piece.title)}</b> · ${esc(composerById(piece.composer).short)}`;
-    ['.listen', '.follow', '.slow'].forEach(s => { $(s).hidden = false; });
+    $('.piece-name').innerHTML = `<b>${esc(piece.title)}</b> · ${esc(creditFor(piece).short)}`;
+    ['.read', '.listen', '.follow', '.slow'].forEach(s => { $(s).hidden = false; });
     showPage(0);
     setStatus('Druk op Luister om het stuk te horen, of op Speel mee om het zelf te spelen.');
   }
@@ -210,6 +222,7 @@ export function pianoView(ui, { pieceId } = {}) {
   function stopAll() {
     player?.stop(); player = null;
     mode = 'free';
+    along = 0;
     clearMarks();
     noteEls.forEach(g => g.classList.remove('done'));
     $('.listen').classList.remove('on');
@@ -223,14 +236,21 @@ export function pianoView(ui, { pieceId } = {}) {
     if (!audioState.ready) { setStatus('De piano wordt nog gestemd… even geduld!'); return; }
     mode = 'listen';
     $('.listen').classList.add('on');
-    setStatus('Luister en kijk mee: de noot die klinkt, licht op.');
-    let lastKey = null;
+    const hint = 'Luister en kijk mee: elke toets die klinkt, licht op. De melodie staat op het blad.';
+    setStatus(parsed.offset ? 'Eerst speelt de piano een inleiding. Kijk naar de toetsen!' : hint);
+    // every key that sounds lights up: the melody in its full colour, the accompaniment softer
+    const lit = new Map();
     player = playPiece(parsed, {
       tempoScale: slow ? 0.65 : 1,
       onNote(n) {
-        lastKey?.classList.remove('active');
+        if (n.i === 0 && parsed.offset) setStatus(hint);
         markNote(n);
-        if (!n.rest) { lastKey = keyEls.get(n.midi); lastKey?.classList.add('active'); spark(n.midi); }
+      },
+      onKey(midi, on, part) {
+        const id = `${part}${midi}`, count = (lit.get(id) || 0) + (on ? 1 : -1);
+        lit.set(id, count);
+        keyEls.get(midi)?.classList.toggle(part === 'melody' ? 'active' : 'accomp', count > 0);
+        if (on && part === 'melody') spark(midi);
       },
       onEnd() { stopAll(); setStatus('Klaar! Probeer het nu zelf met Speel mee.'); },
     });
@@ -248,7 +268,7 @@ export function pianoView(ui, { pieceId } = {}) {
 
   function nextTarget() {
     const notes = parsed.notes;
-    while (idx < notes.length && notes[idx].rest) idx++;
+    while (idx < notes.length && (notes[idx].rest || notes[idx].tied)) idx++;
     keyEls.forEach(k => k.classList.remove('target'));
     if (idx >= notes.length) return finish();
     const n = notes[idx];
@@ -280,6 +300,31 @@ export function pianoView(ui, { pieceId } = {}) {
     setStatus('');
   }
 
+  // Free play with a piece on the desk: the sheet plays along. The next note of the piece, when it's
+  // played, turns green and the sheet moves on (turning the page when needed); any other key makes
+  // that note glow wherever it is on the page, so every key shows where it is written.
+  function playAlong(midi) {
+    const notes = parsed.notes;
+    const skip = () => { while (along < notes.length && (notes[along].rest || notes[along].tied)) along++; };
+    skip();
+    const n = notes[along];
+    if (n && n.midi === midi) {
+      showPage(pageOfNote(parsed, n, SYSTEMS));
+      const g = noteEls.get(n.i);
+      g?.classList.add('done');
+      flash(g);
+      along++;
+      skip();
+      if (along >= notes.length) {
+        setStatus('Je hebt het hele stuk gespeeld! Speel het gerust nog eens.');
+        along = 0;
+        setTimeout(() => { if (mode === 'free') { noteEls.forEach(e => e.classList.remove('done')); showPage(0); } }, 1500);
+      }
+      return;
+    }
+    for (const [i, g] of noteEls) if (notes[i]?.midi === midi) flash(g);
+  }
+
   function press(midi) {
     if (held.has(midi)) return;
     held.add(midi);
@@ -289,6 +334,7 @@ export function pianoView(ui, { pieceId } = {}) {
     k?.classList.add('down');
     spark(midi);
     if (!audioState.ready) setStatus('De piano wordt nog gestemd… even geduld!');
+    if (mode === 'free' && parsed) playAlong(midi);
     if (mode === 'follow') {
       const n = parsed.notes[idx];
       if (n && midi === n.midi) {
@@ -313,6 +359,14 @@ export function pianoView(ui, { pieceId } = {}) {
 
   // --- toolbar
   $('.choose').onclick = () => { stopAll(); ui.open('library', { forPiano: true }); };
+  // Back to the book: when the piano was opened from this piece's book, that book is still open
+  // underneath (at the same page), otherwise it opens on top of the piano.
+  $('.read').onclick = () => {
+    stopAll();
+    const below = ui.stack[ui.stack.length - 2];
+    if (below?.name === 'sheet' && below.pieceId === pieceIdNow) ui.close();
+    else ui.open('sheet', { pieceId: pieceIdNow, fromPiano: true });
+  };
   $('.oct-down').onclick = () => setShift(shift - 1);
   $('.oct-up').onclick = () => setShift(shift + 1);
   $('.pedal').onclick = () => { pedalLatched = !pedalLatched; setPedal(pedalLatched); };

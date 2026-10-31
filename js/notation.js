@@ -28,15 +28,17 @@ function flag(x, y, up, count) {
 
 function noteSvg(n, x, y0) {
   const col = n.rest ? '#4a3626' : NOTE_COLORS[n.letter];
-  let s = `<g class="note${n.rest ? ' rest' : ''}" data-i="${n.i}">`;
+  let s = `<g class="note${n.rest ? ' rest' : ''}" data-i="${n.i}" style="--c:${col}">`;
   s += `<rect class="hl-box" x="${x - 18}" y="${y0 - 26}" width="36" height="${SYS_H - 22}" rx="12" fill="${col}"/>`;
-  const dotted = [1.5, 3, 0.75].includes(n.dur);
+  // the look follows the written value (n.type: w h q 8 16 32), not the length: a triplet eighth
+  // is drawn as an eighth
+  const dotted = n.dotted;
   if (n.rest) {
     const mid = y0 + 2 * S;
-    if (n.dur >= 4) s += `<rect x="${x - 7}" y="${y0 + S}" width="14" height="6" class="ink"/>`;
-    else if (n.dur >= 2) s += `<rect x="${x - 7}" y="${mid - 6}" width="14" height="6" class="ink"/>`;
+    if (n.type === 'w') s += `<rect x="${x - 7}" y="${y0 + S}" width="14" height="6" class="ink"/>`;
+    else if (n.type === 'h') s += `<rect x="${x - 7}" y="${mid - 6}" width="14" height="6" class="ink"/>`;
     else {
-      const glyph = n.dur >= 1 ? '\u{1D13D}' : n.dur >= 0.5 ? '\u{1D13E}' : '\u{1D13F}';
+      const glyph = { q: '\u{1D13D}', 8: '\u{1D13E}', 16: '\u{1D13F}', 32: '\u{1D140}' }[n.type];
       s += `<text class="music ink" x="${x}" y="${mid}" font-size="40" text-anchor="middle" dominant-baseline="middle">${glyph}</text>`;
     }
     if (dotted) s += `<circle class="ink" cx="${x + 12}" cy="${mid - 5}" r="2.6"/>`;
@@ -47,11 +49,11 @@ function noteSvg(n, x, y0) {
   for (let st = E4 - 2; st >= n.step; st -= 2) s += `<line class="ledger" x1="${x - 12}" x2="${x + 12}" y1="${yOf(y0, st)}" y2="${yOf(y0, st)}"/>`;
   for (let st = E4 + 10; st <= n.step; st += 2) s += `<line class="ledger" x1="${x - 12}" x2="${x + 12}" y1="${yOf(y0, st)}" y2="${yOf(y0, st)}"/>`;
   const up = n.step < E4 + 4; // below the middle line: stem up
-  const open = n.dur >= 2;
-  if (n.dur < 4) {
+  const open = n.type === 'w' || n.type === 'h';
+  if (n.type !== 'w') {
     const sx = up ? x + 6 : x - 6;
     s += `<line class="stem" x1="${sx}" x2="${sx}" y1="${y}" y2="${up ? y - 35 : y + 35}"/>`;
-    const flags = n.dur <= 0.25 ? 2 : n.dur < 1 ? 1 : 0;
+    const flags = { 8: 1, 16: 2, 32: 3 }[n.type] || 0;
     if (flags) s += flag(sx, up ? y - 35 : y + 35, up, flags);
   }
   s += `<ellipse class="head${open ? ' open' : ''}" cx="${x}" cy="${y}" rx="7" ry="5.2" transform="rotate(-20 ${x} ${y})" style="--c:${col}"/>`;
@@ -60,6 +62,8 @@ function noteSvg(n, x, y0) {
     const onLine = (n.step - E4) % 2 === 0;
     s += `<circle class="ink" cx="${x + 13}" cy="${onLine ? y - 5 : y}" r="2.6"/>`;
   }
+  // a tied note doesn't get played again: its name circle is left out
+  if (n.tied) return s + '</g>';
   const ly = y0 + 4 * S + 52;
   s += `<circle class="lbl-bg" cx="${x}" cy="${ly}" r="13" fill="${col}"/>`;
   s += `<text class="lbl" x="${x}" y="${ly + 1}" text-anchor="middle" dominant-baseline="middle">${labelFor(n.letter, n.acc)}</text>`;
@@ -96,11 +100,30 @@ export function renderPage(host, parsed, page, systemsPerPage = 2, perSystem = M
     const avg = wSys.reduce((a, b) => a + b, 0) / sys.length;
     const total = wSys.reduce((a, b) => a + b, 0) + (full - sys.length) * avg;
     const scale = (width - 12 - x) / total;
+    let tie = null; // the note a tie starts from, on this line
     sys.forEach((m, mi) => {
       let nx = x + 16 * scale;
+      let tripletRun = 0, tripletUnit = 0;
       for (const n of m) {
         const w = weight(n) * scale;
-        svg += noteSvg(n, nx + 8, y0);
+        const hx = nx + 8;
+        svg += noteSvg(n, hx, y0);
+        // triplets: a small 3 over the first note of each group of three
+        if (n.triplet) {
+          if (!tripletRun) {
+            tripletUnit = n.dur * 3;
+            const top = n.rest ? y0 : Math.min(y0, yOf(y0, n.step) - 30);
+            svg += `<text class="tuplet" x="${hx}" y="${top - 8}" text-anchor="middle">3</text>`;
+          }
+          tripletRun += n.dur;
+          if (tripletRun >= tripletUnit - 1e-6) tripletRun = 0;
+        } else tripletRun = 0;
+        // ties: an arc from the head before to this one (under the heads, or over them for stems down)
+        if (n.tied && tie) {
+          const y = yOf(y0, n.step), below = n.step < E4 + 4, dy = below ? 8 : -8;
+          svg += `<path class="tie" d="M${tie + 7},${y + dy} Q${(tie + hx) / 2},${y + dy * 2.2} ${hx - 7},${y + dy}"/>`;
+        }
+        tie = n.tieNext && !n.rest ? hx : null;
         nx += w;
       }
       x += wSys[mi] * scale;
