@@ -5,7 +5,7 @@ In the shop, the paintings above the piano are the **four makers of the game**, 
 ## For the player
 
 1. **Shop wall**: the four team paintings above the piano, two by two around the hanging lamp, without name plaques. The hotspot is called *Schilderijen*.
-2. **Portrait wall** (*De componisten*), full screen: the close-up `public/art/closeups/gallery-wall.webp` (green damask wall, picture lamp, wainscot) with the six composers in gilded frames, two rows of three, slightly crooked like on a real wall, each with a brass name plaque and the standard silhouette. Pointing at a frame straightens it and makes it glow; click it to open the composer.
+2. **Portrait wall** (*De componisten*), full screen: the close-up `public/art/closeups/gallery-wall.webp` (green damask wall, picture lamp, wainscot) with the composers of the shop's sheet music (from [the back end](backend.md)) in gilded frames, six to a wall in two rows of three, slightly crooked like on a real wall, each with a brass name plaque and the standard silhouette. Those with the most pieces in the shop hang first; the brass arrows, ← / → or a swipe walk along to the next wall (*Muur 1 van 38*). Pointing at a frame straightens it and makes it glow; click it to open the composer.
 3. Meneer Simone's topic *Wie zijn die mensen aan de muur?* says the paintings in the shop are the makers of the game, and that clicking them leads to the composers.
 4. **Composer card** (a paper card over the dimmed wall):
    - Large portrait with plaque.
@@ -14,14 +14,14 @@ In the shop, the paintings above the piano are the **four makers of the game**, 
    - Under it, **Muziek van …**: one card per piece of this composer (their hand-written pieces, which are not in the cabinet: that holds the SOM songs), with its music cylinder, title and subtitle, and two buttons: **Luister** plays it on the [gramophone](gramophone.md), **Bladmuziek** opens the [sheet-music book](sheet-music.md). Composers without pieces yet get a short note from Meneer Simone instead.
    - The family tree that used to be here was removed.
 
-The six composers: Bach, Mozart, Beethoven, Chopin, Verdi, Tchaikovsky (*Tsjaikovski* in Dutch).
+A composer from the Muziekschatten data has no story yet: the card says it's still being written, and shows birth and death years only when the data has them (rarely). Their **Muziek van …** lists all their pieces in the shop, with only the **Bladmuziek** button until the pieces have notes. The game's own six composers (Bach, Mozart, Beethoven, Chopin, Verdi, Tchaikovsky, in `js/data.js`) keep their cards, reached from their pieces' title pages in the piano's cabinet.
 
 ## How it's built
 
 `js/ui/gallery.js`: `galleryView()` and `composerView()`. Data in `js/data.js` (see [content data](content-data.md)): `TEAM` lists the four team portraits for the shop wall, with an empty `name` (fill one in and a brass plaque appears under that frame in the shop). The composers have no `portrait`, so `portraitOf(c)` gives `NO_PORTRAIT` (`portraits/unknown.webp`); give a composer a `portrait` and it shows instead (`assets/portraits/*.jpg` are in the repo but not used).
 
 - **Shop wall**: `FRAMES` in `js/shop.js` (centre x, top, height in world units, and the team id); `drawFrame()` skips the plaque when there's no name.
-- **Wall close-up**: `galleryView()` uses `frame(…, { closeup })` (see [game shell](game-shell.md)). `HANG` gives each frame's centre x, top and height in pixels of the 1672 × 941 picture; they're turned into percentages so the frames scale with the picture. Which frame each composer gets (`COMPOSER_FRAME`), and the size of each frame's opening, come from `js/frames.js` (shared with the shop wall). The portrait is an `<img>` under the frame image, fitted to the opening and rounded for the oval frames.
+- **Wall close-up**: `galleryView()` uses `frame(…, { closeup })` (see [game shell](game-shell.md)). `HANG` gives each frame's centre x, top and height in pixels of the 1672 × 941 picture; they're turned into percentages so the frames scale with the picture. Which frame each place on a wall gets (`COMPOSER_FRAMES`), and the size of each frame's opening, come from `js/frames.js` (shared with the shop wall). The portrait is an `<img>` under the frame image, fitted to the opening and rounded for the oval frames.
 
 - **Composer card**: a CSS grid, portrait (`p`) left over two rows, biography (`b`) and music (`m`) on the right. The music cards use `cylinderColor()` and `coverFor()` from `js/ui/library.js`, so the cylinder and the little cover on the button are the same as at the gramophone and in the cabinet.
 - On narrow screens portrait, biography and music stack vertically.

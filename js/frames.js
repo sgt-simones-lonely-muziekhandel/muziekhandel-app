@@ -14,8 +14,5 @@ export const FRAME_TYPES = {
 // Which frame each team portrait hangs in: ovals in the middle, rectangles at the sides.
 export const TEAM_FRAME = { 'team-1': 'rect-medium', 'team-2': 'oval-large', 'team-3': 'oval-large', 'team-4': 'rect-medium' };
 
-// Which frame each composer hung in (the composer cards still exist, the wall shows the team).
-export const COMPOSER_FRAME = {
-  bach: 'oval-small', mozart: 'rect-large', beethoven: 'oval-small',
-  chopin: 'rect-medium', verdi: 'oval-large', tchaikovsky: 'rect-small',
-};
+// The frames on a wall of composers in the gallery close-up, by place: two rows of three.
+export const COMPOSER_FRAMES = ['oval-small', 'rect-large', 'oval-small', 'rect-medium', 'oval-large', 'rect-small'];

@@ -2,27 +2,35 @@
 // compartments, each with a brass plaque. Every piece stands in its own compartment as a printed
 // sheet-music cover: its printed cover, a drawn one (js/ui/cover.js), or for a composer's piece one
 // of the covers in public/art/items/sheet-music with its title and composer in the cartouche;
-// the shelf says how hard it is (top ★, middle ★★, bottom ★★★), and so does the plaque.
+// the shelf says how hard it is (top ★, middle ★★, bottom ★★★), and so does the plaque. A piece
+// from the Muziekschatten data has no level yet: those fill the shelves in order, without stars.
 // Cylinders (public/art/items/cylinder) are still what the gramophone plays.
 import { frame, h, esc } from './ui.js';
 import { PIECES, ALL_PIECES, creditFor } from '../data.js';
+import { piecePage } from '../catalogue.js';
 import { closedCoverRect } from './sheet.js';
 import { designedCover } from './cover.js';
+import { pager } from './pager.js';
 
 export const CYLINDER_ART = 'public/art/items/cylinder/';
 const CYLINDERS = ['red', 'blue', 'green', 'cream'];
 // Every piece keeps its own cylinder colour, in the cabinet and at the gramophone.
-export const cylinderColor = piece => CYLINDERS[ALL_PIECES.indexOf(piece) % CYLINDERS.length];
+const hash = s => [...s].reduce((n, c) => (n * 31 + c.charCodeAt(0)) >>> 0, 7);
+export const cylinderColor = piece => {
+  const i = ALL_PIECES.indexOf(piece);
+  return CYLINDERS[(i >= 0 ? i : hash(piece.id)) % CYLINDERS.length];
+};
 
-// ...and its own sheet-music cover: a real song shows its printed cover (the first page of its scan)
-// or, when the scan has none, a cover drawn for it; a composer's piece one of six cover pictures
-// with the title and composer printed on it.
+// ...and its own sheet-music cover: a piece from the Muziekschatten data its scanned cover
+// (`cover`), a real song its printed cover (the first page of its scan) or, when the scan has none,
+// a cover drawn for it; a composer's piece one of six cover pictures with the title and composer
+// printed on it.
 export const SHEET_ART = 'public/art/items/sheet-music/';
-export const coverFor = piece => piece.scans?.cover
+export const coverFor = piece => piece.cover || (piece.scans?.cover
   ? `${piece.scans.dir}page-${piece.scans.pages[0]}.webp`
-  : `${SHEET_ART}cover-${(ALL_PIECES.indexOf(piece) % 6) + 1}.webp`;
+  : `${SHEET_ART}cover-${(ALL_PIECES.indexOf(piece) % 6) + 1}.webp`);
 export const coverHtml = (piece, composer, name = composer.name) => {
-  if (piece.scans?.cover) return `<span class="cover-art scan"><img src="${coverFor(piece)}" alt="${esc(piece.title)}"></span>`;
+  if (piece.cover || piece.scans?.cover) return `<span class="cover-art scan"><img src="${coverFor(piece)}" alt="${esc(piece.title)}"></span>`;
   if (piece.scans) return `<span class="cover-art designed">${designedCover(piece, composer.name)}</span>`;
   return `<span class="cover-art"><img src="${coverFor(piece)}" alt="">
     <span class="cover-text"><b>${esc(piece.title)}</b><i>${esc(name)}</i></span></span>`;
@@ -71,17 +79,18 @@ function flyToCentre(art, fullName, done) {
   });
 }
 
-// The cabinets: the songs of the SOM collection, and the composers' own pieces in a second one. The
-// player walks from one to the other with the arrows (or ← →, or a swipe); the cabinet in view
-// is remembered for the next visit.
-const CABINETS = [
+// The cabinets. In the shop: the sheet music of the Muziekschatten collection, fifteen pieces to a
+// cabinet, fetched from the back end (js/catalogue.js) as the player walks along. Choosing music for
+// the piano: the pieces the game can play (they have notes), the songs of the SOM collection and the
+// composers' own pieces in a second cabinet. The cabinet in view is remembered for the next visit.
+const PIANO_CABINETS = [
   { name: 'Liedjes uit de SOM-collectie', pieces: PIECES },
   { name: 'Muziek van de componisten', pieces: ALL_PIECES.filter(p => !PIECES.includes(p)) },
 ].filter(c => c.pieces.length);
-let lastCabinet = 0;
+const lastCabinet = { shop: 0, piano: 0 };
 
 // Where each piece stands: on the shelf of its level (top ★ … bottom ★★★), five to a shelf; a piece
-// whose shelf is full goes to the nearest shelf with room.
+// whose shelf is full goes to the nearest shelf with room, and one without a level to the first.
 function arrange(pieces) {
   const rows = SHELVES.map(() => []);
   for (const p of pieces) {
@@ -99,24 +108,29 @@ export function libraryView(ui, { forPiano = false } = {}) {
     wide: true,
     closeup: 'public/art/closeups/cabinet.webp',
     full: true,
-    tip: CABINETS.length > 1
-      ? 'In elk vakje staat een muziekboek. Klik erop om het open te slaan. Bovenaan staan de makkelijkste stukken, onderaan de moeilijkste. Met de pijlen ga je naar de andere kast.'
-      : 'In elk vakje staat een muziekboek. Klik erop om het open te slaan. Bovenaan staan de makkelijkste stukken, onderaan de moeilijkste.',
+    tip: forPiano && PIANO_CABINETS.length < 2
+      ? 'In elk vakje staat een muziekboek. Klik erop om het open te slaan. Bovenaan staan de makkelijkste stukken, onderaan de moeilijkste.'
+      : forPiano
+        ? 'In elk vakje staat een muziekboek. Klik erop om het open te slaan. Bovenaan staan de makkelijkste stukken, onderaan de moeilijkste. Met de pijlen ga je naar de andere kast.'
+        : 'In elk vakje staat een muziekboek uit de verzameling van de winkel. Klik erop om het open te slaan. Met de pijlen loop je langs de kasten.',
   });
-  let busy = false;
-  const pages = CABINETS.map(cab => {
-    const page = h('<section class="cab-page"></section>');
-    arrange(cab.pieces).forEach((pieces, row) => {
-      const shelf = SHELVES[row];
-      pieces.forEach((p, col) => {
+  let busy = false, nav = null;
+  // one compartment per piece, with its plaque
+  const shelve = (page, pieces) => {
+    arrange(pieces).forEach((row, r) => {
+      const shelf = SHELVES[r];
+      row.forEach((p, col) => {
         const composer = creditFor(p);
-        const plaque = h(`<span class="cab-plaque" title="Moeilijkheid">${'★'.repeat(Math.min(3, p.level || 1))}</span>`);
-        Object.assign(plaque.style, { left: X(COLS[col]), top: Y(shelf.plaque) });
+        if (p.level) {
+          const plaque = h(`<span class="cab-plaque" title="Moeilijkheid">${'★'.repeat(Math.min(3, p.level))}</span>`);
+          Object.assign(plaque.style, { left: X(COLS[col]), top: Y(shelf.plaque) });
+          page.append(plaque);
+        }
         const tube = h(`
           <button class="tube" title="${esc(p.title)} — ${esc(composer.name)}">${coverHtml(p, composer, composer.short)}</button>`);
         Object.assign(tube.style, { left: X(COLS[col] + TUBE_DX), top: Y(shelf.edge) });
         tube.onclick = () => {
-          if (busy || moving) return;
+          if (busy || nav?.moving) return;
           busy = true;
           setTimeout(() => { busy = false; }, 1400);
           if (!forPiano) { flyToCentre(tube.querySelector('.cover-art'), composer.name, () => ui.open('sheet', { pieceId: p.id, noFade: true })); return; }
@@ -127,66 +141,32 @@ export function libraryView(ui, { forPiano = false } = {}) {
             tube.classList.remove('pulled');
           }, 550);
         };
-        page.append(plaque, tube);
+        page.append(tube);
       });
     });
-    stage.appendChild(page);
-    return page;
-  });
+  };
+  const mode = forPiano ? 'piano' : 'shop';
+  const walk = (count, label, fill) => {
+    nav = pager(stage, { count, cls: 'cab-page', what: 'kast', label, fill, start: lastCabinet[mode], onMove: i => { lastCabinet[mode] = i; } });
+  };
 
-  // Going to another cabinet: both slide sideways together, quick and simple.
-  let current = Math.min(lastCabinet, pages.length - 1), moving = false;
-  pages.forEach((pg, k) => { pg.hidden = k !== current; });
-  if (pages.length > 1) {
-    stage.insertAdjacentHTML('beforeend', `
-      <button class="cab-nav prev" title="Vorige kast (←)">‹</button>
-      <button class="cab-nav next" title="Volgende kast (→)">›</button>
-      <div class="cab-sign"><b></b><span class="cab-dots">${pages.map(() => '<i></i>').join('')}</span></div>`);
-  }
-  const sign = () => {
-    if (pages.length < 2) return;
-    stage.querySelector('.cab-sign b').textContent = CABINETS[current].name;
-    stage.querySelectorAll('.cab-dots i').forEach((d, k) => d.classList.toggle('on', k === current));
-    stage.querySelector('.cab-nav.prev').disabled = current === 0;
-    stage.querySelector('.cab-nav.next').disabled = current === pages.length - 1;
-  };
-  sign();
-  const go = d => {
-    const to = current + d;
-    if (moving || to < 0 || to >= pages.length) return;
-    moving = true;
-    const from = pages[current], next = pages[to];
-    next.hidden = false;
-    const timing = { duration: 420, easing: 'cubic-bezier(.25, .8, .25, 1)', fill: 'forwards' };
-    const away = d > 0 ? -100 : 100;
-    from.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${away}%)` }], timing);
-    next.animate([{ transform: `translateX(${-away}%)` }, { transform: 'translateX(0)' }], timing).finished.then(() => {
-      from.hidden = true;
-      from.getAnimations().forEach(a => a.cancel());
-      next.getAnimations().forEach(a => a.cancel());
-      moving = false;
-    });
-    current = lastCabinet = to;
-    sign();
-  };
-  if (pages.length > 1) {
-    stage.querySelector('.cab-nav.prev').onclick = () => go(-1);
-    stage.querySelector('.cab-nav.next').onclick = () => go(1);
-    // a swipe across the cabinet walks along too
-    let sx = null;
-    stage.addEventListener('pointerdown', e => { sx = e.clientX; });
-    stage.addEventListener('pointerup', e => {
-      if (sx == null) return;
-      const dx = e.clientX - sx;
-      sx = null;
-      if (Math.abs(dx) > 70) go(dx < 0 ? 1 : -1);
+  if (forPiano) {
+    walk(PIANO_CABINETS.length, i => PIANO_CABINETS[i].name, (i, page) => shelve(page, PIANO_CABINETS[i].pieces));
+  } else {
+    // the first cabinet tells how many there are
+    const note = h('<p class="stage-note">Meneer Simone zoekt de bladmuziek op…</p>');
+    stage.appendChild(note);
+    piecePage(0).then(first => {
+      note.remove();
+      walk(first.pages, i => `Kast ${i + 1} van ${first.pages}`, (i, page) => piecePage(i).then(
+        d => shelve(page, d.pieces),
+        () => page.appendChild(h('<p class="stage-note">Deze kast klemt. Probeer het straks nog eens.</p>'))));
+    }, () => {
+      note.textContent = 'De bladmuziekkast zit op slot: Meneer Simone kan de muziek nu niet vinden. Probeer het straks nog eens.';
     });
   }
   return {
     el,
-    onKey(e) {
-      if (e.code === 'ArrowRight') { e.preventDefault(); go(1); }
-      if (e.code === 'ArrowLeft') { e.preventDefault(); go(-1); }
-    },
+    onKey(e) { nav?.onKey(e); },
   };
 }

@@ -4,6 +4,7 @@
 // durations: w h. h q. q 8. 8 16. 16 32, triplets ht qt 8t 16t; a trailing ~ ties the note to the
 // next one. Bar lines "|" are optional and only for readability.
 import { SOM_PIECES } from './som-scores.js';
+import { cachedPiece } from './catalogue.js';
 
 // The portrait for a composer we have no picture of (or whose picture won't load): a silhouette
 // in a wig, no one in particular.
@@ -256,9 +257,11 @@ export const PIECES = SOM_PIECES;
 export const ALL_PIECES = [...SOM_PIECES, ...DEMO_PIECES];
 
 export const composerById = id => COMPOSERS.find(c => c.id === id);
-// Who made a piece, for labels: one of the composers, or the makers of a real song (`credit`), who
+// Who made a piece, for labels: one of the composers, the composer of a piece from the
+// Muziekschatten data (`maker`, see js/catalogue.js), or the makers of a real song (`credit`), who
 // have no portrait or story in the game (`id: null`).
-export const creditFor = piece => composerById(piece.composer)
+export const creditFor = piece => composerById(piece.composer) || piece.maker
   || { id: null, name: piece.credit, short: piece.creditShort || piece.credit, years: '', portrait: NO_PORTRAIT };
 export const piecesBy = id => DEMO_PIECES.filter(p => p.composer === id);
-export const pieceById = id => ALL_PIECES.find(p => p.id === id);
+// a piece of the game's own, or one from the Muziekschatten data that has been loaded
+export const pieceById = id => ALL_PIECES.find(p => p.id === id) || cachedPiece(id);

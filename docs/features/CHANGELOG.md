@@ -2,6 +2,17 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — The shop's sheet music and composers from Virtuoso
+
+Added:
+
+- [Back end](backend.md): `backend/server.py` asks Virtuoso for the Muziekschatten data and answers the game with a small JSON API (`/api/pieces`, `/api/composers`); it also serves the game, so `python3 backend/server.py` (or `nix run`) runs everything. On the server nginx passes `/api/` to it.
+
+Changed:
+
+- [Sheet music](sheet-music.md): the cabinet holds the collection's 974 pieces with a scanned cover, fifteen to a cabinet (*Kast 1 van 65*), each with its real cover. The book's title page names all the makers; the notes are still to come, so these books end with a page saying so and can't go to the piano. The piano's own cabinet keeps the songs that have notes.
+- [Composers](composers.md): the wall close-up holds the composers of that music, six to a wall, most pieces first (*Muur 1 van 38*); their cards list their pieces. Their stories come later, from Wikidata.
+
 ## 2026-10-31 — One back button, ↓ goes back, every book bends, a calmer voice, two legs and two arms
 
 Changed:

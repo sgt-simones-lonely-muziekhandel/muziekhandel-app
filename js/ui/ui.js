@@ -276,6 +276,20 @@ export function frame(ui, { title, cls = '', tip, wide = false, closeup = null, 
   return { el, body, stage, panel: el.querySelector('.panel') };
 }
 
+// A card that says Meneer Simone is looking something up (a piece or composer from the back end).
+// When `promise` comes in, `then` puts the real view in its place, unless the player has gone
+// somewhere else meanwhile; if it fails, the card says so.
+export function waitView(ui, title, promise, then) {
+  const { el, body } = frame(ui, { title, cls: 'waiting' });
+  const note = h('<p class="wait-note">Meneer Simone zoekt het even op…</p>');
+  body.appendChild(note);
+  const view = { el };
+  promise.then(() => { if (ui.top === view) then(); }, () => {
+    note.textContent = 'Meneer Simone kan het nu niet vinden. Probeer het straks nog eens.';
+  });
+  return view;
+}
+
 export class UI {
   constructor(game) {
     this.game = game;

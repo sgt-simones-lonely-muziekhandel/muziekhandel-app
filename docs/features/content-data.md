@@ -1,5 +1,7 @@
 # Content data: composers and pieces
 
+The shop's sheet music and composers come from the Muziekschatten data, through [the back end](backend.md); `js/catalogue.js` turns them into the shape below (a piece without `notes` yet, a composer without `bio` or `fact`). What follows is the game's own content in `js/data.js`, which the piano, the gramophone and the lessons still use.
+
 All composers and pieces live in one file, `js/data.js`, so content can be added without touching the game code.
 
 ## Composers

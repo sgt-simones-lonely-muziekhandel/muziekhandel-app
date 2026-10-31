@@ -4,6 +4,8 @@ The cabinet right of the counter in the shop (`public/art/shop/cabinet.webp`). I
 
 ## For the player
 
+The shop's cabinet holds the sheet music of the Muziekschatten collection, from [the back end](backend.md): fifteen pieces to a cabinet, each with its real scanned cover and no stars yet (they fill the shelves in order); the arrows walk along 65 cabinets. Their books open on the cover and a title page with all the makers, then a page saying the notes are still to come; they have no *Speel op de piano*. The piano's cabinet (*Kies muziek voor de piano*) still holds the songs below, which have notes.
+
 1. **Cabinet** (*De bladmuziekkast*): clicking the cabinet in the shop opens its close-up full screen, `public/art/closeups/cabinet.webp`: three shelves of five compartments, each with a brass plaque. Each of the 15 [real songs](som-scores.md) stands in its own compartment as a sheet-music book: its printed cover, or a cover drawn for it (`js/ui/cover.js`). A composer's own piece (opened from the [portrait gallery](composers.md)) gets one of six cover pictures (`cover-1` … `cover-6`) with the title and the composer printed in the cartouche at the top. The plaque under it shows 1–3 stars. The shelves go by difficulty, as worked out by the import: top shelf ★, middle ★★, bottom ★★★, five each. Clicking a book lifts it out and opens the music.
    - **Two cabinets**, 20 pieces in all: *Liedjes uit de SOM-collectie* (the 15 songs) and *Muziek van de componisten* (the composers' 5 pieces). Brass arrows on the glass doors (the right one nudges to be noticed), ← / →, or a swipe across the cabinet go to the other one: the two cabinets slide sideways together in a short, smooth movement (0.42 s). A brass sign at the bottom names the cabinet, with a dot per cabinet. The cabinet in view is remembered for the next visit.
 2. **Picking a book**: the chosen book comes out of its compartment, tilts a little and flies to the middle of the screen, growing as it comes closer. The desk fades in around it and the book lies there **closed**, with *Klik op het boek om het open te slaan* under it.
@@ -41,6 +43,7 @@ The covers and the title page use **Playfair Display**, a high-contrast Didone t
 ## Known limits / next steps
 
 - Five compartments per shelf: a sixth piece of the same difficulty doesn't fit yet (it would need a second cabinet page or two cylinders per compartment).
+- The Muziekschatten pieces have no notes and no level yet; see [the back end](backend.md).
 
 - Melody only, treble clef only: no chords, no bass clef, no key signatures (accidentals are written on every note), no beams (each eighth has its own flag), no ties or lyrics.
 - For real scores from Muziekschatten, an engraver like VexFlow or OpenSheetMusicDisplay (MusicXML) would be needed; the highlight hook (`data-i` per note) can stay the same.

@@ -229,6 +229,13 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .cab-dots { display: flex; gap: .45cqw; }
 .cab-dots i { width: .6cqw; height: .6cqw; border-radius: 50%; background: rgba(42, 26, 10, .35); transition: background .3s, transform .3s; }
 .cab-dots i.on { background: #2a1a0a; transform: scale(1.25); }
+/* a word from Meneer Simone on a close-up while the music or the composers are looked up (or can't be) */
+.stage-note {
+  position: absolute; z-index: 2; left: 50%; top: 45%; translate: -50% -50%; max-width: 60cqw; margin: 0; padding: 1cqw 2cqw;
+  font: italic 1.5cqw var(--font-1900); color: #2a1a0a; text-align: center;
+  background: #f3e6c4; border: .15cqw solid #4a3216; border-radius: .4cqw; box-shadow: 0 .4cqw 1cqw rgba(0, 0, 0, .5);
+}
+.wait-note { font-style: italic; color: #5a4636; }
 
 /* ---------- Sheet music: a ring binder on a desk ---------- */
 /* Full-screen stage without a picture: a wooden desk (stage is 100cqw × 56.25cqw). */
@@ -323,6 +330,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .tp-text .tp-sub { margin: 0; font-style: italic; font-size: 1.2cqw; color: #5a4636; }
 .tp-text .tp-rule { width: 40%; height: 0; border-top: 1.5px solid #8b6a3e; margin: .3cqw 0; }
 .tp-text small { font-style: italic; font-size: 1cqw; color: #6b4e36; }
+.tp-text .tp-more { margin: .6cqw 0 0; font-size: 1cqw; line-height: 1.4; color: #5a4636; }
 .composer-link { background: none; border: none; padding: 0; font-family: var(--font-1900); font-size: 1.5cqw; font-weight: 700; color: var(--red); cursor: pointer; display: flex; flex-direction: column; align-items: center; }
 .composer-link span { font-weight: 500; font-size: .85em; color: #5a4636; }
 .composer-link:hover { text-decoration: underline; }
@@ -344,6 +352,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .mp-head b { font-weight: 800; font-size: 1.4cqw; }
 .mp-head i { font-size: .95cqw; color: #6b4e36; }
 .mp-staff { flex: 1; min-height: 0; display: grid; align-items: start; }
+/* the page of a piece whose notes are still to come */
+.mp-later { margin: auto 2cqw; font: italic 1.5cqw/1.5 var(--font-1900); color: #5a4636; text-align: center; }
 .mp-staff .staff-svg { width: 100%; height: auto; }
 .mp-no { text-align: center; font-family: var(--font-1900); font-style: italic; font-size: 1cqw; color: #6b4e36; }
 /* buttons on the desk */
@@ -630,6 +640,9 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 
 /* ---------- Gallery ---------- */
 .composer .panel::before { background: radial-gradient(circle at 20% 20%, rgba(139, 90, 40, .15), transparent 30%), linear-gradient(#ede0c6, #e2d1b0); }
+/* the walls of composers: each is a page carrying the wall picture, so it can slide along (pager.js) */
+.gallery .stage { background-image: none !important; background-color: #140b06; overflow: hidden; }
+.wall-page { position: absolute; inset: 0; background: url(../public/art/closeups/gallery-wall.webp) 0 0 / 100% 100%; will-change: transform; }
 .gframe {
   position: absolute; padding: 0; border: none; background: none; cursor: pointer;
   transform: rotate(var(--tilt)); transform-origin: 50% 0; transition: transform .25s, filter .25s;

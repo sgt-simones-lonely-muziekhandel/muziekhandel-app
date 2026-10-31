@@ -22,6 +22,7 @@ One document per feature: what it does for the player, how it's built, where the
 | De notenles (theory for beginners) | [lessons.md](lessons.md) | `js/ui/lessons.js` |
 | Game shell, input and overlays | [game-shell.md](game-shell.md) | `index.html`, `js/main.js`, `js/ui/ui.js`, `css/style.css` |
 | Content data (composers and pieces) | [content-data.md](content-data.md) | `js/data.js` |
+| Back end (Muziekschatten data from Virtuoso) | [backend.md](backend.md) | `backend/server.py`, `js/catalogue.js`, `js/ui/pager.js` |
 | Real sheet music (SOM collection) | [som-scores.md](som-scores.md) | `tools/sheet2midi/`, `scripts/import_scores.py`, `js/som-scores.js` |
 | Art assets | [assets.md](assets.md) | `assets/`, `tools/build_assets.py` |
 
@@ -29,4 +30,4 @@ One document per feature: what it does for the player, how it's built, where the
 
 - All in-game text is Dutch; code, comments and these documents are English.
 - Colours, fonts and UI style follow the [design guide](../design/README.md).
-- No build step: plain ES modules served as static files. Run instructions are in the [root README](../../README.md).
+- No build step: plain ES modules served as static files, by the back end (`backend/server.py`). Run instructions are in the [root README](../../README.md).

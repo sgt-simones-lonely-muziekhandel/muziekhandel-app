@@ -10,10 +10,13 @@
 // paper and a shadow cast on the page underneath (a cover is board: it hardly bends); a page can be
 // dragged with the mouse or a finger, and its corner lifts when pointed at.
 // ← → or a click on a page flip; Space takes the piece to the piano, on top of the book, so Terug
-// comes back to this page.
-import { frame, h, esc } from './ui.js';
+// comes back to this page. A piece from the Muziekschatten data (js/catalogue.js) has no notes yet:
+// its book is its scanned cover, the title page with all its makers, and a page saying the notes
+// are still to come; it can't go to the piano.
+import { frame, h, esc, waitView } from './ui.js';
 import { coverHtml, SHEET_ART } from './library.js';
 import { pieceById, creditFor } from '../data.js';
+import { loadPiece } from '../catalogue.js';
 import { parsePiece } from '../music.js';
 import { renderPage, pageCount } from '../notation.js';
 import { rustle } from '../audio.js';
@@ -35,17 +38,21 @@ export function closedCoverRect() {
   return { left: W / 2 - PAGE.w / 2 * cq, top: top + PAGE.top * cq, width: PAGE.w * cq, height: PAGE.h * cq };
 }
 
-export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
+export function sheetView(ui, opts) {
+  const { pieceId, noFade = false, fromPiano = false } = opts;
   const piece = pieceById(pieceId);
-  const parsed = parsePiece(piece);
+  if (!piece) return waitView(ui, 'Bladmuziek', loadPiece(pieceId), () => ui.replace('sheet', opts));
+  const parsed = piece.notes ? parsePiece(piece) : null;
   const composer = creditFor(piece);
-  const musicPages = pageCount(parsed, SYSTEMS, PER_SYSTEM);
+  const musicPages = parsed ? pageCount(parsed, SYSTEMS, PER_SYSTEM) : 0;
 
   const { el, body } = frame(ui, {
     title: 'Bladmuziek',
     cls: `sheet ${noFade ? 'no-zoom' : ''}`,
     full: true,
-    tip: 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op de spatiebalk om dit stuk op de piano te spelen.',
+    tip: parsed
+      ? 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op de spatiebalk om dit stuk op de piano te spelen.'
+      : 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug.',
   });
 
   // The pages in reading order. A real song: the pages of the original scan; when the second page
@@ -57,6 +64,14 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
   const maker = composer.id
     ? `<button class="composer-link">${esc(composer.name)}<span>${esc(composer.years)}</span></button>`
     : `<span class="composer-link plain">${esc(composer.name)}</span>`;
+  // the other makers of a piece from the Muziekschatten data, and when it was printed
+  const names = people => people?.map(p => p.name).join(', ');
+  const more = [
+    piece.composers?.length > 1 && `muziek ook van ${names(piece.composers.slice(1))}`,
+    piece.lyricists?.length && `tekst van ${names(piece.lyricists)}`,
+    piece.arrangers?.length && `bewerkt door ${names(piece.arrangers)}`,
+    [piece.publisher, piece.year].filter(Boolean).join(', '),
+  ].filter(Boolean);
   const pages = scans ? scanUrls.map((url, i) => (url
     ? `<figure class="scan-page"><img src="${url}" alt="Bladzijde ${i + 1} van het origineel" draggable="false"></figure>`
     : '<div class="blank-page"></div>')) : [
@@ -67,7 +82,13 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
        <span class="tp-rule"></span>
        <small>muziek van</small>
        ${maker}
+       ${more.length ? `<p class="tp-more">${more.map(esc).join('<br>')}</p>` : ''}
      </div>`,
+    ...(parsed ? [] : [`
+      <div class="music-page">
+        <header class="mp-head"><b>${esc(piece.title)}</b><i>${esc(composer.name)}</i></header>
+        <p class="mp-later">De noten van dit stuk komen er binnenkort bij. Dan kun je het ook op de piano spelen!</p>
+      </div>`]),
     ...Array.from({ length: musicPages }, (_, i) => `
       <div class="music-page">
         <header class="mp-head"><b>${esc(piece.title)}</b><i>${esc(composer.name)}</i></header>
@@ -221,11 +242,13 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
   };
   place();
 
-  // opened from the piano (its Bladmuziek button), the piano is still underneath
-  const toPiano = () => (fromPiano ? ui.close() : ui.open('piano', { pieceId }));
+  // opened from the piano (its Bladmuziek button), the piano is still underneath; without notes
+  // there is nothing to play yet
+  const toPiano = () => { if (parsed) (fromPiano ? ui.close() : ui.open('piano', { pieceId })); };
   body.querySelector('.prev').onclick = () => turn(-1);
   body.querySelector('.next').onclick = () => turn(1);
   body.querySelector('.play').onclick = toPiano;
+  body.querySelector('.play').hidden = !parsed;
   if (composer.id) body.querySelector('.composer-link').onclick = e => { e.stopPropagation(); ui.open('composer', { composerId: composer.id }); };
   // Drag a page over (mouse or finger): it follows the pointer and, let go, finishes the turn if it
   // got past a third of the way (or was flicked), else falls back. A click without moving turns it.

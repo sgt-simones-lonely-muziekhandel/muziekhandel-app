@@ -7,15 +7,19 @@ A game for Dutch kids (5–15) built on sheet music from Muziekschatten. Made fo
 
 ## Run it
 
-No build step: it's plain HTML, CSS and JavaScript modules. Serve the folder and open it in a browser:
+No build step: it's plain HTML, CSS and JavaScript modules. The back end serves them, and gets the
+sheet music and the composers from Virtuoso (see [the back end](docs/features/backend.md)):
 
 ```sh
-python3 -m http.server 8765
+ssh -N -L 8890:localhost:8890 root@hackalod.kernelmaft.com   # Virtuoso, in another terminal
+python3 backend/server.py
 # open http://localhost:8765
 ```
 
-With Nix: `nix run` serves the game the same way (`PORT=9000 nix run` for another port), and
-`nix develop` gives a shell with Python and the packages the scripts in `scripts/` and `tools/` need.
+Without Virtuoso the game still runs, but the sheet-music cabinet and the portrait wall stay empty.
+
+With Nix: `nix run` does the same (`PORT=9000 nix run` for another port), and `nix develop` gives a
+shell with Python and the packages the scripts in `scripts/` and `tools/` need.
 
 Opening `index.html` straight from disk won't work, because browsers block JS modules on `file://`.
 The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the internet.
@@ -64,10 +68,10 @@ Composers and pieces live in `js/data.js`. A piece is a line of notes like `E4:q
 | Area | Files | Owners |
 |---|---|---|
 | **Front end** | `index.html`, `css/`, `js/` (scenes, player, views in `js/ui/`), `public/art/`, `assets/` | Amber, Antonio |
-| **Back end** | `public/data/` (Muziekschatten JSON), `public/audio/`, `scripts/fetch-data` | Rei, Teo |
+| **Back end** | `backend/` (API over Virtuoso), `js/catalogue.js`, `public/audio/` | Rei, Teo |
 | Design | `docs/design/`, `scripts/import_art.py` | Amber, Antonio |
 
-**The contract between back end and front end** is the shape of the composers and pieces in `js/data.js`, described in [`docs/features/content-data.md`](docs/features/content-data.md). The back end delivers Muziekschatten data as JSON in that shape in `public/data/`, and `js/data.js` loads it instead of the demo set. Agree on any extra fields (IRIs, links between people and works) together before building on either side.
+**The contract between back end and front end** is the API of `backend/server.py`, described in [`docs/features/backend.md`](docs/features/backend.md); `js/catalogue.js` turns its answers into the shape of the composers and pieces in `js/data.js` ([`docs/features/content-data.md`](docs/features/content-data.md)). Agree on any extra fields together before building on either side.
 
 ## Folder map
 
@@ -76,7 +80,8 @@ index.html       start page and title screen
 css/             styling: paper cards, brass buttons
 js/              FRONT END  the game: main loop, street, shop, boy, cyclists, sky
   ui/                       the views: piano, sheet music, gallery, gramophone, shopkeeper
-  data.js                   composers and pieces (demo now, Muziekschatten later)
+  data.js                   the game's own composers and pieces
+  catalogue.js              BACK END  the Muziekschatten sheet music and composers, from the API
   music.js, notation.js     note text → notes on the staff and the keys
   audio.js                  piano sound (Tone.js)
 public/
@@ -84,6 +89,7 @@ public/
   data/          BACK END   Muziekschatten data as JSON
   audio/         BACK END   recordings for the gramophone
 assets/          a few images of the game's own (composer portraits)
+backend/         BACK END   the API over Virtuoso (server.py), which also serves the game
 scripts/         tools you run yourself (art import, data fetch)
 docs/
   design/        design guide and mood boards
