@@ -533,6 +533,11 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .gframe .face { position: absolute; object-fit: cover; object-position: 50% 15%; }
 .gframe .face.oval { border-radius: 50%; }
 .gframe .gilt-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wall-plaque {
+  position: absolute; left: 50%; top: 100%; translate: -50% 35%; white-space: nowrap; padding: .15cqw .8cqw; border-radius: .3cqw;
+  font-family: var(--font-head); font-weight: 700; font-size: 1.05cqw; color: #2a1a0a;
+  background: linear-gradient(#e9c97a, #a87d34); border: 1.5px solid #4a3216;
+}
 .gilt {
   display: block; padding: 12px; border-radius: 6px; position: relative;
   background: linear-gradient(135deg, #f6dc96, #a87a2e 30%, #f0d58e 50%, #8a5f1f 75%, #e9c97a);

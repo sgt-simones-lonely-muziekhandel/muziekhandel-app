@@ -10,11 +10,9 @@ A game for Dutch kids (5–15) built on sheet music from Muziekschatten. Made fo
 No build step: it's plain HTML, CSS and JavaScript modules. Serve the folder and open it in a browser:
 
 ```sh
-python3 scripts/serve.py
+python3 -m http.server 8765
 # open http://localhost:8765
 ```
-
-`scripts/serve.py` is `python3 -m http.server` that tells the browser to check every file for a newer version. With plain `http.server` the browser keeps old copies of the scripts for a while, so after a change or a `git pull` it can run a mix of old and new code, even after a normal refresh (Cmd+Shift+R forces a full reload).
 
 Opening `index.html` straight from disk won't work, because browsers block JS modules on `file://`.
 The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the internet.

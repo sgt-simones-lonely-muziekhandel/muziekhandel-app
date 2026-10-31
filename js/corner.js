@@ -1,6 +1,6 @@
 // The listening corner, one room to the right of the shop: a painted close-up of a window,
-// a chest of cylinders and an armchair (closeups/gramophone-corner), with the gramophone
-// (shop/gramophone, on its own cabinet) standing on the floor between them.
+// a crate of records and an armchair (closeups/gramophone-corner), with the gramophone
+// (shop/gramophone, horn and box only) standing on the round table.
 import { Boy } from './boy.js';
 import { hitSpot, nearestSpot, clickSpots, drawLabel } from './hotspots.js';
 import { skyAt, currentHour } from './sky.js';
@@ -17,9 +17,10 @@ const IMG = {
 };
 const ready = img => img.complete && img.naturalWidth > 0;
 
-// The gramophone image is a cylinder phonograph on its cabinet, drawn whole with its feet on the
-// floor (`bottom`, scene units) between the chest and the armchair.
-const GRAMO = { cx: 640, bottom: 610, w: 270 };
+// The gramophone image is a cylinder phonograph on a cabinet; only the top part (source rows
+// 0–TOP_ROWS: horn and box down to its black base) is drawn, standing on the round table.
+const TOP_ROWS = 584;
+const GRAMO = { cx: 628, bottom: 404, w: 300 };
 
 // The painted room is in daylight; by the visitor's clock it gets darker like the street outside.
 const K = W / BG_W;
@@ -30,7 +31,7 @@ const ROOM_LAMP = [640, 120];                                      // a warm glo
 const HOTSPOTS = [
   { id: 'back', label: 'Terug naar de winkel', rects: [[0, 120, 46, 580]], stands: [70], faceLeft: true, action: g => g.goTo('shop') },
   { id: 'records', label: 'Cilinders', rects: [[65, 352, 298, 306]], stands: [220], action: g => g.ui.open('gramophone') },
-  { id: 'gramophone', label: 'Grammofoon', rects: [[490, 140, 300, 470]], stands: [640], action: g => g.ui.open('gramophone') },
+  { id: 'gramophone', label: 'Grammofoon', rects: [[470, 110, 340, 300]], stands: [640], action: g => g.ui.open('gramophone') },
 ];
 
 export class Corner {
@@ -93,15 +94,15 @@ export class Corner {
   }
 }
 
-// The room with the gramophone on its cabinet, lit for the time of day (W × H scene units).
+// The room with the gramophone on its table, lit for the time of day (W × H scene units).
 function drawCornerPicture(ctx, sky, time) {
   if (ready(IMG.bg)) ctx.drawImage(IMG.bg, 0, 0, W, H);
   const g = IMG.gramophone;
   if (ready(g)) {
-    const h = g.naturalHeight * GRAMO.w / g.naturalWidth;
+    const s = GRAMO.w / g.naturalWidth, h = TOP_ROWS * s;
     ctx.fillStyle = 'rgba(20,12,6,0.35)';
-    ctx.beginPath(); ctx.ellipse(GRAMO.cx + 6, GRAMO.bottom - 4, GRAMO.w * 0.42, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.drawImage(g, GRAMO.cx - GRAMO.w / 2, GRAMO.bottom - h, GRAMO.w, h);
+    ctx.beginPath(); ctx.ellipse(GRAMO.cx, GRAMO.bottom - 3, GRAMO.w * 0.36, 9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.drawImage(g, 0, 0, g.naturalWidth, TOP_ROWS, GRAMO.cx - GRAMO.w / 2, GRAMO.bottom - h, GRAMO.w, h);
   }
   drawNight(ctx, sky, time);
 }
