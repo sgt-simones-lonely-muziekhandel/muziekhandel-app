@@ -10,7 +10,7 @@ In the shop, the paintings above the piano are the **four makers of the game**, 
 4. **Composer card** (a paper card over the dimmed wall):
    - Large portrait with plaque.
    - Large portrait with plaque on the left.
-   - **Biography** (*Het verhaal van …*) on the right, in short, simple sentences, a **Wist je dat?** (did you know?) fact, and birth/death dates and places. **Voorlezen** (speaker icon) reads it aloud in Dutch.
+   - **Biography** (*Het verhaal van …*) on the right, in short, simple sentences, a **Wist je dat?** (did you know?) fact, and birth/death dates and places. **Voorlezen** (speaker icon) reads it aloud in Dutch; press it again (*Stoppen*) to stop. Leaving the card stops the voice too.
    - Under it, **Muziek van …**: one card per piece of this composer (their hand-written pieces, which are not in the cabinet: that holds the SOM songs), with its music cylinder, title and subtitle, and two buttons: **Luister** plays it on the [gramophone](gramophone.md), **Bladmuziek** opens the [sheet-music book](sheet-music.md). Composers without pieces yet get a short note from Meneer Simone instead.
    - The family tree that used to be here was removed.
 

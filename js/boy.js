@@ -3,7 +3,9 @@
 // is posed every frame: legs swing and bend, arms swing the other way, the body rides up
 // and down on whichever foot is on the ground. Walks with the arrow keys or to a clicked spot.
 // The future boy (characters/kid-future, grey jacket and gas mask) was cut from the same sheet
-// layout, so his pieces share the same joints.
+// layout, so his pieces share the same joints. The torso is torso-armless.webp: torso.webp has
+// both sleeves painted on, which with the swinging arm pieces gave him four arms
+// (scripts/make_armless_torso.py takes them off).
 
 const ready = img => img.complete && img.naturalWidth > 0;
 
@@ -14,7 +16,7 @@ function parts(kit) {
   if (kits.has(kit)) return kits.get(kit);
   const load = name => { const i = new Image(); i.src = `public/art/characters/${kit}/${name}.webp`; return i; };
   const P = {
-    torso: { img: load('torso'), neck: [156, 14], shoulder: [128, 50], hipFront: [150, 196], hipBack: [124, 196] },
+    torso: { img: load('torso-armless'), neck: [156, 14], shoulder: [128, 50], hipFront: [150, 196], hipBack: [124, 196] },
     head: { img: load('head'), pivot: [96, 158] },
     upperArm1: { img: load('upper-arm-1'), pivot: [54, 21], end: [25, 91] },
     lowerArm1: { img: load('lower-arm-1'), pivot: [25, 19] },

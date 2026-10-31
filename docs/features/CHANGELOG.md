@@ -2,6 +2,20 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — One back button, ↓ goes back, every book bends, a calmer voice, two legs and two arms
+
+Changed:
+
+- [Game shell](game-shell.md): every window has one round brass back button, top left (like the shopkeeper's ✕); the ✕ in the corner of the windows is gone. **↓** goes back everywhere: out of a window, out of the corner, out of the shop (also S in the scenes). The game can be played with the keyboard alone.
+- [Sheet music](sheet-music.md): every book opens like a real book with bending pages, the composers' books too (their cover bends only a little, like board). A song whose scan has no printed cover keeps the cover it had in the cabinet, so it no longer disappears on the desk.
+- [Shopkeeper](shopkeeper.md), [composers](composers.md): *Voorlezen* uses the most natural Dutch voice the browser has and reads a sentence at a time. While reading, the button says *Stoppen*; leaving the card or the window stops the voice.
+- [Shop](shop.md): the four paintings hang a little lower and behind the hanging lamp (the lamp is cut out of the wall and drawn over them, `scripts/cut_shop_lamp.py`).
+
+Fixed:
+
+- [Cyclists](cyclists.md): the lady had a third leg: a piece of the boot drawn in her picture stayed in her cut-out body, still, while her two boots pedalled.
+- [Player](player.md): the boy had four arms: his torso picture has both sleeves painted on, under the two swinging arms. He now uses an armless torso (`scripts/make_armless_torso.py`), the future boy too.
+
 ## 2026-10-31 — Two sheet-music cabinets, a gramophone chest that glides
 
 Added:

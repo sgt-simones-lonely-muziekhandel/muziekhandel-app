@@ -94,7 +94,7 @@ export function composerView(ui, { composerId }) {
     list.appendChild(li);
   }
   if (!pieces.length) list.appendChild(h('<li class="music-none">Van deze componist heeft de winkel nog geen muziek. Vraag het Meneer Simone later nog eens!</li>'));
-  body.querySelector('.speak').onclick = () => speak(`${c.name}. ${c.bio} Wist je dat? ${c.fact}`);
+  body.querySelector('.speak').onclick = e => speak(`${c.name}. ${c.bio} Wist je dat? ${c.fact}`, null, e.currentTarget);
 
   return { el };
 }

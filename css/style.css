@@ -160,9 +160,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
   width: min(100vw, 100dvh * 1672 / 941);
 }
 .full-hud { position: absolute; left: 16px; right: 16px; top: 14px; display: flex; align-items: flex-start; gap: 12px; pointer-events: none; z-index: 4; }
-.full-hud .close { margin-left: auto; }
 .full-hud > * { pointer-events: auto; }
-.full-hud .btn { min-height: 40px; padding: 6px 14px; font-size: 16px; box-shadow: 0 3px 10px rgba(0, 0, 0, .5); }
+.full-hud .btn:not(.brass-round) { min-height: 40px; padding: 6px 14px; font-size: 16px; box-shadow: 0 3px 10px rgba(0, 0, 0, .5); }
 .full-title {
   margin: 0; padding: 8px 18px; border-radius: 8px; font-family: var(--font-title); font-size: clamp(15px, 1.6vw, 22px); color: #2a1a0a;
   background: linear-gradient(#f0d58e, #b8862f); border: 2px solid #5a3d12; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 4px 12px rgba(0, 0, 0, .45);
@@ -248,6 +247,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .book {
   position: absolute; left: 50%; top: 6.1cqw; width: calc(2 * 44cqw * 566 / 768); height: 44cqw; margin-left: calc(-44cqw * 566 / 768);
   transform-style: preserve-3d; transition: transform .9s cubic-bezier(.45, .05, .2, 1);
+  --pw: calc(44cqw * 566 / 768); touch-action: none; user-select: none;
 }
 /* closed, the cover (the right half) is in the middle of the screen */
 .book.closed { transform: translateX(-25%); }
@@ -260,33 +260,27 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .leaf {
   position: absolute; left: 50%; top: 0; width: 50%; height: 100%; transform-origin: 0 50%; transform-style: preserve-3d; cursor: pointer;
   transform: translateZ(var(--z)) rotateY(0deg);
-  transition: transform 1.05s cubic-bezier(.45, .05, .2, 1);
-  will-change: transform;
 }
 .leaf.turned { transform: translateZ(var(--z)) rotateY(-180deg); }
-/* A real song's book is the original sheets: paper all through, and pages that bend while they turn
-   (sheet.js cuts each leaf into strips, `.curl`, shown instead of the flat faces while it moves). */
-.book.curly { --pw: calc(44cqw * 566 / 768); touch-action: none; user-select: none; }
-.book.curly .leaf { transition: none; }
-.book.curly .book-back { background: #e9dfc8; border-radius: 0; box-shadow: .25cqw 0 0 #ddd0b4, .5cqw 0 0 #cfc09f, .6cqw 1.2cqw 2.4cqw rgba(0, 0, 0, .55); }
-.book.curly .leaf .face.front { box-shadow: none; }
+/* Pages bend while they turn: sheet.js cuts each leaf into strips (`.curl`), each showing its slice
+   of a copy of the page, shown instead of the flat faces while it moves. A real song's book is the
+   original sheets: paper all through, down to the back. */
+.book.scanned .book-back { background: #e9dfc8; border-radius: 0; box-shadow: .25cqw 0 0 #ddd0b4, .5cqw 0 0 #cfc09f, .6cqw 1.2cqw 2.4cqw rgba(0, 0, 0, .55); }
+.book.scanned .paper-leaf .face.front { box-shadow: none; }
 .leaf.curling { transform: translateZ(var(--z)); }
 .leaf.curling > .face { visibility: hidden; }
 .curl { position: absolute; inset: 0; transform-style: preserve-3d; display: none; }
 .leaf.curling .curl { display: block; }
 .strip { position: absolute; top: 0; left: 0; width: calc(100% / var(--strips)); height: 100%; transform-origin: 0 50%; transform-style: preserve-3d; }
 .strip .strip { left: 100%; width: 100%; }
-.strip > i {
-  position: absolute; inset: 0 -1px 0 0; backface-visibility: hidden;
-  background-color: #e9dfc8; background-repeat: no-repeat; background-size: var(--pw) auto;
-  background-position: calc(var(--pw) * var(--col) / var(--strips) * -1) center;
-}
+.strip > i { position: absolute; inset: 0 -1px 0 0; backface-visibility: hidden; overflow: hidden; background: #e9dfc8; }
+.strip .slice { position: absolute; top: 0; height: 100%; width: var(--pw); left: calc(var(--pw) * var(--col) / var(--strips) * -1); }
 .strip > .sb { transform: rotateY(180deg); inset: 0 0 0 -1px; }
-.strip > i::after { content: ''; position: absolute; inset: 0; background: #1a0f05; opacity: var(--sh, 0); }
+.strip > i::after { content: ''; position: absolute; inset: 0; z-index: 1; background: #1a0f05; opacity: var(--sh, 0); }
 /* the edge of the paper catches the light */
-.strip > .sf::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 40%, rgba(255, 248, 225, calc(var(--sh, 0) * .6))); }
+.strip > .sf::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, transparent 40%, rgba(255, 248, 225, calc(var(--sh, 0) * .6))); }
 /* blank paper: the back of a cover, the inside of the last page */
-.blank-page, .strip > i.blank {
+.blank-page {
   background-color: #e9dfc8;
   background-image: radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(110, 80, 40, .16)), repeating-linear-gradient(0deg, rgba(120, 90, 50, .035) 0 2px, transparent 2px 5px);
   background-size: auto;
@@ -304,11 +298,6 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .face::before { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(90deg, rgba(40, 24, 10, .28), rgba(40, 24, 10, .06) 7%, transparent 14%); }
 .face.back::before { background: linear-gradient(270deg, rgba(40, 24, 10, .28), rgba(40, 24, 10, .06) 7%, transparent 14%); }
 .cover-leaf .face.front::before { background: linear-gradient(90deg, rgba(0, 0, 0, .35), transparent 5%); }
-/* light falls off a page while it is in the air */
-.face::after { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; background: linear-gradient(90deg, rgba(30, 18, 8, .4), rgba(30, 18, 8, .1)); }
-.face.back::after { background: linear-gradient(270deg, rgba(30, 18, 8, .4), rgba(30, 18, 8, .1)); }
-.leaf.turning .face::after { animation: leaf-shade 1.05s ease-in-out; }
-@keyframes leaf-shade { 50% { opacity: 1; } }
 /* the cover: the cover picture, with the board's edge around it */
 .cover-leaf .face { border-radius: 0 .5cqw .5cqw 0; box-shadow: 0 0 0 .45cqw #4a1c14; }
 .cover-leaf .face.back { border-radius: .5cqw 0 0 .5cqw; }
@@ -323,7 +312,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
     repeating-linear-gradient(35deg, rgba(120, 80, 40, .05) 0 .3cqw, transparent .3cqw .9cqw),
     #e7dbc0;
 }
-.face .endpaper { position: absolute; inset: 0; }
+.face .endpaper, .slice .endpaper { position: absolute; inset: 0; }
 /* the title page (cover-inside.webp): only the title and the composer change */
 .tp-img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tp-text {
@@ -820,18 +809,28 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .q:hover::before { transform: scale(1.3); }
 .q.on { background: rgba(201, 154, 69, .26); color: #2a1a0a; border-bottom-color: #a87a2e; }
 .q.on::before { background: #8a2f1c; }
-/* the close button: a round brass button on the paper's top-right corner, clear of the bubble */
-.keeper-box { position: relative; }
-.keeper-close {
-  position: absolute; z-index: 2; top: -18px; right: -18px; width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+/* Every close (✕) and back (‹) button in the game: a round brass button. ✕ turns a quarter when
+   pointed at, ‹ leans the way it goes. */
+.brass-round {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
   display: grid; place-items: center; padding: 0; font: 700 21px/1 var(--font-body); color: #2e1c08;
   background: radial-gradient(circle at 35% 30%, #fff0b8, #f2c76b 45%, #c99a45 75%, #8a5f1f);
   border: 2px solid #4a3216; box-shadow: 0 4px 10px rgba(0, 0, 0, .45), inset 0 1px 1px rgba(255, 255, 255, .6);
   transition: transform .15s, filter .15s;
 }
-.keeper-close:hover { transform: scale(1.08) rotate(90deg); filter: brightness(1.1); }
-.keeper-close:focus-visible { outline: 3px solid #fff0b8; outline-offset: 2px; }
-@media (max-width: 700px) { .keeper-close { top: 6px; right: 6px; width: 40px; height: 40px; } }
+.brass-round:hover { transform: scale(1.08) rotate(90deg); filter: brightness(1.1); }
+.brass-round.back svg { width: 56%; height: 56%; }
+.brass-round.back:hover { transform: scale(1.08) translateX(-2px); }
+.brass-round:active { transform: scale(.95); }
+.brass-round:focus-visible { outline: 3px solid #fff0b8; outline-offset: 2px; }
+@media (max-width: 700px) { .brass-round { width: 40px; height: 40px; } }
+/* the title stays centred: as wide as the back button on the other side */
+.head-balance { flex: none; width: 46px; }
+@media (max-width: 700px) { .head-balance { width: 40px; } }
+/* the shopkeeper's: on the paper's top-right corner, clear of the bubble */
+.keeper-box { position: relative; }
+.keeper-close { position: absolute; z-index: 2; top: -18px; right: -18px; }
+@media (max-width: 700px) { .keeper-close { top: 6px; right: 6px; } }
 
 /* ---------- Small screens ---------- */
 .rotate-hint { display: none; }
@@ -844,7 +843,6 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
   .gramo-grid { grid-template-columns: 1fr; }
   .gramo-scene { max-height: 240px; }
   .panel { padding: 10px 12px 14px; }
-  .panel-head .back { padding: 6px 10px; }
   .keeper-main { flex-direction: column; gap: 10px; }
   .keeper-portrait { width: auto; flex-direction: row; }
   .keeper-portrait .keeper-face { width: 72px; height: 72px; }

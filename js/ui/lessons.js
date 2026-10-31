@@ -2,7 +2,7 @@
 // sentences in simple Dutch (Voorlezen reads them aloud) and something to try: a little keyboard,
 // a staff to click on, a tune to listen to while the counting runs along. The notes look and sound
 // as everywhere in the game (js/notation.js, the note colours, the piano samples).
-import { frame, h, esc, speak, SPEAKER } from './ui.js';
+import { frame, h, esc, speak, stopSpeaking, SPEAKER } from './ui.js';
 import { parsePiece, midiInfo, labelFor, noteNames, NOTE_COLORS } from '../music.js';
 import { renderPage } from '../notation.js';
 import { strike, playPiece, audioState } from '../audio.js';
@@ -279,6 +279,7 @@ export function lessonsView(ui) {
 
   function show(i) {
     stop();
+    stopSpeaking();
     at = Math.max(0, Math.min(CHAPTERS.length - 1, i));
     seen.add(at);
     const c = CHAPTERS[at];
@@ -300,13 +301,13 @@ export function lessonsView(ui) {
   }
   $('.prev').onclick = () => show(at - 1);
   $('.next').onclick = () => show(at + 1);
-  $('.speak').onclick = () => speak(`${CHAPTERS[at].title}. ${CHAPTERS[at].text}`);
+  $('.speak').onclick = e => speak(`${CHAPTERS[at].title}. ${CHAPTERS[at].text}`, null, e.currentTarget);
   show(0);
 
   return {
     el,
     onHide: stop,
-    destroy() { stop(); speechSynthesis?.cancel?.(); },
+    destroy() { stop(); stopSpeaking(); },
     onKey(e) {
       if (e.code === 'ArrowRight') { e.preventDefault(); show(at + 1); }
       if (e.code === 'ArrowLeft') { e.preventDefault(); show(at - 1); }
