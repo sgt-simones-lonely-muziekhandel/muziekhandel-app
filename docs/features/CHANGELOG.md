@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Recorded footsteps, a short gust for the time travel
+
+Changed:
+
+- [Sound effects](sound-effects.md): the footsteps are recordings now (Kenney, CC0), softer and lower; the time travel's chimes and long wind are replaced by one 2.5-second gust with a little chime (BigSoundBank, CC0) as the swirl starts, quiet long before the past has fully appeared. Made by `scripts/import_sounds.py` into `public/audio`.
+
 ## 2026-10-31 — The prologue dissolves again
 
 Changed:

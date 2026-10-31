@@ -10,7 +10,7 @@
 // A click, tap or ↑ / Enter / Space jumps to the next shot. The shared parts (timeline,
 // dissolves, captions, rain, dust) are in js/film.js.
 import { Film, H, load as loadImg, ready, smooth, ease, bump, cover, glow, sunBeams, boyFromBehind } from './film.js';
-import { sparkle, wind } from './sfx.js';
+import { loadTimeTravel, timeTravel } from './sfx.js';
 
 const load = name => loadImg(`public/art/intro/${name}.webp`);
 const IMG = {
@@ -57,6 +57,7 @@ export class Story extends Film {
     this.particles = [];
     this.spawn = 0;
     this.heard = 0; // the story time sounds were played up to
+    loadTimeTravel();
   }
 
   tick(dt) {
@@ -65,23 +66,13 @@ export class Story extends Film {
     this.sounds();
   }
 
-  // The sounds of the time travel (js/sfx.js): chimes when the crate opens, when the lid pops off
-  // and while the swirl sweeps across; wind that rises with the swirl and dies down towards the
-  // sunset. They follow the story time, so they wait with it while a caption is up.
+  // The sound of the time travel (js/sfx.js): one short gust of wind with a little chime as the
+  // swirl starts, about 2.5 seconds, so it is quiet again long before the past has fully come.
+  // It follows the story time, so it waits with it while a caption is up.
   sounds() {
-    const at = (key, beat) => this.shots.find(s => s.key === key).start + beat;
-    const now = (key, beat) => this.heard < at(key, beat) && this.T >= at(key, beat);
-    if (now('crate', CRATE_FLASH + 0.4)) sparkle({ n: 5, spread: 0.6 });
-    if (now('tube', LID_POP)) sparkle({ n: 10, spread: 1.4 });
-    if (now('travel', SWIRL[0])) sparkle({ n: 18, spread: SWIRL[1] * 0.8, level: 0.8 });
-    if (now('travel', AHEAD)) sparkle({ n: 6, spread: 2, rising: false, level: 0.5 });
+    const swirl = this.shots.find(s => s.key === 'travel').start + SWIRL[0];
+    if (this.heard < swirl && this.T >= swirl) timeTravel();
     this.heard = this.T;
-    const tube = this.timeIn('tube'), travel = this.timeIn('travel');
-    const peak = SWIRL[0] + SWIRL[1] * 0.5;
-    const level = travel >= 0
-      ? (0.35 + 0.65 * bump(travel, 0.5, peak, peak + 0.5, AHEAD)) * (1 - smooth((travel - AHEAD) / (SHOTS[2].dur - AHEAD)))
-      : 0.35 * smooth((tube - LID_POP) / 2.5);
-    if (level > 0.01) wind(level);
   }
 
   // over the shots: the flying music, and a gold bloom between the tube and the time travel,
