@@ -1,11 +1,11 @@
 // Inside the music shop, put together from the separate pieces in public/art/shop:
-// the empty room (back-wall), the piano with the composers' portraits above it, the counter
+// the empty room (back-wall), the piano with the team's portraits above it, the counter
 // with the shopkeeper, the cabinet, and foreground silhouettes. In the evening the hanging
 // lamps light up, following the real time like the street. Walking out on the right leads to
 // the listening corner (js/corner.js).
 import { Boy } from './boy.js';
-import { COMPOSERS } from './data.js';
-import { FRAME_TYPES, FRAME_SRC, COMPOSER_FRAME } from './frames.js';
+import { TEAM } from './data.js';
+import { FRAME_TYPES, FRAME_SRC, TEAM_FRAME } from './frames.js';
 import { hitSpot, nearestSpot, clickSpots, drawLabel } from './hotspots.js';
 import { skyAt, currentHour } from './sky.js';
 
@@ -59,22 +59,21 @@ const FURNITURE = [
 // The three hanging lamps in back-wall.webp: where the bulb sits under each shade.
 const LAMPS = [[518, 160], [982, 160], [1340, 160]];
 
-// Gilded frames on the wall, each with a composer portrait inside (see js/frames.js).
+// Gilded frames on the wall, each with a team portrait inside (see js/frames.js).
 const FRAME_IMG = Object.fromEntries(Object.keys(FRAME_TYPES).map(n => [n, load(FRAME_SRC(n))]));
-// A gallery wall above the piano: two in the top row (left and right of the hanging lamp), four below.
+// A gallery wall above the piano: two by two, close together around the hanging lamp.
 // Sized to the green wall panel between the pillars (x ≈ 345–710, below the beam at y ≈ 95).
 const FRAMES = [
-  { cx: 398, top: 104, h: 72, composer: 'bach' },
-  { cx: 606, top: 104, h: 74, composer: 'mozart' },
-  { cx: 396, top: 204, h: 72, composer: 'beethoven' },
-  { cx: 471, top: 204, h: 70, composer: 'chopin' },
-  { cx: 546, top: 204, h: 72, composer: 'verdi' },
-  { cx: 628, top: 208, h: 62, composer: 'tchaikovsky' },
+  { cx: 446, top: 112, h: 80, team: 'team-1' },
+  { cx: 560, top: 112, h: 80, team: 'team-2' },
+  { cx: 446, top: 200, h: 80, team: 'team-3' },
+  { cx: 560, top: 200, h: 80, team: 'team-4' },
 ];
 for (const f of FRAMES) {
-  f.type = COMPOSER_FRAME[f.composer];
-  f.portrait = load(COMPOSERS.find(c => c.id === f.composer).portrait);
-  f.short = COMPOSERS.find(c => c.id === f.composer).short;
+  const t = TEAM.find(m => m.id === f.team);
+  f.type = TEAM_FRAME[f.team];
+  f.portrait = load(t.portrait);
+  f.short = t.name;
 }
 
 function box(item) {
@@ -86,7 +85,7 @@ function box(item) {
 // Where things are, in world units. `stands` is where the boy walks to, one per rect.
 const HOTSPOTS = [
   { id: 'door', label: 'Naar buiten', rects: [[18, 150, 72, 450]], stands: [85], faceLeft: true, action: g => g.goTo('street') },
-  { id: 'portraits', label: 'Componisten', rects: [[352, 98, 324, 204]], stands: [420], action: g => g.ui.open('gallery') },
+  { id: 'portraits', label: 'Schilderijen', rects: [[352, 98, 324, 204]], stands: [420], action: g => g.ui.open('gallery') },
   { id: 'piano', label: 'Piano', rects: [[326, 300, 320, 298]], stands: [490], action: g => g.ui.open('piano') },
   { id: 'keeper', label: 'Meneer Simone', rects: [[666, 270, 436, 380]], stands: [880], action: g => g.ui.open('keeper') },
   { id: 'next', label: 'Luisterhoek →', rects: [[1406, 120, 34, 560]], stands: [1400], action: g => g.goTo('corner') },
@@ -248,6 +247,7 @@ export class Shop {
     ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
     if (ready(FRAME_IMG[f.type])) ctx.drawImage(FRAME_IMG[f.type], x, y, w, f.h);
     ctx.restore();
+    if (!f.short) return;
     // brass name plaque
     ctx.font = '700 11px "EB Garamond", serif';
     const pw = ctx.measureText(f.short).width + 14, py = y + f.h + 3;

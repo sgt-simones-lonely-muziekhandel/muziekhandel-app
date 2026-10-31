@@ -25,7 +25,7 @@ const TOPICS = [
   },
   {
     q: 'Wie zijn die mensen aan de muur?',
-    a: 'Dat zijn componisten: mensen die muziek bedenken en opschrijven. Bach, Mozart, Beethoven en nog meer. Klik op een schilderij en je leest hun verhaal en hoort hun muziek.',
+    a: 'Dat zijn de makers van dit spel! Ze hebben zich laten schilderen in kleren van vroeger, met hoge hoed en pruik en al. Klik op een schilderij en je ziet ze allemaal.',
     go: ['gallery', 'Naar de schilderijen'],
   },
   {

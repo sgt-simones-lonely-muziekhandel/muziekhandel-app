@@ -53,7 +53,7 @@ button { font: inherit; color: inherit; }
 /* during the films (the prologue and the time travel) the help button makes way for Overslaan */
 #btn-skip { display: none; min-height: 40px; box-shadow: var(--shadow); }
 #game.in-film #btn-skip { display: inline-flex; }
-#game.in-film #btn-help { display: none; }
+#game:not(.in-shop) #btn-help, #game.in-film #btn-help { display: none; }
 
 #fade { position: absolute; inset: 0; background: #0d0905; opacity: 0; pointer-events: none; transition: opacity .45s ease; z-index: 20; }
 #fade.on { opacity: 1; }
@@ -240,6 +240,40 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
   will-change: transform;
 }
 .leaf.turned { transform: translateZ(var(--z)) rotateY(-180deg); }
+/* A real song's book is the original sheets: paper all through, and pages that bend while they turn
+   (sheet.js cuts each leaf into strips, `.curl`, shown instead of the flat faces while it moves). */
+.book.curly { --pw: calc(44cqw * 566 / 768); touch-action: none; user-select: none; }
+.book.curly .leaf { transition: none; }
+.book.curly .book-back { background: #e9dfc8; border-radius: 0; box-shadow: .25cqw 0 0 #ddd0b4, .5cqw 0 0 #cfc09f, .6cqw 1.2cqw 2.4cqw rgba(0, 0, 0, .55); }
+.book.curly .leaf .face.front { box-shadow: none; }
+.leaf.curling { transform: translateZ(var(--z)); }
+.leaf.curling > .face { visibility: hidden; }
+.curl { position: absolute; inset: 0; transform-style: preserve-3d; display: none; }
+.leaf.curling .curl { display: block; }
+.strip { position: absolute; top: 0; left: 0; width: calc(100% / var(--strips)); height: 100%; transform-origin: 0 50%; transform-style: preserve-3d; }
+.strip .strip { left: 100%; width: 100%; }
+.strip > i {
+  position: absolute; inset: 0 -1px 0 0; backface-visibility: hidden;
+  background-color: #e9dfc8; background-repeat: no-repeat; background-size: var(--pw) auto;
+  background-position: calc(var(--pw) * var(--col) / var(--strips) * -1) center;
+}
+.strip > .sb { transform: rotateY(180deg); inset: 0 0 0 -1px; }
+.strip > i::after { content: ''; position: absolute; inset: 0; background: #1a0f05; opacity: var(--sh, 0); }
+/* the edge of the paper catches the light */
+.strip > .sf::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 40%, rgba(255, 248, 225, calc(var(--sh, 0) * .6))); }
+/* blank paper: the back of a cover, the inside of the last page */
+.blank-page, .strip > i.blank {
+  background-color: #e9dfc8;
+  background-image: radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(110, 80, 40, .16)), repeating-linear-gradient(0deg, rgba(120, 90, 50, .035) 0 2px, transparent 2px 5px);
+  background-size: auto;
+}
+.blank-page { position: absolute; inset: 0; }
+/* the shadow a turning page throws on the page it uncovers */
+.cast {
+  position: absolute; top: 0; height: 100%; left: 50%; width: calc(var(--span, 0%) / 2 + 9%); pointer-events: none; opacity: 0;
+  transform: translateZ(4px); background: linear-gradient(90deg, rgba(25, 14, 4, .55) calc(100% - 9cqw), transparent);
+}
+.cast.left { left: auto; right: 50%; background: linear-gradient(270deg, rgba(25, 14, 4, .55) calc(100% - 9cqw), transparent); }
 .face { position: absolute; inset: 0; backface-visibility: hidden; overflow: hidden; background: #f3ead8; }
 .face.back { transform: rotateY(180deg); }
 /* the fold of the spine: a soft shadow on the inner edge of every page */
@@ -284,8 +318,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .composer-link.plain:hover { text-decoration: none; }
 /* a page of the original scan: the yellowed sheet itself, with a small caption */
 .scan-page { position: absolute; inset: 0; margin: 0; background: #e9dfc8; }
-.scan-page img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.scan-page figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: .8cqw 0 .4cqw; text-align: center; font-family: var(--font-1900); font-style: italic; font-size: .85cqw; color: #5a4636; background: linear-gradient(transparent, rgba(233, 223, 200, .9) 40%); }
+.scan-page img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; -webkit-user-drag: none; user-select: none; }
 /* a real printed cover: inset like the drawn covers (which have a 10 px transparent margin), filling the
    book's cover on the desk */
 .cover-art.scan img { inset: 2% 2.8%; width: 94.4%; height: 96%; object-fit: cover; border-radius: 2px; }
@@ -547,6 +580,14 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .plaque { display: flex; flex-direction: column; align-items: center; padding: 6px 14px; border-radius: 5px; color: #2a1a0a; background: linear-gradient(#f0d58e, #b8862f); border: 2px solid #5a3d12; box-shadow: 0 3px 6px rgba(0, 0, 0, .3); }
 .plaque b { font-family: var(--font-head); font-size: 16px; letter-spacing: .03em; text-transform: uppercase; }
 .plaque small { font-size: 12px; }
+
+.team-card { text-align: center; }
+.team-intro { max-width: 760px; margin: 0 auto 18px; font-size: 18px; line-height: 1.55; }
+.team-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.team-list li { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.team-list .gilt { width: 100%; max-width: 220px; }
+.team-list .gilt img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 15%; }
+@media (max-width: 800px) { .team-list { grid-template-columns: 1fr 1fr; } }
 
 .composer-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; grid-template-areas: 'p b' 'p m'; grid-template-rows: auto 1fr; gap: 16px 26px; }
 .composer-portrait { grid-area: p; display: flex; flex-direction: column; align-items: center; gap: 10px; }

@@ -169,3 +169,22 @@ export function setGramophone(on) {
     crackle = null;
   }
 }
+
+// The soft rustle of a page being turned: a short burst of filtered noise, straight to the speakers
+// (not through the piano's filter, so it stays the same on the gramophone).
+let paper = null;
+export function rustle(seconds = 0.5) {
+  if (!audioState.ready) return;
+  if (!paper) {
+    const gain = new Tone.Gain(0.05).toDestination();
+    const env = new Tone.AmplitudeEnvelope({ attack: 0.06, decay: 0.15, sustain: 0.4, release: 0.25 }).connect(gain);
+    const filter = new Tone.Filter({ frequency: 3200, type: 'bandpass', Q: 0.7 }).connect(env);
+    const noise = new Tone.Noise('pink').connect(filter).start();
+    paper = { env, filter };
+  }
+  const now = Tone.now();
+  // the sound brightens as the page swings up and darkens as it lands
+  paper.filter.frequency.cancelScheduledValues(now).setValueAtTime(1800, now)
+    .linearRampToValueAtTime(4200, now + seconds * 0.45).linearRampToValueAtTime(1500, now + seconds);
+  paper.env.triggerAttackRelease(seconds * 0.7, now);
+}

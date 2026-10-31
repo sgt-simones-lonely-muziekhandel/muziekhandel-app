@@ -121,6 +121,9 @@ class Game {
     // a film has an Overslaan button instead of the help button
     const film = s instanceof Film;
     if (film !== this.inFilm) { this.inFilm = film; document.getElementById('game').classList.toggle('in-film', film); }
+    // Meneer Simone's help button only while the boy is inside the shop (or its listening corner)
+    const inShop = s === this.scenes.shop || s === this.scenes.corner;
+    if (inShop !== this.inShop) { this.inShop = inShop; document.getElementById('game').classList.toggle('in-shop', inShop); }
     // camera follows the boy; scenes narrower than the screen are centred
     this.camX = s.width <= this.viewW
       ? (s.width - this.viewW) / 2

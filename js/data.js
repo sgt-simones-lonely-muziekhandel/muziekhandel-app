@@ -178,6 +178,10 @@ export const COMPOSERS = [
   },
 ];
 
+// The makers of the game, as oil paintings: they hang on the shop wall and in the gallery close-up.
+// `name` goes on the brass plaque; without one the frame has no plaque.
+export const TEAM = [1, 2, 3, 4].map(n => ({ id: `team-${n}`, name: '', portrait: `public/art/portraits/team-${n}.webp` }));
+
 const DEMO_PIECES = [
   {
     id: 'kortjakje',

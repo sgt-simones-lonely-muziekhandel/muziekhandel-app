@@ -8,6 +8,11 @@ import { Cyclist } from './cyclist.js';
 const ART = 'public/art/past-street/';
 const load = name => { const i = new Image(); i.src = `${ART}${name}.webp`; return i; };
 const SKY = load('sky'), FAR = load('far'), WALK = load('walk'), FG = load('foreground');
+// sun, moon and stars (public/art/sky): light on transparency, drawn additively
+const skyArt = name => { const i = new Image(); i.src = `public/art/sky/${name}.webp`; return i; };
+const SUN = skyArt('sun'), MOON_GLOW = skyArt('moon-glow');
+const MOONS = [1, 2, 3, 4].map(n => skyArt(`moon-${n}`));
+const STARS = [1, 2, 3, 4, 5, 6].map(n => skyArt(`star-${n}`));
 
 const LAYER_W = 2172, LAYER_H = 724;
 const K = 720 / LAYER_H;             // layer pixels → world units
@@ -50,7 +55,16 @@ export class Street {
     this.hoverDoor = false;
     this.door = null; // { t, dir: 1 going in, -1 coming out } while stepping through the shop door
     const r = mulberry(42);
-    this.stars = Array.from({ length: 90 }, () => [r(), r() * 0.55, 0.5 + r() * 1.3, r() * 6]);
+    // A few stars, not a crowd: x and y (share of the sky), picture, size, twinkle phase and speed, and
+    // how dark it must be before the star comes out, so the evening has only the brightest ones.
+    this.stars = Array.from({ length: 24 }, (_, i) => {
+      const big = i % 6 === 0; // every sixth one is a sparkling star, the rest small points
+      return {
+        x: 0.03 + r() * 0.94, y: 0.04 + r() * 0.5, img: big ? 2 + Math.floor(r() * 4) : Math.floor(r() * 2),
+        size: big ? 30 + r() * 14 : 12 + r() * 10, ph: r() * 6.3, speed: 0.8 + r() * 1.6,
+        from: big ? 0.35 + r() * 0.2 : 0.45 + r() * 0.5,
+      };
+    });
     // glints of light on the water: x, y, length, phase, speed
     this.glints = Array.from({ length: 70 }, () => [r() * W, 650 + r() * 66, 6 + r() * 16, r() * 7, 0.6 + r() * 1.4]);
   }
@@ -249,32 +263,53 @@ export class Street {
     ctx.restore();
   }
 
+  // Sun, moon and stars from public/art/sky, all light on transparency, added onto the sky colour.
   drawSkyBodies(ctx, sky, vw) {
-    if (sky.dark > 0.25) {
-      ctx.fillStyle = '#fff8e0';
-      for (const [x, y, s, ph] of this.stars) {
-        ctx.globalAlpha = (sky.dark - 0.25) * (0.55 + 0.45 * Math.sin(this.time * 1.5 + ph));
-        ctx.fillRect(x * vw, y * 480, s, s);
-      }
-      ctx.globalAlpha = 1;
-    }
     const arc = t => [vw * (0.1 + 0.8 * t), 380 - Math.sin(Math.PI * t) * 320];
-    const disc = (t, r, glowCol, fill) => {
-      const [x, y] = arc(t);
-      const glow = ctx.createRadialGradient(x, y, 8, x, y, r * 4.5);
-      glow.addColorStop(0, glowCol); glow.addColorStop(1, 'rgba(255,240,200,0)');
-      ctx.fillStyle = glow; ctx.fillRect(x - r * 4.5, y - r * 4.5, r * 9, r * 9);
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = fill; ctx.fill();
-      ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.stroke();
-      return [x, y];
-    };
-    if (sky.sun != null) disc(sky.sun, 30, 'rgba(255,230,160,0.7)', '#fbe3a1');
-    if (sky.moon != null) {
-      const [x, y] = disc(sky.moon, 22, 'rgba(230,235,255,0.35)', '#efeedd');
-      ctx.beginPath(); ctx.arc(x + 9, y - 5, 18, 0, Math.PI * 2);
-      ctx.fillStyle = sky.top; ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    // stars come out one by one as it gets dark and twinkle by fading in and out
+    for (const s of this.stars) {
+      const out = Math.min(1, Math.max(0, (sky.dark - s.from) / 0.2));
+      const img = STARS[s.img];
+      if (!out || !ready(img)) continue;
+      const tw = 0.5 + 0.5 * Math.sin(this.time * s.speed + s.ph);
+      const size = s.size * (0.85 + 0.25 * tw);
+      ctx.globalAlpha = out * (0.45 + 0.55 * tw);
+      ctx.drawImage(img, s.x * vw - size / 2, s.y * 480 - size / 2, size, size);
     }
+    // the sun, warmer and bigger near the horizon
+    if (sky.sun != null && ready(SUN)) {
+      const [x, y] = arc(sky.sun);
+      const low = 1 - Math.sin(Math.PI * Math.min(1, Math.max(0, sky.sun)));
+      const size = 170 * (1 + 0.25 * low);
+      ctx.globalAlpha = 1;
+      ctx.filter = low > 0.35 ? `sepia(${(low - 0.35).toFixed(2)}) saturate(${(1 + low).toFixed(2)}) hue-rotate(${(-12 * low).toFixed(0)}deg)` : 'none';
+      ctx.drawImage(SUN, x - size / 2, y - size / 2, size, size);
+      ctx.filter = 'none';
+    }
+    // the moon in today's phase: a crescent, half, gibbous or full moon, lit on the right while it
+    // grows and mirrored while it shrinks; at new moon there is none
+    if (sky.moon != null) {
+      const [x, y] = arc(sky.moon);
+      const lit = (1 - Math.cos(2 * Math.PI * sky.phase)) / 2;
+      const D = 58;
+      if (lit > 0.03 && ready(MOON_GLOW)) {
+        ctx.globalAlpha = Math.min(1, sky.dark) * (0.25 + 0.45 * lit);
+        ctx.drawImage(MOON_GLOW, x - D * 2.6, y - D * 2.6, D * 5.2, D * 5.2);
+      }
+      const img = lit < 0.03 ? null : MOONS[lit < 0.35 ? 0 : lit < 0.65 ? 1 : lit < 0.93 ? 2 : 3];
+      if (img && ready(img)) {
+        // the pictures are cut to the lit part: their right edge is the right edge of the disc
+        const w = D * img.naturalWidth / img.naturalHeight;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.6 + 0.4 * Math.min(1, sky.dark);
+        ctx.translate(x, y);
+        if (sky.phase > 0.5) ctx.scale(-1, 1);
+        ctx.drawImage(img, D / 2 - w, -D / 2, w, D);
+      }
+    }
+    ctx.restore();
   }
 
   // The canal: each thin row of painted water is drawn again shifted sideways by a slow wave,

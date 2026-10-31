@@ -5,7 +5,7 @@ A small room to the right of the shop, where the [gramophone](gramophone.md) sta
 ## For the player
 
 - A cosy corner: a big window over the canal, a crate full of records, a round table with the brass gramophone on it, and a green armchair.
-- **Gramophone** (*Grammofoon*) and the **crate** (*Cilinders*) both open the gramophone, where you pick a music cylinder and listen.
+- Only the **gramophone** (*Grammofoon*) can be clicked: it opens the gramophone, where you pick a music cylinder and listen. The crate is part of the room, not a button.
 - **Back to the shop**: keep walking left, or click the left edge (*Terug naar de winkel*). The boy comes back in at the right side of the shop.
 - Objects get a paper label like in the shop (no glowing outline); ↑ / Enter / E / Space uses the nearest one.
 

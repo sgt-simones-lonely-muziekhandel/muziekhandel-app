@@ -30,7 +30,7 @@ const ROOM_LAMP = [640, 120];                                      // a warm glo
 
 const HOTSPOTS = [
   { id: 'back', label: 'Terug naar de winkel', rects: [[0, 120, 46, 580]], stands: [70], faceLeft: true, action: g => g.goTo('shop') },
-  { id: 'records', label: 'Cilinders', rects: [[65, 352, 298, 306]], stands: [220], action: g => g.ui.open('gramophone') },
+  // only the gramophone opens the music; the crate is just part of the room
   { id: 'gramophone', label: 'Grammofoon', rects: [[470, 110, 340, 300]], stands: [640], action: g => g.ui.open('gramophone') },
 ];
 

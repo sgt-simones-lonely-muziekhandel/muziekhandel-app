@@ -2,6 +2,38 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Painted sun, real moon phases, a few stars
+
+Changed:
+
+- [Sky](sky.md): the street's sky uses the painted art in `public/art/sky/`: the sun (warmer near the horizon), the moon in today's real phase with its glow (mirrored while waning), and about two dozen twinkling stars that come out one by one, only a few in the evening. `?maan=` fakes the phase.
+
+## 2026-10-31 — Only the gramophone opens the music
+
+Changed:
+
+- [Listening corner](listening-corner.md): the crate is no longer clickable; only the gramophone opens the music.
+
+## 2026-10-31 — Sheet music: only the original, pages that bend
+
+Changed:
+
+- [Sheet music](sheet-music.md) / [real sheet music](som-scores.md): the book of a real song holds only the original scan pages, with no drawn cover, endpaper or caption; the first page (printed cover, or the album's cover) lies on top.
+- [Sheet music](sheet-music.md): the pages bend like paper while they turn, with moving light, a shadow on the page underneath and a soft rustle ([audio](audio.md) `rustle()`). They can be dragged with the mouse or a finger, and a corner lifts when pointed at.
+
+## 2026-10-31 — Help button only in the shop
+
+Changed:
+
+- [Game shell](game-shell.md): the **?** help button is only shown while the boy is inside the shop (and its listening corner); on the streets and in the films it is hidden.
+- [Shop](shop.md): the four paintings above the piano hang closer together, around the hanging lamp.
+
+## 2026-10-31 — The team on the portrait wall
+
+Changed:
+
+- [Portrait wall](composers.md): the shop wall and the gallery close-up show the four makers of the game (`portraits/team-1` … `team-4`) instead of the six composers, without composer names; clicking a painting opens *De makers van dit spel* with all four. Meneer Simone explains who they are. Name plaques appear once names are filled in in `TEAM` (`js/data.js`). The composer cards stay in the code but are no longer reachable from the shop.
+
 ## 2026-10-31 — More instruments on the piano
 
 Added:

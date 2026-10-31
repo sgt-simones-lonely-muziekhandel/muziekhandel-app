@@ -1,19 +1,27 @@
-// Reading a piece: a sheet-music book lying on a wooden desk. It starts closed, showing the piece's
-// cover (it has just flown here from the cabinet, see library.js). Pages turn from right to left
-// around the spine like a real book: the cover first, then the title page
-// (items/sheet-music/cover-inside, the same for every piece, only the title and composer change),
-// then the music. A real song (js/som-scores.js) is only its original: the printed cover and the
-// pages of the scan (its notes in the game's colours are on the piano). ← → or a click on a page
-// flip; Space takes the piece to the piano, on top of the book, so Terug comes back to this page.
+// Reading a piece: a sheet-music book lying on a wooden desk. It starts closed (it has just flown
+// here from the cabinet, see library.js). Pages turn from right to left around the spine like a
+// real book. A real song (js/som-scores.js) is only its original: the pages of the scan, nothing
+// added (its notes in the game's colours are on the piano); its first page (the printed cover, or
+// for the album's tunes the album's cover) lies on top. Those paper pages bend while they turn:
+// each leaf is cut into strips that curl one after the other (`setCurl`), with light and shade on
+// the paper and a shadow cast on the page underneath; a page can be dragged with the mouse or a
+// finger, and its corner lifts when pointed at. A composer's piece is a drawn book: its cover, the
+// title page (items/sheet-music/cover-inside) and the engraved music, turning flat.
+// ← → or a click on a page flip; Space takes the piece to the piano, on top of the book, so Terug
+// comes back to this page.
 import { frame, h, esc } from './ui.js';
 import { coverHtml, SHEET_ART } from './library.js';
 import { pieceById, creditFor } from '../data.js';
 import { parsePiece } from '../music.js';
 import { renderPage, pageCount } from '../notation.js';
+import { rustle } from '../audio.js';
 
 // A portrait page holds 4 lines of 2 bars, engraved narrow so the notes come out big.
 const SYSTEMS = 4, PER_SYSTEM = 2, STAFF_W = 560;
 const TURN_MS = 1050;
+// a bending page: strips per leaf, how far it bends (degrees) and how long a whole turn takes
+const STRIPS = 18, BEND = 70, CURL_MS = 950;
+const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 
 // Size and place of one page on the desk, in cqw of the full-screen stage (100 × 56.25).
 export const PAGE = { w: 44 * 566 / 768, h: 44, top: 6.1 };
@@ -39,18 +47,19 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
     tip: 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op de spatiebalk om dit stuk op de piano te spelen.',
   });
 
-  // The pages in reading order: the title page and the music, or for a real song the pages of the
-  // original scan (without its first page when that is already the cover).
+  // The pages in reading order. A real song: the pages of the original scan; when the second page
+  // isn't the one printed on the back of the first (an album's tune after the album's cover), that
+  // back stays blank paper.
   const scans = piece.scans;
-  const scanPages = scans ? scans.pages.slice(scans.cover ? 1 : 0) : [];
+  const curly = !!scans;
+  const scanUrls = scans ? scans.pages.map(k => `${scans.dir}page-${k}.webp`) : [];
+  if (scans && scans.pages.length > 1 && scans.pages[1] !== scans.pages[0] + 1) scanUrls.splice(1, 0, null);
   const maker = composer.id
     ? `<button class="composer-link">${esc(composer.name)}<span>${esc(composer.years)}</span></button>`
     : `<span class="composer-link plain">${esc(composer.name)}</span>`;
-  const pages = scans ? scanPages.map((k, i) => `
-      <figure class="scan-page">
-        <img src="${scans.dir}page-${k}.webp" alt="Bladzijde ${k} van het origineel" ${i > 1 ? 'loading="lazy"' : ''}>
-        <figcaption>Uit de collectie van SOM · ${i + 1} van ${scanPages.length}</figcaption>
-      </figure>`) : [
+  const pages = scans ? scanUrls.map((url, i) => (url
+    ? `<figure class="scan-page"><img src="${url}" alt="Bladzijde ${i + 1} van het origineel" draggable="false"></figure>`
+    : '<div class="blank-page"></div>')) : [
     `<img class="tp-img" src="${SHEET_ART}cover-inside.webp" alt="">
      <div class="tp-text">
        <h3>${esc(piece.title)}</h3>
@@ -68,21 +77,35 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
   ];
   // A leaf is one sheet of paper: its front is a right-hand page, its back the left-hand page you see
   // after turning it. Leaf 0 is the cover, its back the endpaper.
-  const leafData = [{ cls: 'cover-leaf', front: coverHtml(piece, composer), back: '<div class="endpaper"></div>' }];
-  for (let p = 0; p < pages.length; p += 2) leafData.push({ cls: 'paper-leaf', front: pages[p], back: pages[p + 1] || '' });
+  const leafData = curly ? [] : [{ cls: 'cover-leaf', front: coverHtml(piece, composer), back: '<div class="endpaper"></div>' }];
+  for (let p = 0; p < pages.length; p += 2) {
+    leafData.push({ cls: 'paper-leaf', front: pages[p], back: pages[p + 1] || '', urls: curly && [scanUrls[p], scanUrls[p + 1]] });
+  }
   const n = leafData.length;
   // the last leaf is only turned if there is something on its back
   const maxTurn = pages.length % 2 === 0 ? n : n - 1;
+  // the bending copy of a leaf: nested strips, each hinged on the one before, showing its slice of
+  // the front and (turned around) of the back
+  const curlHtml = ([front, back]) => {
+    let inner = '';
+    for (let k = STRIPS - 1; k >= 0; k--) {
+      const face = (url, col, cls) => `<i class="${cls} ${url === null ? 'blank' : ''}" style="--col:${col}${url ? `;background-image:url('${url}')` : ''}"></i>`;
+      inner = `<div class="strip">${face(front, k, 'sf')}${face(back === undefined ? null : back, STRIPS - 1 - k, 'sb')}${inner}</div>`;
+    }
+    return `<div class="curl" style="--strips:${STRIPS}">${inner}</div>`;
+  };
 
   body.appendChild(h(`
     <div class="book-wrap">
-      <div class="book closed">
-        <div class="book-back"><div class="endpaper"></div></div>
+      <div class="book closed ${curly ? 'curly' : ''}">
+        <div class="book-back">${curly ? '<div class="blank-page"></div>' : '<div class="endpaper"></div>'}</div>
         ${leafData.map(l => `
           <div class="leaf ${l.cls}">
             <div class="face front">${l.front}</div>
             <div class="face back">${l.back}</div>
+            ${l.urls ? curlHtml(l.urls) : ''}
           </div>`).join('')}
+        <div class="cast"></div>
       </div>
       <button class="turn-btn prev" title="Terug bladeren (←)">‹</button>
       <button class="turn-btn next" title="Verder bladeren (→)">›</button>
@@ -109,9 +132,88 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
     body.querySelector('.prev').disabled = turned === 0;
     body.querySelector('.next').disabled = turned >= maxTurn;
   };
+  // ---- the bending page (real songs) ----
+  const cast = body.querySelector('.cast');
+  // Bend leaf `leaf` to `t` (0 flat on the right … 1 flat on the left); `dir` -1 when it is being
+  // turned back, so its free edge leads the other way. The edge lifts first and the part at the
+  // spine follows, so the page rolls over like paper held by its corner.
+  const setCurl = (leaf, t, dir) => {
+    const bend = BEND * Math.sin(Math.PI * t), base = 180 * ease(t);
+    const strips = leaf.curlStrips ??= [...leaf.querySelectorAll('.strip')];
+    let prev = 0, sum = 0;
+    strips.forEach((st, k) => {
+      const along = k / (STRIPS - 1);
+      let a = Math.max(0, Math.min(180, base + bend * (along - 0.5)));
+      if (dir < 0) a = 180 - a;
+      st.style.transform = `rotateY(${-(a - prev)}deg)`;
+      // light: full when flat, darker as the strip stands up
+      st.style.setProperty('--sh', (0.42 * Math.sin(a * Math.PI / 180)).toFixed(3));
+      prev = a; sum += a;
+    });
+    // the shadow it throws on the page it is uncovering, strongest mid-turn
+    const mid = sum / STRIPS, span = Math.abs(Math.cos(mid * Math.PI / 180));
+    cast.style.opacity = (0.55 * Math.sin(Math.PI * Math.min(1, t))).toFixed(3);
+    cast.classList.toggle('left', mid > 90);
+    cast.style.setProperty('--span', `${(span * 100).toFixed(1)}%`);
+  };
+  let active = null; // { leaf, dir, t, raf }
+  let drag = null, peek = null;
+  const startCurl = (leaf, dir) => {
+    leaf.classList.add('curling');
+    leaf.style.setProperty('--z', `${n + 2}px`);
+    active = { leaf, dir, t: 0, raf: 0 };
+    setCurl(leaf, 0, dir);
+    return active;
+  };
+  const endCurl = done => {
+    const { leaf, dir } = active;
+    cancelAnimationFrame(active.raf);
+    active = null;
+    if (done) turned += dir;
+    leaf.classList.remove('curling');
+    cast.style.opacity = 0;
+    place();
+  };
+  // run the active curl to `to` (1 = turned over, 0 = back where it was)
+  const settle = (to, ms = CURL_MS) => {
+    const a = active, from = a.t, t0 = performance.now(), dur = Math.max(160, ms * Math.abs(to - from));
+    cancelAnimationFrame(a.raf);
+    const step = now => {
+      const k = Math.min(1, (now - t0) / dur);
+      // a page already moving keeps its speed; one starting from rest eases in
+      a.t = from + (to - from) * (from > 0.02 && from < 0.98 ? 1 - (1 - k) ** 2 : k);
+      setCurl(a.leaf, a.t, a.dir);
+      if (k < 1) a.raf = requestAnimationFrame(step);
+      else if (to === 0 || to === 1) endCurl(to === 1);
+    };
+    a.raf = requestAnimationFrame(step);
+  };
+  // a whole turn from rest: map the eased time onto t linearly (setCurl already eases)
+  const curlTurn = d => {
+    const leaf = leaves[d > 0 ? turned : turned - 1];
+    const a = startCurl(leaf, d), t0 = performance.now();
+    rustle(CURL_MS / 1000 * 0.8);
+    if (turned === 0 || (d < 0 && turned === 1)) book.classList.toggle('closed', d < 0);
+    const step = now => {
+      a.t = Math.min(1, (now - t0) / CURL_MS);
+      setCurl(leaf, a.t, d);
+      if (a.t < 1) a.raf = requestAnimationFrame(step);
+      else endCurl(true);
+    };
+    a.raf = requestAnimationFrame(step);
+  };
+
+  // a page still moving lands at once; a lifted corner drops back
+  const land = () => {
+    if (active) { const done = active.leaf !== peek; setCurl(active.leaf, done ? 1 : 0, active.dir); endCurl(done); }
+    peek = null;
+  };
   const turn = d => {
+    // a page still moving lands first; a lifted corner drops back
+    land();
     const t = Math.max(0, Math.min(maxTurn, turned + d));
     if (t === turned) return;
+    if (curly) { curlTurn(d); return; }
     const leaf = leaves[d > 0 ? turned : t];
     turned = t;
     // light and shade run over the page while it's in the air
@@ -129,9 +231,74 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
   body.querySelector('.play').onclick = toPiano;
   if (composer.id) body.querySelector('.composer-link').onclick = e => { e.stopPropagation(); ui.open('composer', { composerId: composer.id }); };
   // a click on the right-hand page turns forward, on the left-hand page back
-  leaves.forEach((leaf, i) => {
-    leaf.onclick = () => { if (i === turned) turn(1); else if (i === turned - 1) turn(-1); };
-  });
+  if (!curly) {
+    leaves.forEach((leaf, i) => {
+      leaf.onclick = () => { if (i === turned) turn(1); else if (i === turned - 1) turn(-1); };
+    });
+  } else {
+    // Drag a page over (mouse or finger): it follows the pointer and, let go, finishes the turn if it
+    // got past a third of the way (or was flicked), else falls back. A click without moving turns it.
+    // Pointing at the outer edge of a page lifts its corner a little.
+    const pageW = () => book.getBoundingClientRect().width / 2;
+    const unpeek = () => {
+      if (!peek) return;
+      if (active?.leaf === peek) settle(0, 1400);
+      peek = null;
+    };
+    book.addEventListener('pointerdown', e => {
+      const leaf = e.target.closest('.leaf'), i = leaves.indexOf(leaf);
+      const d = i === turned ? 1 : i === turned - 1 ? -1 : 0;
+      if (!d || (d > 0 && turned >= maxTurn)) return;
+      e.preventDefault();
+      if (active && active.leaf !== leaf) land();
+      peek = null;
+      drag = { leaf, d, x0: e.clientX, moved: false, lastX: e.clientX, lastT: performance.now(), v: 0 };
+      book.setPointerCapture(e.pointerId);
+    });
+    book.addEventListener('pointermove', e => {
+      if (!drag) {
+        // peek: the corner of the right page lifts when pointed at its outer quarter
+        if (active && active.leaf !== peek) return;
+        const r = book.getBoundingClientRect();
+        const leaf = leaves[turned];
+        const near = !book.classList.contains('closed') && turned < maxTurn && e.clientX > r.right - r.width * 0.12;
+        if (near && !peek) {
+          peek = leaf;
+          startCurl(leaf, 1); settle(0.05, 6000);
+        } else if (!near) unpeek();
+        return;
+      }
+      const dx = e.clientX - drag.x0;
+      if (!drag.moved && Math.abs(dx) < 6) return;
+      if (!drag.moved) {
+        drag.moved = true;
+        if (!active) startCurl(drag.leaf, drag.d);
+        cancelAnimationFrame(active.raf);
+        drag.t0 = active.t;
+        rustle(0.6);
+        if (turned === 0 || (drag.d < 0 && turned === 1)) book.classList.toggle('closed', drag.d < 0);
+      }
+      const now = performance.now();
+      drag.v = (e.clientX - drag.lastX) / Math.max(1, now - drag.lastT);
+      drag.lastX = e.clientX; drag.lastT = now;
+      // across the whole spread (two page widths) is a whole turn
+      active.t = Math.max(0, Math.min(1, drag.t0 + (-dx * drag.d) / (pageW() * 1.7)));
+      setCurl(active.leaf, active.t, active.dir);
+    });
+    const release = e => {
+      if (!drag) return;
+      const { moved, d, v } = drag;
+      drag = null;
+      if (!moved) { if (active) { cancelAnimationFrame(active.raf); setCurl(active.leaf, 0, active.dir); endCurl(false); } turn(d); return; }
+      const flick = -v * d > 0.5, back = v * d > 0.5;
+      const to = !back && (flick || active.t > 0.33) ? 1 : 0;
+      if (to === 0 && (turned === 0 || (d < 0 && turned === 1))) book.classList.toggle('closed', d > 0);
+      settle(to);
+    };
+    book.addEventListener('pointerup', release);
+    book.addEventListener('pointercancel', release);
+    book.addEventListener('pointerleave', () => { if (!drag) unpeek(); });
+  }
 
   return {
     el,

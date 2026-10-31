@@ -19,6 +19,7 @@ All music in the game is played on the **Salamander Grand Piano** (a free sample
   - A `requestAnimationFrame` loop compares the audio clock with each note's start and calls `onNote(note)` exactly when it sounds, which keeps the lit-up notes in sync with what you hear.
   - Returns `{ stop, duration }`.
 - `setInstrument(id)`: what `noteOn`, `noteOff`, `strike` and new `playPiece` calls sound on (`voice`). `'piano'` is the Salamander sampler; any other id from `js/instruments.js` gets its own `Tone.Sampler` from `https://nbrosowsky.github.io/tonejs-instruments/samples/<id>/` (sharps written `s`, e.g. `Fs3.mp3`) into the same filter/reverb/limiter chain, built on first use and cached (a failed load is forgotten so it can be tried again). Returns a promise; rejects when audio isn't ready yet. A playing piece keeps the voice it started with.
+- `rustle(seconds)`: the sound of a page being turned in the [sheet-music book](sheet-music.md): pink noise through a band-pass filter that brightens and darkens, under a short envelope, straight to the speakers.
 - `setGramophone(on)`: lowers the filter to 3.2 kHz and adds pink-noise hiss and random clicks; turning it off removes them.
 
 ## Credits

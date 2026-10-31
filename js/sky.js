@@ -1,4 +1,5 @@
-// Sky colours that follow the visitor's real local time. ?uur=21.5 in the URL overrides it for testing.
+// Sky colours that follow the visitor's real local time. ?uur=21.5 in the URL overrides it for testing,
+// ?maan=0.5 the moon's phase (0 new, 0.25 first quarter, 0.5 full, 0.75 last quarter).
 
 const KEYS = [
   // hour, top, horizon, darkness (0 = full day, 1 = deep night)
@@ -28,6 +29,15 @@ export function currentHour() {
   return d.getHours() + d.getMinutes() / 60;
 }
 
+// Where the moon is in its month today: 0 new, 0.5 full, from a known new moon and the length of
+// the lunar month.
+const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14), MONTH = 29.530588853 * 86400000;
+export function moonPhase(date = new Date()) {
+  const forced = new URLSearchParams(location.search).get('maan');
+  if (forced != null && !isNaN(+forced)) return ((+forced % 1) + 1) % 1;
+  return (((date - NEW_MOON) % MONTH) + MONTH) % MONTH / MONTH;
+}
+
 export function skyAt(hour) {
   let i = 0;
   while (i < KEYS.length - 2 && KEYS[i + 1][0] <= hour) i++;
@@ -43,6 +53,7 @@ export function skyAt(hour) {
     dark,
     sun: dayT > -0.05 && dayT < 1.05 ? dayT : null,
     moon: dayT <= 0 || dayT >= 1 ? nightT : null,
+    phase: moonPhase(),
     lampsOn: dark > 0.3,
     painted: paintedWeight(hour),
   };

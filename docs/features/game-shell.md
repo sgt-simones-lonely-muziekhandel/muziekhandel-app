@@ -5,7 +5,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 ## For the player
 
 - **Title screen**: a swinging brass shop sign (*Muziekhandel Simone — sinds 1892*) over the dimmed empty shop room (`public/art/shop/back-wall.webp`), a big **▶ Start** button, and the controls in one line, all set in Playfair Display (`--font-1900`), the typeface of the sheet music in the game.
-- **HUD**: only the **?** help button and the piano-loading chip; during the films (prologue, time travel) the help button makes way for **Overslaan ⏭**, which skips the film. There is no place name: the pictures show where you are (the place name is only the browser tab title, `setPlace()`).
+- **HUD**: only the **?** help button and the piano-loading chip. The **?** (Meneer Simone's help) is only there while the boy is inside the shop or its listening corner (`#game.in-shop`, set in `frame()`); on the streets it is hidden. During the films (prologue, time travel) **Overslaan ⏭** is shown instead, which skips the film. There is no place name: the pictures show where you are (the place name is only the browser tab title, `setPlace()`).
 - **Scene changes** fade to black and back.
 - **Windows** (piano, cabinet, …) open on aged paper over a dimmed shop. Every window has **◀ Terug** (back one step) and **✕** (straight back to the shop); **Esc** and **Backspace** also go back.
 - **Back in the scenes**: with no window open, **Backspace** or **Esc** go one place back (listening corner → shop → street), and so does the browser's back button / a keyboard's back key (`game.back()`, with a `history` entry the game keeps refilling).

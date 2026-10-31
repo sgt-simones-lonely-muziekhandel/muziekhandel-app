@@ -1,47 +1,72 @@
-// Portrait gallery on the empty wall close-up (public/art/closeups/gallery-wall), and a composer
-// card with the portrait, the biography and the composer's music in the shop.
+// Portrait gallery on the empty wall close-up (public/art/closeups/gallery-wall): the four makers of
+// the game as oil paintings, opening a card with all four. The composer card (portrait, biography
+// and music) is still opened from a composer's sheet music.
 import { frame, h, esc, speak, SPEAKER } from './ui.js';
 import { CYLINDER_ART, cylinderColor, coverFor } from './library.js';
-import { COMPOSERS, composerById, piecesBy } from '../data.js';
-import { FRAME_TYPES, FRAME_SRC, COMPOSER_FRAME } from '../frames.js';
+import { TEAM, composerById, piecesBy } from '../data.js';
+import { FRAME_TYPES, FRAME_SRC, TEAM_FRAME } from '../frames.js';
 
 // Where the frames hang on the close-up (1672 × 941): centre x, top y and height, in image pixels.
-// Two rows of three between the pillars, under the picture lamp and above the wainscot.
+// One row of four between the pillars, under the picture lamp and above the wainscot.
 const BG_W = 1672, BG_H = 941;
 const HANG = [
-  { cx: 420, top: 120, h: 210 }, { cx: 836, top: 104, h: 226 }, { cx: 1252, top: 120, h: 210 },
-  { cx: 420, top: 392, h: 214 }, { cx: 836, top: 386, h: 220 }, { cx: 1252, top: 400, h: 200 },
+  { cx: 362, top: 170, h: 380 }, { cx: 676, top: 150, h: 400 },
+  { cx: 996, top: 150, h: 400 }, { cx: 1310, top: 170, h: 380 },
 ];
+const TILT = [-1.2, 0.8, -0.6, 1];
 const pct = (v, of) => `${v / of * 100}%`;
 
 export function galleryView(ui) {
   const { el, stage } = frame(ui, {
-    title: 'De componisten',
+    title: 'De makers',
     cls: 'gallery',
     wide: true,
     closeup: 'public/art/closeups/gallery-wall.webp',
     full: true,
-    tip: 'Dit zijn beroemde componisten: mensen die muziek bedenken en opschrijven. Klik op een schilderij om hun verhaal te lezen en hun muziek te horen.',
+    tip: 'Dit zijn de mensen die dit spel hebben gemaakt, geschilderd in kleren van vroeger. Klik op een schilderij om ze allemaal te zien.',
   });
-  COMPOSERS.forEach((c, i) => {
+  TEAM.forEach((m, i) => {
     const spot = HANG[i % HANG.length];
-    const t = FRAME_TYPES[COMPOSER_FRAME[c.id]];
+    const t = FRAME_TYPES[TEAM_FRAME[m.id]];
     const w = spot.h * t.w / t.h;
     const [l, tp, r, b] = t.inner;
+    const label = m.name || 'Een van de makers';
     const f = h(`
-      <button class="gframe" title="${esc(c.name)}" style="--tilt:${[-1.2, 0.8, -0.4, 1, -0.8, 0.5][i % 6]}deg">
-        <img class="face ${t.oval ? 'oval' : ''}" src="${c.portrait}" alt="${esc(c.name)}"
+      <button class="gframe" title="${esc(label)}" style="--tilt:${TILT[i % TILT.length]}deg">
+        <img class="face ${t.oval ? 'oval' : ''}" src="${m.portrait}" alt="${esc(label)}"
           style="left:${pct(l, t.w)};top:${pct(tp, t.h)};width:${pct(r - l, t.w)};height:${pct(b - tp, t.h)}">
-        <img class="gilt-frame" src="${FRAME_SRC(COMPOSER_FRAME[c.id])}" alt="">
-        <span class="wall-plaque">${esc(c.short)}</span>
+        <img class="gilt-frame" src="${FRAME_SRC(TEAM_FRAME[m.id])}" alt="">
+        ${m.name ? `<span class="wall-plaque">${esc(m.name)}</span>` : ''}
       </button>`);
     Object.assign(f.style, {
       left: pct(spot.cx - w / 2, BG_W), top: pct(spot.top, BG_H),
       width: pct(w, BG_W), height: pct(spot.h, BG_H),
     });
-    f.onclick = () => ui.open('composer', { composerId: c.id });
+    f.onclick = () => ui.open('team');
     stage.appendChild(f);
   });
+  return { el };
+}
+
+// The makers of the game, all four together on a paper card.
+export function teamView(ui) {
+  const { el, body } = frame(ui, {
+    title: 'De makers van dit spel',
+    cls: 'team',
+    wide: true,
+    tip: 'Deze mensen hebben Muziekhandel Simone gemaakt.',
+  });
+  body.appendChild(h(`
+    <div class="team-card">
+      <p class="team-intro">Op deze schilderijen staan de makers van dit spel. Zij hebben de winkel, de piano, de muziek en het verhaal voor jou gemaakt. Ze hebben zich laten schilderen in kleren van vroeger.</p>
+      <ul class="team-list">
+        ${TEAM.map(m => `
+          <li>
+            <span class="gilt"><img src="${m.portrait}" alt="${esc(m.name || 'Een van de makers')}"></span>
+            ${m.name ? `<div class="plaque"><b>${esc(m.name)}</b></div>` : ''}
+          </li>`).join('')}
+      </ul>
+    </div>`));
   return { el };
 }
 
