@@ -91,6 +91,8 @@ export function pianoView(ui, { pieceId } = {}) {
         <span class="piece-name"></span>
         <span class="spacer"></span>
         <button class="btn brass listen" hidden>Luister</button>
+        <button class="btn brass pause" hidden title="Zet het liedje even stil"><span class="ico">❚❚</span><span class="pause-label">Pauze</span></button>
+        <button class="btn wood stop" hidden title="Stop het liedje"><span class="ico">■</span>Stop</button>
         <button class="btn brass follow" hidden title="De piano wacht tot je de goede toets speelt">Speel mee</button>
         <button class="btn brass rhythm" hidden title="Speel op tijd mee: de piano telt af en speelt de begeleiding">In de maat</button>
         <button class="btn wood practice-btn" hidden title="Kies een stukje, het tempo en meer">Oefenen</button>
@@ -172,7 +174,9 @@ export function pianoView(ui, { pieceId } = {}) {
 
   // --- state
   let parsed = null, page = -1, noteEls = new Map();
-  let mode = 'free';           // free | listen | follow | rhythm
+  let mode = 'free';           // free | listen | paused | follow | rhythm
+  let heardAt = null;          // while listening: where in the melody (in beats) the song is now
+  let pausedAt = null;         // while paused: where it goes on from
   let player = null, idx = 0, mistakes = 0;
   // practice settings: tempo, which stretch (-1: the whole piece), repeat it, accompaniment in
   // Speel mee, metronome
@@ -310,25 +314,54 @@ export function pianoView(ui, { pieceId } = {}) {
     ['.listen', '.follow', '.rhythm'].forEach(s => $(s).classList.remove('on'));
     $('.celebrate').hidden = true;
     $('.count-in').hidden = true;
+    heardAt = pausedAt = null;
+    showPlayback(false);
+  }
+
+  // Pauze and Stop, next to Luister, only while a song plays (or is paused). Pauze becomes Verder
+  // while paused.
+  function showPlayback(on, isPaused = false) {
+    $('.pause').hidden = $('.stop').hidden = !on;
+    $('.pause').classList.toggle('on', isPaused);
+    $('.pause .ico').textContent = isPaused ? '▶' : '❚❚';
+    $('.pause .pause-label').textContent = isPaused ? 'Verder' : 'Pauze';
+    $('.pause').title = isPaused ? 'Luister verder' : 'Zet het liedje even stil';
+  }
+
+  // Pause: the song stops where it is; Verder (or Luister, or Enter) plays on from the note it was
+  // at. Keys can be played as usual in between.
+  function pause() {
+    if (mode !== 'listen') return;
+    const at = heardAt ?? stretch().from;
+    stopAll();
+    mode = 'paused';
+    pausedAt = at;
+    $('.listen').classList.add('on');
+    showPlayback(true, true);
+    setStatus('Het liedje staat stil. Klik op Verder om verder te luisteren, of op Stop.');
   }
 
   function listen() {
     if (mode === 'listen') { stopAll(); setStatus(''); return; }
+    const from = mode === 'paused' ? pausedAt : null; // going on after a pause
     stopAll();
     if (!audioState.ready) { setStatus('De piano wordt nog gestemd… even geduld!'); return; }
     mode = 'listen';
     $('.listen').classList.add('on');
+    showPlayback(true);
     const hint = 'Luister en kijk mee: elke toets die klinkt, licht op. De melodie staat op het blad.';
-    setStatus(parsed.offset ? 'Eerst speelt de piano een inleiding. Kijk naar de toetsen!' : hint);
+    setStatus(parsed.offset && from == null ? 'Eerst speelt de piano een inleiding. Kijk naar de toetsen!' : hint);
     // every key that sounds lights up: the melody in its full colour, the accompaniment softer
     const lit = new Map();
     if (section >= 0) setStatus(`Luister naar ${sections[section].label.toLowerCase()}${loop ? ' (steeds opnieuw)' : ''}.`);
     player = playPiece(parsed, {
       ...stretch(),
+      ...(from != null && { from }),
       tempoScale: tempo,
       metronome: metro,
       onNote(n) {
         if (n.i === 0 && parsed.offset) setStatus(hint);
+        heardAt = n.start;
         markNote(n);
       },
       onKey(midi, on, part) {
@@ -620,6 +653,8 @@ export function pianoView(ui, { pieceId } = {}) {
   $('.pedal').onclick = () => { pedalLatched = !pedalLatched; setPedal(pedalLatched); };
   $('.lesson-btn').onclick = () => { stopAll(); ui.open('lessons'); };
   $('.listen').onclick = listen;
+  $('.pause').onclick = () => (mode === 'paused' ? listen() : pause());
+  $('.stop').onclick = () => { stopAll(); setStatus(''); };
   $('.follow').onclick = follow;
   $('.rhythm').onclick = rhythm;
 

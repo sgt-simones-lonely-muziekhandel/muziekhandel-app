@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Pause and stop while listening
+
+Added:
+
+- [Piano](piano.md): while a song plays with *Luister*, a brass **Pauze** plaque (it becomes **Verder** while paused, and the song goes on from the same note) and an ebony **Stop** plaque.
+
 ## 2026-10-31 — Two rows on the piano, Space for the pedal, Enter to listen
 
 Changed:
