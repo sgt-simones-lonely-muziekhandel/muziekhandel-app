@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — The gramophone on its cabinet
+
+Changed:
+
+- [Listening corner](listening-corner.md): the gramophone is drawn whole, cabinet and all, standing on the floor between the chest and the armchair (the room's picture no longer has the round table it used to stand on).
+
 ## 2026-10-31 — More instruments on the piano
 
 Added:
