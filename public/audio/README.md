@@ -10,4 +10,4 @@ Made by `scripts/import_sounds.py` from the recordings in `design/sounds` (all C
 
 - `steps/stone-N`, `steps/wood-N`, `steps/wet-N`: footsteps (cobbles, the shop's floor, the flooded future), five of each, from Kenney's [Impact Sounds](https://kenney.nl/assets/impact-sounds) (concrete, wood, grass).
 - `time-travel/sparkle`, `time-travel/gust`, `time-travel/chime`: the chime as the tube opens, one 2.5 s gust of wind and a little chime, from [BigSoundBank](https://bigsoundbank.com) (*Chimes "Dream" #1*, *Strong wind #2*, *Chimes "Butterfly" #1*).
-- `weather/rain`, `weather/thunder-0` to `-2`: a 20 s loop of rain on puddles and three distant thunders, from BigSoundBank (*Rain on Puddle*, *Thunder #2*, *#3*, *#7*).
+- `weather/rain`, `weather/thunder-0` to `-2`: a 20 s loop of gentle rain and three distant thunders, from BigSoundBank (*Rain Under an Umbrella*, *Thunder #2*, *#3*, *#7*).

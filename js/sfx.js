@@ -101,22 +101,24 @@ export function hushThunder() {
   }
 }
 
-// Soft rain on puddles, a recorded loop. The scene sets how hard it rains (0–1) every frame with
-// rain(level); when that stops (another scene, or a film that's over) it fades out by itself.
+// Gentle rain pattering, a recorded loop with its hiss taken off (a low-pass), so it's the soft
+// drops you hear. The scene sets how hard it rains (0–1) every frame with rain(level); when that
+// stops (another scene, or a film that's over) it fades out by itself.
 let shower = null;
 export function rain(level) {
   if (!live()) return;
   if (!shower) {
     const gain = new Tone.Gain(0).connect(out());
-    const player = new Tone.Player({ url: 'public/audio/weather/rain.m4a', loop: true, autostart: true }).connect(gain);
-    shower = { gain, player, seen: 0 };
+    const soft = new Tone.Filter({ frequency: 3500, type: 'lowpass' }).connect(gain);
+    const player = new Tone.Player({ url: 'public/audio/weather/rain.m4a', loop: true, autostart: true }).connect(soft);
+    shower = { gain, soft, player, seen: 0 };
     shower.timer = setInterval(() => {
       if (performance.now() - shower.seen < 300) return;
       const r = shower;
       shower = null;
       clearInterval(r.timer);
       r.gain.gain.rampTo(0, 1);
-      setTimeout(() => { r.player.stop(); r.player.dispose(); r.gain.dispose(); }, 1500);
+      setTimeout(() => { r.player.stop(); [r.player, r.soft, r.gain].forEach(n => n.dispose()); }, 1500);
     }, 150);
   }
   shower.seen = performance.now();

@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Gentler rain
+
+Changed:
+
+- [Sound effects](sound-effects.md): the rain is a gentle pitter-patter now (rain on an umbrella, BigSoundBank, CC0, with the hiss filtered off) instead of rain on puddles, which sounded like a steady stream.
+
 ## 2026-10-31 — Quiet when the crate opens, a halo for the tube
 
 Changed:

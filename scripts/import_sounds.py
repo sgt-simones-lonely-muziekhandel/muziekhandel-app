@@ -78,10 +78,11 @@ def main(src):
     x, sr = read(os.path.join(src, 'bigsoundbank', 'chimes-dream-1 (2079).mp3'))
     write(fade(x[:int(2.3 * sr)], sr, 0.01, 0.8), sr, 'time-travel/sparkle')
 
-    # rain on puddles, as a 20 s loop: the 1.5 s after the cut are blended into its start, so it
-    # repeats without a seam
-    x, sr = read(os.path.join(src, 'bigsoundbank', 'rain-on-puddle (1290).mp3'))
-    n, c, a = int(20 * sr), int(1.5 * sr), int(10 * sr)
+    # gentle rain pattering on an umbrella (warmer and with more separate drops than rain on
+    # puddles, which sounded like a stream), as a 20 s loop from the steady middle: the 1.5 s
+    # after the cut are blended into its start, so it repeats without a seam
+    x, sr = read(os.path.join(src, 'bigsoundbank', 'rain-under-an-umbrella (2679).mp3'))
+    n, c, a = int(20 * sr), int(1.5 * sr), int(5 * sr)
     loop = x[a:a + n].copy()
     k = np.linspace(0, np.pi / 2, c)
     loop[:c] = loop[:c] * np.sin(k) + x[a + n:a + n + c] * np.cos(k)
