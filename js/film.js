@@ -2,11 +2,20 @@
 // painted shots in screen space that drift and zoom slowly, dissolve into each other, with
 // captions on a strip of old paper, rain and floating dust. A film is a scene: subclass `Film`,
 // give it a list of shots, and write one method per shot with the shot's `key` as its name,
-// called as `this[key](ctx, t, vw)` with the time inside the shot.
+// called as `this[key](ctx, t, vw, live)`: `t` is the story time inside the shot, `live` a clock
+// that never stops (for rain, dust, breathing, swaying).
+//
+// Made for young kids: when a caption has come in, the story waits until the player clicks or
+// taps (a pulsing ▶ on the caption shows it after a moment); then the caption fades and the story
+// goes on. While it waits only the story time stops, so the picture keeps living. Keys and clicks
+// without a caption don't skip anything.
 
 export const H = 720;
-const XF = 1.6;        // seconds two shots dissolve into each other
-const EDGE = 1.6;      // fade in from black at the start
+const XF = 2.2;        // seconds two shots dissolve into each other
+const EDGE = 2;        // fade in from black at the start
+const CAP_IN = 0.9;    // a caption fades in over this long, then the story waits for a click
+const CAP_OUT = 0.7;   // and fades out over this long after the click
+const HINT = 1.5;      // seconds of waiting before the ▶ appears
 const INK = '#2a1d12';
 
 export const load = path => { const i = new Image(); i.src = path; return i; };
@@ -20,9 +29,10 @@ export const bump = (t, a, b, c, d) => (t < b ? smooth((t - a) / (b - a)) : t < 
 const STRIP = load('public/art/ui/paper-strip.webp');
 
 export class Film {
-  // shots: [{ key, dur, captions: [[from, to, text], …] }]. At the end the last picture dissolves
-  // over `out` seconds into the scene `next`.
-  constructor(game, { shots, place, next, out = 2.8, seed = 1 }) {
+  // shots: [{ key, dur, captions: [[from, text], …] }], `from` in seconds within the shot; leave
+  // CAP_IN + CAP_OUT between one caption's `from` and the next. At the end the last picture
+  // dissolves over `out` seconds into the scene `next`.
+  constructor(game, { shots, place, next, out = 3.5, seed = 1 }) {
     this.game = game;
     this.width = 1; // drawn in screen space; the camera doesn't move
     this.shots = shots;
@@ -33,7 +43,9 @@ export class Film {
     for (const s of shots) { s.start = at; at += s.dur - XF; }
     const last = shots[shots.length - 1];
     this.total = last.start + last.dur;
+    this.captions = shots.flatMap(s => s.captions.map(([from, text]) => ({ text, from: s.start + from, hold: s.start + from + CAP_IN })));
     this.T = 0;
+    this.clock = 0;
     this.done = false;
     const r = mulberry(seed);
     this.rain = Array.from({ length: 160 }, () => [r(), r(), 12 + r() * 20, 0.9 + r() * 0.6]);
@@ -42,31 +54,33 @@ export class Film {
 
   enter() {
     this.T = 0;
+    this.clock = 0;
     this.done = false;
+    this.holding = null; // the caption the story is waiting on
+    for (const c of this.captions) { c.released = null; c.since = null; }
     this.game.setPlace(this.place);
   }
 
-  // skip ahead: start dissolving into the next shot now
-  interact() {
-    const i = this.shotAt(this.T);
-    if (i < this.shots.length - 1) this.T = Math.max(this.T, this.shots[i + 1].start);
-    else this.T = Math.max(this.T, this.total);
+  // Only a click or tap goes on, and only while a caption waits; keys don't skip.
+  interact() {}
+  click() {
+    if (!this.holding) return;
+    this.holding.released = this.clock;
+    this.holding = null;
   }
-  click() { this.interact(); }
-  hover() { return true; }
-
-  shotAt(T) {
-    let i = 0;
-    while (i < this.shots.length - 1 && T >= this.shots[i + 1].start + XF) i++;
-    return i;
-  }
+  hover() { return !!this.holding; }
 
   // Seconds into the shot with this key (negative before it starts).
   timeIn(key) { return this.T - this.shots.find(s => s.key === key).start; }
 
   update(dt) {
-    this.T += dt;
-    this.tick?.(dt);
+    this.clock += dt;
+    if (!this.holding) {
+      const next = this.captions.find(c => c.released == null);
+      if (next && this.T + dt >= next.hold) { this.T = next.hold; this.holding = next; next.since = this.clock; }
+      else this.T += dt;
+    }
+    this.tick?.(this.holding ? 0 : dt);
     if (this.T >= this.total && !this.done) { this.done = true; this.game.goTo(this.next, { dissolve: this.out }); }
   }
 
@@ -84,16 +98,15 @@ export class Film {
       if (a <= 0) return;
       ctx.save();
       ctx.globalAlpha = a;
-      this[s.key](ctx, t, vw);
+      this[s.key](ctx, t, vw, this.clock);
       ctx.restore();
     });
     this.overlay?.(ctx, vw);
-    for (const s of this.shots) {
-      const t = T - s.start;
-      for (const [from, to, text] of s.captions) {
-        const a = bump(t, from, from + 0.8, to - 0.8, to);
-        if (a > 0) caption(ctx, text, a, vw);
-      }
+    for (const c of this.captions) {
+      const a = smooth((T - c.from) / CAP_IN) * (c.released == null ? 1 : 1 - smooth((this.clock - c.released) / CAP_OUT));
+      if (a <= 0) continue;
+      const hint = c === this.holding ? smooth((this.clock - c.since - HINT) / 0.6) : 0;
+      caption(ctx, c.text, a, vw, hint, this.clock);
     }
     // soft fade in from black at the start
     const black = 1 - smooth(T / EDGE);
@@ -133,8 +146,9 @@ export class Film {
 }
 
 // A caption on a strip of old paper, bottom right (clear of the boy and his hands). Long
-// sentences wrap onto more lines and the strip grows with them.
-function caption(ctx, text, a, vw) {
+// sentences wrap onto more lines and the strip grows with them. `hint` (0–1) shows a pulsing
+// brass ▶ on its right end: click to go on.
+function caption(ctx, text, a, vw, hint, clock) {
   ctx.save();
   ctx.globalAlpha = a;
   ctx.font = '600 38px Caveat, "Comic Sans MS", cursive';
@@ -154,6 +168,15 @@ function caption(ctx, text, a, vw) {
   ctx.fillStyle = INK; ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
   lines.forEach((l, i) => ctx.fillText(l, x + w / 2, y + 20 + 22 + i * 44 + 2));
+  if (hint > 0) {
+    const r = 22 * (1 + 0.08 * Math.sin(clock * 4)), cx = x + w - 6, cy = y + h - 6;
+    ctx.globalAlpha = a * hint;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#f2c76b'; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 6, cy - 10); ctx.lineTo(cx + 11, cy); ctx.lineTo(cx - 6, cy + 10); ctx.closePath();
+    ctx.fillStyle = INK; ctx.fill();
+  }
   ctx.restore();
 }
 

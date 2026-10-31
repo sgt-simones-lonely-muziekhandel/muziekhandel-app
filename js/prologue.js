@@ -5,7 +5,7 @@
 //   2. map     an old map of the Netherlands; the year counts up to 2126 while the sea creeps in
 //   3. future  the same street in 2126, flooded and quiet under smoky air; the camera tilts down
 //              from the storm to the boy on the quay, then dissolves into the future street
-// A click, tap or ↑ / Enter / Space jumps to the next shot.
+// Each caption waits until the player clicks or taps (see js/film.js).
 import { Film, H, load as loadImg, ready, smooth, ease, bump, cover, glow, sunBeams, boyFromBehind, mulberry } from './film.js';
 
 const load = name => loadImg(`public/art/intro/${name}.webp`);
@@ -22,18 +22,23 @@ const SEA = [0.1, 0.35];
 // The boy on the quay in future-street.webp, as in the story.
 const KID_AT = [0.3, 0.985], KID_H = 0.42;
 
+// Shots, in order. `captions` are [from, text]: the caption comes in at `from` seconds into the
+// shot and the prologue waits there until the player clicks.
 const SHOTS = [
-  { key: 'today', dur: 8, captions: [[1.2, 7, 'Amsterdam, 2026. Een stad vol water, fietsen… en muziek.']] },
-  { key: 'map', dur: 12, captions: [
-    [1.4, 6, 'De aarde werd steeds warmer. Het ijs smolt en de zee steeg.'],
-    [6.4, 11, 'Het water kwam steeds verder het land in.'],
+  { key: 'today', dur: 9, captions: [[1.4, 'Amsterdam, 2026. Een stad vol water, fietsen… en muziek.']] },
+  { key: 'map', dur: 15, captions: [
+    [1.2, 'De aarde werd steeds warmer. Het ijs smolt en de zee steeg.'],
+    [11.6, 'Het water kwam steeds verder het land in.'],
   ] },
-  { key: 'future', dur: 15, captions: [
-    [1.6, 5.6, 'Het jaar 2126. De mensen zijn vertrokken naar hoger land.'],
-    [6, 10, 'De lucht is vies van stormen en branden. Wie naar buiten gaat, draagt een masker.'],
-    [10.4, 14.4, 'De stad is stil — er klinkt geen muziek meer. Maar één jongen is nog op zoek…'],
+  { key: 'future', dur: 17, captions: [
+    [6.8, 'Het jaar 2126. De mensen zijn vertrokken naar hoger land.'],
+    [8.6, 'De lucht is vies van stormen en branden. Wie naar buiten gaat, draagt een masker.'],
+    [12.4, 'De stad is stil — er klinkt geen muziek meer. Maar één jongen is nog op zoek…'],
   ] },
 ];
+const FLOOD = [3.2, 8];   // after the first map caption the sea rises, taking this long
+const TILT = 7;           // the camera comes down from the storm to the street over this long
+const BOY = 10.2;         // after the smoke caption the boy appears on the quay
 
 export class Prologue extends Film {
   constructor(game) {
@@ -47,16 +52,16 @@ export class Prologue extends Film {
   }
 
   // 1. Amsterdam today: a slow pan along the canal on a fresh morning, birds flying over.
-  today(ctx, t, vw) {
-    const p = ease(t / 8);
-    cover(ctx, IMG.today, vw, 1.04 + 0.08 * p, 0.4 + 0.15 * p, 0.5);
-    sunBeams(ctx, vw, t, 0.35);
-    this.drawMotes(ctx, t, vw, vw * 0.55, H * 0.35, 'rgba(255,250,230,', 0.4);
+  today(ctx, t, vw, live) {
+    const p = ease(t / 9);
+    cover(ctx, IMG.today, vw, 1.04 + 0.08 * p, 0.4 + 0.15 * p + 0.01 * Math.sin(live * 0.25), 0.5);
+    sunBeams(ctx, vw, live, 0.35);
+    this.drawMotes(ctx, live, vw, vw * 0.55, H * 0.35, 'rgba(255,250,230,', 0.4);
     ctx.save();
     ctx.strokeStyle = INK; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
     for (const [x, y, sp, ph] of this.birds) {
-      const bx = ((x + t * 0.025 * sp) % 1.2) * vw - vw * 0.1, by = H * y + Math.sin(t * sp + ph) * 6;
-      const flap = Math.sin(t * 9 * sp + ph) * 5, s = 9;
+      const bx = ((x + live * 0.025 * sp) % 1.2) * vw - vw * 0.1, by = H * y + Math.sin(live * sp + ph) * 6;
+      const flap = Math.sin(live * 9 * sp + ph) * 5, s = 9;
       ctx.beginPath();
       ctx.moveTo(bx - s, by - flap); ctx.quadraticCurveTo(bx - s / 2, by - 3, bx, by);
       ctx.quadraticCurveTo(bx + s / 2, by - 3, bx + s, by - flap);
@@ -67,9 +72,9 @@ export class Prologue extends Film {
 
   // 2. The map: the year counts up from 2026 to 2126 while the sea creeps inland from the coast.
   // The flooded map is the same picture with water, revealed by a soft growing circle from the sea.
-  map(ctx, t, vw) {
-    const p = ease((t - 1.8) / 8.4);
-    const at = cover(ctx, IMG.mapNow, vw, 1.03 + 0.07 * ease(t / 12), 0.5, 0.45);
+  map(ctx, t, vw, live) {
+    const p = ease((t - FLOOD[0]) / FLOOD[1]);
+    const at = cover(ctx, IMG.mapNow, vw, 1.03 + 0.07 * ease(t / 15), 0.5 + 0.008 * Math.sin(live * 0.3), 0.45);
     if (at && ready(IMG.mapFlooded) && p > 0) {
       const m = ctx.getTransform(), k = m.a;
       const c = this.flood || (this.flood = document.createElement('canvas'));
@@ -92,7 +97,7 @@ export class Prologue extends Film {
     // the weather gets darker and wetter as the years go by
     ctx.fillStyle = `rgba(20,26,38,${0.28 * p})`;
     ctx.fillRect(0, 0, vw, H);
-    this.drawRain(ctx, t, vw, 0.25 * p);
+    this.drawRain(ctx, live, vw, 0.25 * p);
     this.yearPlaque(ctx, vw, Math.round(YEAR_FROM + (YEAR_TO - YEAR_FROM) * p), smooth((t - 0.6) / 1));
   }
 
@@ -113,25 +118,25 @@ export class Prologue extends Film {
 
   // 3. The year 2126: the camera tilts down from the storm to the flooded street. Smoke drifts
   // through, now and then lightning, and at last the boy appears on the quay.
-  future(ctx, t, vw) {
-    const p = ease(t / 9);
-    const at = cover(ctx, IMG.future, vw, 1.28 - 0.2 * p, 0.45 + 0.05 * p, 0.12 + 0.5 * p);
-    // the boy fades in once the camera has come down
-    const kid = smooth((t - 8.5) / 1.8);
+  future(ctx, t, vw, live) {
+    const p = ease(t / TILT);
+    const at = cover(ctx, IMG.future, vw, 1.28 - 0.2 * p, 0.45 + 0.05 * p + 0.01 * Math.sin(live * 0.2), 0.12 + 0.5 * p);
+    // the boy fades in after the camera has come down
+    const kid = smooth((t - BOY) / 1.8);
     if (kid > 0) {
       ctx.save();
       ctx.globalAlpha *= kid;
-      boyFromBehind(ctx, IMG.kid, at, KID_AT[0], KID_AT[1], KID_H, t);
+      boyFromBehind(ctx, IMG.kid, at, KID_AT[0], KID_AT[1], KID_H, live);
       ctx.restore();
     }
     if (ready(IMG.futureFrame)) {
       // dark vines in front, drifting a little more than the street for depth
-      ctx.drawImage(IMG.futureFrame, -vw * 0.06 + Math.sin(t * 0.25) * 10, -H * 0.06, vw * 1.12, H * 1.12);
+      ctx.drawImage(IMG.futureFrame, -vw * 0.06 + Math.sin(live * 0.25) * 10, -H * 0.06, vw * 1.12, H * 1.12);
     }
-    this.drawSmoke(ctx, t, vw, 0.6 + 0.4 * smooth((t - 5.5) / 2));
-    this.drawRain(ctx, t, vw, 0.3);
+    this.drawSmoke(ctx, live, vw, 0.6 + 0.4 * smooth((t - 8.6) / 2));
+    this.drawRain(ctx, live, vw, 0.3);
     // distant lightning, twice
-    const flash = Math.max(bump(t, 3.1, 3.2, 3.3, 4), 0.7 * bump(t, 11.6, 11.7, 11.8, 12.5));
+    const flash = Math.max(bump(t, 3.1, 3.2, 3.3, 4), 0.7 * bump(t, 15.2, 15.3, 15.4, 16.1));
     if (flash > 0) glow(ctx, vw * 0.6, H * 0.2, vw, `rgba(190,200,230,${0.3 * flash})`);
   }
 

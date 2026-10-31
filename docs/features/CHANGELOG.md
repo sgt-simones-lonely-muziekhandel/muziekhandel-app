@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Slower films that wait for a click
+
+Changed:
+
+- [Prologue](prologue.md) and [story](story.md): slower, for five-year-olds. Each caption now waits until the player clicks or taps (a pulsing ▶ appears on it after a moment), and the next thing (the crate opening, the lid popping, the swirl, the sea rising) only happens after the click. The picture keeps moving gently while it waits. Keys no longer skip, and clicking without a caption does nothing. Dissolves between shots are slower too.
+
 ## 2026-10-31 — Prologue: Amsterdam today, the sea rising, the year 2126
 
 Added:

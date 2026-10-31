@@ -30,12 +30,17 @@ const KID_AT = [0.3, 0.985], KID_H = 0.42;
 // The setting sun in past-street.webp, where the camera drifts to at the end.
 const SUN = [0.62, 0.56];
 
-// Shots, in order. `captions` are [from, to, text] in seconds within the shot.
+// Shots, in order. `captions` are [from, text]: the caption comes in at `from` seconds into the
+// shot and the story waits there until the player clicks (see js/film.js).
 const SHOTS = [
-  { key: 'crate', dur: 7, captions: [[1, 6.2, 'Tussen de puinhopen staat een oude kist…']] },
-  { key: 'tube', dur: 7.5, captions: [[1.2, 6.4, 'Hij maakt een rol open… en de muziek begint.']] },
-  { key: 'travel', dur: 12, captions: [[1.4, 5, '…en de wereld verandert…'], [5.6, 10, '…naar het verleden.']] },
+  { key: 'crate', dur: 9, captions: [[1.2, 'Tussen de puinhopen staat een oude kist…']] },
+  { key: 'tube', dur: 9.5, captions: [[1.4, 'Hij maakt een rol open… en de muziek begint.']] },
+  { key: 'travel', dur: 16.5, captions: [[3, '…en de wereld verandert…'], [11, '…naar het verleden.']] },
 ];
+const CRATE_FLASH = 3.2;  // after the caption: the crate opens in a golden flash
+const LID_POP = 3.4;      // after the caption: the lid pops off the tube
+const SWIRL = [4.4, 6];   // after the first caption: the swirl starts and takes this long
+const AHEAD = 12.1;       // after the second caption: the camera drifts towards the sunset
 
 export class Story extends Film {
   constructor(game) {
@@ -59,8 +64,8 @@ export class Story extends Film {
   // like a white-out in a film
   overlay(ctx, vw) {
     this.drawParticles(ctx);
-    const T = this.T;
-    const bloom = bump(T, SHOTS[1].start + 5.6, SHOTS[2].start + 0.3, SHOTS[2].start + 0.6, SHOTS[2].start + 2.2);
+    const s2 = SHOTS[2].start;
+    const bloom = bump(this.T, s2 - 1.2, s2 + 0.8, s2 + 1.2, s2 + 3.2);
     if (bloom > 0) {
       ctx.globalCompositeOperation = 'lighter';
       ctx.fillStyle = `rgba(255,214,140,${0.85 * bloom})`;
@@ -70,54 +75,55 @@ export class Story extends Film {
   }
 
   // ---- the shots -------------------------------------------------------------------------
+  // `t` moves the story on (and stops while a caption waits); `live` keeps things breathing.
 
   // 1. The crate, seen from above. It sits closed, glowing through the cracks; a slow push in;
   // a golden flash and it lies open (the two paintings don't line up exactly, the flash hides it).
-  crate(ctx, t, vw) {
-    const zoom = 1.04 + 0.1 * ease(t / 7);
-    const flash = bump(t, 2.6, 3.1, 3.2, 4.4);
-    const img = t < 3.15 ? IMG.crateClosed : IMG.crateOpen;
-    cover(ctx, img, vw, zoom, 0.5 + 0.02 * Math.sin(t * 0.3), 0.48);
+  crate(ctx, t, vw, live) {
+    const zoom = 1.04 + 0.1 * ease(t / 9);
+    const flash = bump(t, CRATE_FLASH, CRATE_FLASH + 0.5, CRATE_FLASH + 0.6, CRATE_FLASH + 1.8);
+    const open = t >= CRATE_FLASH + 0.55;
+    cover(ctx, open ? IMG.crateOpen : IMG.crateClosed, vw, zoom, 0.5 + 0.02 * Math.sin(live * 0.3), 0.48);
     const cx = vw / 2, cy = H * 0.5;
-    const pulse = 0.7 + 0.3 * Math.sin(t * 2.1);
-    glow(ctx, cx, cy, 160 + 60 * pulse + 220 * flash, `rgba(255,200,110,${0.25 * pulse + (t > 3.1 ? 0.25 : 0)})`);
-    this.drawMotes(ctx, t, vw, cx, cy, 'rgba(255,215,140,', 0.5 + (t > 3.1 ? 0.5 : 0));
-    this.drawRain(ctx, t, vw, 0.18);
+    const pulse = 0.7 + 0.3 * Math.sin(live * 2.1);
+    glow(ctx, cx, cy, 160 + 60 * pulse + 220 * flash, `rgba(255,200,110,${0.25 * pulse + (open ? 0.25 : 0)})`);
+    this.drawMotes(ctx, live, vw, cx, cy, 'rgba(255,215,140,', 0.5 + (open ? 0.5 : 0));
+    this.drawRain(ctx, live, vw, 0.18);
     if (flash > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(255,220,150,${0.9 * flash})`; ctx.fillRect(0, 0, vw, H); ctx.globalCompositeOperation = 'source-over'; }
   }
 
   // 2. The hands lift the tube into view, it rests a moment, the lid pops off and light pours out
   // with notes and sheets of music spiralling up.
-  tube(ctx, t, vw) {
-    cover(ctx, IMG.tubeBg, vw, 1.06 + 0.06 * ease(t / 7.5), 0.5, 0.6);
+  tube(ctx, t, vw, live) {
+    cover(ctx, IMG.tubeBg, vw, 1.06 + 0.06 * ease(t / 9.5), 0.5, 0.6);
     ctx.fillStyle = 'rgba(8,10,18,0.25)'; ctx.fillRect(0, 0, vw, H);
     if (!ready(IMG.hands)) return;
     // the hands come in from the bottom-left corner: the left sleeve runs off the left edge,
     // the right one off the bottom, as if we look through the boy's eyes
     const hw = Math.min(vw * 0.62, 820), k = hw / IMG.hands.naturalWidth, hh = IMG.hands.naturalHeight * k;
-    const rise = (1 - ease(t / 1.8)) * 300;
-    const bob = Math.sin(t * 1.5) * 5 + Math.sin(t * 0.7) * 3;
+    const rise = (1 - ease(t / 2.2)) * 300;
+    const bob = Math.sin(live * 1.5) * 5 + Math.sin(live * 0.7) * 3;
     const hx = -hw * 0.04, hy = H - hh + 150 + rise + bob;
     const top = [hx + TUBE_TOP[0] * k, hy + TUBE_TOP[1] * k];
     this.tubeTop = top;
-    const open = t - 2.8; // seconds since the lid came off
+    const open = t - LID_POP; // seconds since the lid came off
     // the light first, behind the hands, rising out of the tube
     if (open > 0 && ready(IMG.burst)) {
-      const s = ease(open / 1.2), bw = 560 * s * (1 + 0.04 * Math.sin(t * 3)), bh = bw * IMG.burst.naturalHeight / IMG.burst.naturalWidth;
+      const s = ease(open / 1.5), bw = 560 * s * (1 + 0.04 * Math.sin(live * 3)), bh = bw * IMG.burst.naturalHeight / IMG.burst.naturalWidth;
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       ctx.globalAlpha *= 0.85 * s;
       ctx.drawImage(IMG.burst, top[0] - bw / 2, top[1] - bh * 0.92, bw, bh);
       ctx.restore();
     }
-    glow(ctx, top[0], top[1], 120 + (open > 0 ? 160 * ease(open / 1) : 0), `rgba(255,205,120,${open > 0 ? 0.45 : 0.15})`);
+    glow(ctx, top[0], top[1], 120 + (open > 0 ? 160 * ease(open / 1.2) : 0), `rgba(255,205,120,${open > 0 ? 0.45 : 0.15})`);
     ctx.drawImage(IMG.hands, hx, hy, hw, hh);
-    // the lid: on the tube, wobbling a little; then it pops up and tumbles away
+    // the lid: on the tube, wobbling a little while we wait; then it pops up and tumbles away
     if (ready(IMG.lid)) {
       const lw = TUBE_W * k * 1.05, lh = lw * IMG.lid.naturalHeight / IMG.lid.naturalWidth;
       let x = top[0], y = top[1] - lh * 0.25, r = 0, a = 1;
-      if (open < 0) r = Math.sin(t * 9) * 0.03 * smooth((t - 1.8) / 0.8);
-      else { x += 330 * open; y += -520 * open + 420 * open * open; r = 2.6 * open; a = 1 - smooth((open - 0.6) / 0.6); }
+      if (open < 0) r = Math.sin(live * 9) * 0.03 * smooth((t - 2) / 0.6);
+      else { x += 280 * open; y += -440 * open + 330 * open * open; r = 2.2 * open; a = 1 - smooth((open - 0.8) / 0.7); }
       if (a > 0) {
         ctx.save();
         ctx.globalAlpha *= a;
@@ -126,20 +132,20 @@ export class Story extends Film {
         ctx.restore();
       }
     }
-    this.drawMotes(ctx, t, vw, top[0], top[1] - 100, 'rgba(255,220,150,', open > 0 ? 1 : 0.3);
+    this.drawMotes(ctx, live, vw, top[0], top[1] - 100, 'rgba(255,220,150,', open > 0 ? 1 : 0.3);
   }
 
   // 3. The flooded street, the boy from behind on the quay. A swirl of light sweeps across from
   // right to left; behind it the same street appears in the past, and the boy's grey jacket turns
   // brown. Then the camera drifts slowly towards the setting sun while the light grows warmer.
-  travel(ctx, t, vw) {
-    const p = ease((t - 1.6) / 4.4);
+  travel(ctx, t, vw, live) {
+    const p = ease((t - SWIRL[0]) / SWIRL[1]);
     const sx = vw * 1.2 - p * vw * 1.45; // the swirl's x
     this.swirlX = p > 0 && p < 1 ? sx : null;
-    const ahead = ease((t - 6) / 6); // looking ahead, after the swirl
-    const zoom = 1.06 + 0.04 * ease(t / 6) + 0.22 * ahead;
-    const fx = 0.5 + 0.03 * Math.sin(t * 0.2) + (SUN[0] - 0.5) * ahead, fy = 0.45 + (SUN[1] - 0.45) * ahead;
-    const kid = (img, at) => boyFromBehind(ctx, img, at, KID_AT[0], KID_AT[1], KID_H, t);
+    const ahead = ease((t - AHEAD) / (SHOTS[2].dur - AHEAD)); // looking ahead, after the swirl
+    const zoom = 1.06 + 0.04 * ease(t / 8) + 0.22 * ahead;
+    const fx = 0.5 + 0.03 * Math.sin(live * 0.2) + (SUN[0] - 0.5) * ahead, fy = 0.45 + (SUN[1] - 0.45) * ahead;
+    const kid = (img, at) => boyFromBehind(ctx, img, at, KID_AT[0], KID_AT[1], KID_H, live);
     // the future, left of the swirl
     if (sx > 0) {
       ctx.save();
@@ -147,9 +153,9 @@ export class Story extends Film {
       kid(IMG.kidFuture, cover(ctx, IMG.future, vw, zoom, fx, fy));
       if (ready(IMG.futureFrame)) {
         // dark vines in front, drifting a little more than the street for depth
-        ctx.drawImage(IMG.futureFrame, -vw * 0.06 + Math.sin(t * 0.25) * 10, -H * 0.06, vw * 1.12, H * 1.12);
+        ctx.drawImage(IMG.futureFrame, -vw * 0.06 + Math.sin(live * 0.25) * 10, -H * 0.06, vw * 1.12, H * 1.12);
       }
-      this.drawRain(ctx, t, vw, 0.3);
+      this.drawRain(ctx, live, vw, 0.3);
       ctx.restore();
     }
     // the past, right of the swirl
@@ -157,9 +163,9 @@ export class Story extends Film {
       ctx.save();
       ctx.beginPath(); ctx.rect(sx, 0, vw - sx, H); ctx.clip();
       const at = cover(ctx, IMG.past, vw, zoom, fx, fy);
-      sunBeams(ctx, vw, t, 0.5 + 0.5 * ahead);
+      sunBeams(ctx, vw, live, 0.5 + 0.5 * ahead);
       kid(IMG.kidPast, at);
-      this.drawMotes(ctx, t, vw, vw * 0.6, H * 0.4, 'rgba(255,236,170,', 0.8 + 0.4 * ahead);
+      this.drawMotes(ctx, live, vw, vw * 0.6, H * 0.4, 'rgba(255,236,170,', 0.8 + 0.4 * ahead);
       // the sunset grows warmer and brighter, as if looking ahead to a better time
       if (ahead > 0 && at) glow(ctx, at.x + SUN[0] * at.w, at.y + SUN[1] * at.h, 200 + 500 * ahead, `rgba(255,214,150,${0.45 * ahead})`);
       ctx.restore();
@@ -174,8 +180,8 @@ export class Story extends Film {
       ctx.fillStyle = col; ctx.fillRect(sx - 260, 0, 520, H);
       for (let i = 0; i < 2; i++) {
         ctx.save();
-        ctx.translate(sx + Math.sin(t * 2 + i) * 18, H / 2);
-        ctx.rotate(Math.sin(t * 1.3 + i * 2) * 0.06 + (i ? 0.25 : -0.1));
+        ctx.translate(sx + Math.sin(live * 2 + i) * 18, H / 2);
+        ctx.rotate(Math.sin(live * 1.3 + i * 2) * 0.06 + (i ? 0.25 : -0.1));
         ctx.scale(i ? -1 : 1, 1);
         ctx.globalAlpha *= i ? 0.4 : 0.8;
         ctx.drawImage(IMG.swirl, -w / 2, -h / 2 - 20, w, h);
@@ -192,11 +198,11 @@ export class Story extends Film {
     const T = this.T, tube = T - SHOTS[1].start, travel = T - SHOTS[2].start;
     this.spawn -= dt;
     if (this.spawn <= 0) {
-      if (tube > 3 && tube < 7 && this.tubeTop) {
+      if (tube > LID_POP + 0.2 && tube < SHOTS[1].dur - 1.5 && this.tubeTop) {
         const [x, y] = this.tubeTop;
         this.add(x + (Math.random() - 0.5) * 40, y - 20, (Math.random() - 0.5) * 160, -260 - Math.random() * 200, 0.22);
         this.spawn = 0.13;
-      } else if (this.swirlX != null && travel > 1.6 && travel < 6) {
+      } else if (this.swirlX != null && travel > SWIRL[0] && travel < SWIRL[0] + SWIRL[1] - 0.6) {
         this.add(this.swirlX + (Math.random() - 0.5) * 200, H * (0.2 + Math.random() * 0.8), -320 - Math.random() * 200, -160 - Math.random() * 160, 0.3);
         this.spawn = 0.09;
       }
