@@ -20,7 +20,7 @@ const TOPICS = [
   },
   {
     q: 'Waar is de bladmuziek?',
-    a: 'In de grote kast, rechts naast mijn toonbank! In elke koker zit een opgerold muziekstuk. Haal er maar eentje uit. Met de pijltjes blader je, en met de spatiebalk speel je het op de piano.',
+    a: 'In de grote kast, rechts naast mijn toonbank! In elke koker zit een opgerold muziekstuk. Haal er maar eentje uit. Met de pijltjes blader je, en met Enter speel je het op de piano.',
     go: ['library', 'Naar de kast'],
   },
   {

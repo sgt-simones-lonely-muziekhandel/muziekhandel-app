@@ -11,7 +11,104 @@ Added:
 Changed:
 
 - [Sheet music](sheet-music.md): the cabinet holds the collection's 974 pieces with a scanned cover, fifteen to a cabinet (*Kast 1 van 65*), each with its real cover. The book's title page names all the makers; the notes are still to come, so these books end with a page saying so and can't go to the piano. The piano's own cabinet keeps the songs that have notes.
-- [Composers](composers.md): the wall close-up holds the composers of that music, six to a wall, most pieces first (*Muur 1 van 38*); their cards list their pieces. Their stories come later, from Wikidata.
+- [Composers](composers.md): the wall close-up holds the composers of that music, ten to a wall (*Muur 1 van 23*); *Sorteer* has *Meeste muziek* besides *A – Z*. The sorts by age and the *Muziek* filter show only once the composers have birth years and kinds of music (from Wikidata, later). Their cards list their pieces.
+
+## 2026-10-31 — Every validated SOM score in the shop: 37 songs in three cabinets
+
+Added:
+
+- [SOM scores](som-scores.md): all the hand-checked scores of sheet2midi's `validated/` (64 `.mxl`), 22 new songs: *Way Down South*, *Posthorn Galop*, *Oh, my Horsey*, *Black Train Blues*, *That Girl of Mine*, *Prikkebeen*, *Améthyste*, *Chocante*, *Meet me to-night in Dreamland*, *Hoe heet je?*, *Weet je, wat ik zou willen?*, *Valse miniature*, *Memory of Hawaii*, *Hompie-Kurkie*, *Het gaat alles voorbij*, *Flying-Patrol*, *In eenen nacht in mei*, *Ping Ping Ping*, *Señor en Señorita*, *Uit de Cantine*, *Witte Rozen*, *Keep Pretending*. Each has its scan pages as a book, its melody on the piano and, where the score has one, its piano accompaniment. The import reads songs split over several `.mxl`, two songs in one score, and piano solos (melody from the right hand).
+- [Sheet music](sheet-music.md): the songs fill three cabinets (*kast 1–3*), five easy, five middle and five hard songs to a cabinet; the composers' cabinet comes after them.
+
+Changed:
+
+- [Sheet music](sheet-music.md): *Speel op de piano* and its tip say **Enter** (Space still works).
+
+## 2026-10-31 — Pause and stop in one small set
+
+Changed:
+
+- [Piano](piano.md): *Luister* is now the play/pause button itself (▶ Luister → ❚❚ Pauze → ▶ Verder, also with Enter), with only a small round ■ beside it to stop, instead of two extra plaques (*Pauze* and *Stop*) in the row.
+
+## 2026-10-31 — Names on the black keys
+
+Changed:
+
+- [Piano](piano.md): a black key that sounds (pressed, in *Luister* or next in *Speel mee*) shows its name too (*C♯*, *F♯*…), smaller, as the white keys already did.
+- [Lessons](lessons.md): the small keyboards that show note names name the black keys too.
+
+## 2026-10-31 — Pause and stop while listening
+
+Added:
+
+- [Piano](piano.md): while a song plays with *Luister*, a brass **Pauze** plaque (it becomes **Verder** while paused, and the song goes on from the same note) and an ebony **Stop** plaque.
+
+## 2026-10-31 — Two rows on the piano, Space for the pedal, Enter to listen
+
+Changed:
+
+- [Piano](piano.md): only two rows of the computer keyboard play, like a piano: the home row (A S D F G H J K L Ò À Ù) is the white keys C4–G5, the row above (Q W E R T Y U I O P È +) the black keys, each between its two white keys (Q, R, I and È are silent: no black key there). The digits and the bottom row no longer play. The octave shift reaches one octave further down, to A0. The pedal is the space bar instead of Shift; *Luister* is Enter. The keyboard guide shows just those two rows.
+- [Sheet music](sheet-music.md): Enter (as well as Space) takes the piece to the piano; the [shopkeeper](shopkeeper.md) says Enter.
+
+## 2026-10-31 — Portrait rows centred
+
+Changed:
+
+- [Composers](composers.md): a row of portraits that isn't full is centred on the wall.
+
+## 2026-10-31 — Sort and music only
+
+Changed:
+
+- [Composers](composers.md): the *Instrument* button is gone; the wall is sorted (*Sorteer*) and filtered on the kind of music (*Muziek*) only. The composers no longer carry an `instruments` list.
+
+## 2026-10-31 — Filter buttons, composers A–Z, a living shop sign
+
+Changed:
+
+- [Composers](composers.md): *Sorteer*, *Muziek* and *Instrument* are three buttons; each opens its options above it and shows what is chosen. The composers are in alphabetical order by default.
+- [Game shell](game-shell.md): the title sign comes down on chains, swings and keeps swaying gently; a gleam runs across its gilt letters, the lyres' strings shiver and little notes rise from them.
+
+Fixed:
+
+- [Composers](composers.md): the wall was empty when it opened (the frames' entrance animation started before the view was on the page and stayed stuck, invisible).
+
+## 2026-10-31 — Room for many composers, lamps off by day, Middelburg by the hour, a real shop sign
+
+Added:
+
+- [Composers](composers.md): the portrait wall can be sorted (old → new, new → old, A–Z) and filtered on the kind of music (*Pianomuziek*, *Symfonieën*, *Opera*, *Ballet*, *Kerkmuziek*, *Concerten*) and the instruments (*Piano*, *Viool*, *Orkest*, *Zang*, *Orgel*, *Klavecimbel*), with brass plates on the wainscot. Ten composers to a wall; more walk on with arrows or ← →. Every composer has `music` and `instruments` in `js/data.js`.
+
+Changed:
+
+- [Composers](composers.md): no name plaques under the portraits.
+- [Street](street.md): the gas lamps are off by day (their painted glass turned dark) and come on at dusk. The houses take the light of the hour: plain daylight at noon, golden at sunrise and sunset, blue at night.
+- [Game shell](game-shell.md): the title screen is the shop's front on the canal, with the sign as a green board with gilt letters and lyres, like the sign above the door; *Start* is a brass button like the others.
+
+## 2026-10-31 — Birds in the sky, a living sun and moon
+
+Changed:
+
+- [Prologue](prologue.md): the birds in the first shot circle in the open sky over the canal, instead of flying across the trees and the houses.
+- [Sky](sky.md): the sun breathes in a warm halo, its rays shimmer and long faint beams wheel around it; it keeps its orange instead of washing out white. The moon's glow breathes, and now and then a wisp of cloud drifts past it.
+
+## 2026-10-31 — ↓ only in the windows
+
+Changed:
+
+- [Game shell](game-shell.md): in the street, the shop and the listening corner ↓ (and S) no longer go back: there the arrows only walk (← →) and go in (↑). In the windows ↓ still goes back one step.
+
+## 2026-10-31 — The game is set in Middelburg
+
+Changed:
+
+- The game takes place in Middelburg instead of Amsterdam: the title screen, the [prologue](prologue.md) (*Middelburg, 2026…*), the place in the tab of the [street](street.md) (*Middelburg, 1900*), the docs and the comments. Two real facts still say Amsterdam: Mozart's concerts in 1765–66 ([composers](composers.md)), and the city of the publisher printed on the real SOM sheet music ([SOM scores](som-scores.md)).
+
+## 2026-10-31 — A cat that meows, a laugh at the door
+
+Added:
+
+- [Shop](shop.md) / [sound effects](sound-effects.md): the cat on the piano can be clicked and meows (BigSoundBank, CC0), with a little "Miauw!"; Meneer Simone laughs a deep "ho ho ho" the first time you walk in (Mixkit, free license).
 
 ## 2026-10-31 — One back button, ↓ goes back, every book bends, a calmer voice, two legs and two arms
 
@@ -49,6 +146,42 @@ Changed:
 - [Piano](piano.md): the *MIDI* and *C D E* buttons are gone. The empty music desk asks *Wat wil je doen?*: *Een liedje leren* (choose sheet music) or *Gewoon spelen*. The instrument plaque reads *Instrument · Piano ▾*, without flashing (not when it first appears, nor while an instrument loads).
 - [Composers](composers.md): the shop wall keeps the team's paintings; the wall close-up shows the six composers again, with their name plaques, biographies and music, all with the standard silhouette (we have no portraits of them). The *De makers van dit spel* card is gone.
 - [Shopkeeper](shopkeeper.md): the ✕ is a round brass button on the paper's corner instead of a small cross on the speech bubble.
+
+## 2026-10-31 — Gentler rain
+
+Changed:
+
+- [Sound effects](sound-effects.md): the rain is a gentle pitter-patter now (rain on an umbrella, BigSoundBank, CC0, with the hiss filtered off) instead of rain on puddles, which sounded like a steady stream.
+
+## 2026-10-31 — Quiet when the crate opens, a halo for the tube
+
+Changed:
+
+- [Sound effects](sound-effects.md) / [story](story.md): when the crate opens the rain and any thunder fade out, so the focus stays on the picture; the tube's chime gets a soft heavenly choir (a *halo*) swelling under it.
+
+## 2026-10-31 — Rain, recorded thunder, the tube's chime
+
+Added / changed:
+
+- [Sound effects](sound-effects.md): soft rain wherever it rains on screen (the future street, the prologue's map and 2126 shot, the story until the past), as hard as it rains there; recorded thunder (instead of a synthesized rumble too low for laptop speakers) after every lightning flash, in the future street and the prologue, plus a distant rumble now and then in the future street; a sparkling recorded chime again as the lid comes off the tube in the [story](story.md). Recordings from BigSoundBank (CC0).
+
+## 2026-10-31 — Recorded footsteps, a short gust for the time travel
+
+Changed:
+
+- [Sound effects](sound-effects.md): the footsteps are recordings now (Kenney, CC0), softer and lower; the time travel's chimes and long wind are replaced by one 2.5-second gust with a little chime (BigSoundBank, CC0) as the swirl starts, quiet long before the past has fully appeared. Made by `scripts/import_sounds.py` into `public/audio`.
+
+## 2026-10-31 — The prologue dissolves again
+
+Changed:
+
+- [Prologue](prologue.md): Middelburg → map → 2126 slowly dissolve into each other again, without the seam of light and the swirl, which stays for the time travel in the [story](story.md).
+
+## 2026-10-31 — Sound effects
+
+Added:
+
+- [Sound effects](sound-effects.md) (`js/sfx.js`), made with Tone.js: footsteps in time with the walk (cobbles, wooden floor, puddles), the shop door creaking with its bell, distant thunder after the lightning in the future street, paper picked up from the cabinet, and wind and sparkling chimes during the time travel.
 
 ## 2026-10-31 — Painted sun, real moon phases, a few stars
 
@@ -174,11 +307,11 @@ Changed:
 
 - [Prologue](prologue.md) and [story](story.md): slower, for five-year-olds. Each caption now waits until the player clicks or taps (a pulsing ▶ appears on it after a moment), and the next thing (the crate opening, the lid popping, the swirl, the sea rising) only happens after the click. The picture keeps moving gently while it waits. Keys no longer skip, and clicking without a caption does nothing. Dissolves between shots are slower too.
 
-## 2026-10-31 — Prologue: Amsterdam today, the sea rising, the year 2126
+## 2026-10-31 — Prologue: Middelburg today, the sea rising, the year 2126
 
 Added:
 
-- [Prologue](prologue.md): the game now opens with a short film before the [future street](future-street.md): Amsterdam today, an old map of the Netherlands where the sea creeps in while the year counts from 2026 to 2126, and the flooded street in smoky air with the boy appearing on the quay. It tells kids where and when they are and why the city is flooded, calm and never scary.
+- [Prologue](prologue.md): the game now opens with a short film before the [future street](future-street.md): Middelburg today, an old map of the Netherlands where the sea creeps in while the year counts from 2026 to 2126, and the flooded street in smoky air with the boy appearing on the quay. It tells kids where and when they are and why the city is flooded, calm and never scary.
 
 Changed:
 
@@ -372,7 +505,7 @@ Removed:
 
 - `assets/shop-interior.jpg` and its step in `tools/build_assets.py` ([assets](assets.md)).
 
-## 2026-10-30 — Painted Amsterdam street
+## 2026-10-30 — Painted Middelburg street
 
 Changed:
 
@@ -386,7 +519,7 @@ Changed:
 
 Added:
 
-- [Street](street.md) in Amsterdam around 1900, with canal crossing, houses and the music shop.
+- [Street](street.md) in Middelburg around 1900, with canal crossing, houses and the music shop.
 - [Real-time sky](sky.md) that follows the visitor's local time.
 - [Cyclists](cyclists.md) who ride past while the player is idle.
 - [Player character](player.md) from the 8-frame walk cycle.

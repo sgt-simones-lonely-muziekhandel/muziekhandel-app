@@ -1,13 +1,14 @@
 // The prologue, played before the game starts: where and when the player is, and why the city is
 // flooded. Three painted shots from public/art/intro, in the same slow anime style as the story
 // (shared parts in js/film.js):
-//   1. today   Amsterdam in 2026: the canal on a fresh morning, bikes, boats, birds
+//   1. today   Middelburg in 2026: the canal on a fresh morning, bikes, boats, birds
 //   2. map     an old map of the Netherlands; the year counts up to 2126 while the sea creeps in
 //   3. future  the same street in 2126, flooded and quiet under smoky air; the camera tilts down
 //              from the storm to the boy on the quay, then dissolves into the future street
-// The shots slide into each other behind a seam of light (`wipe`), like the time travel in the
-// story. Each caption waits until the player clicks or taps (see js/film.js); Overslaan skips it all.
+// The shots slowly dissolve into each other. Each caption waits until the player clicks or taps
+// (see js/film.js); Overslaan skips it all.
 import { Film, H, load as loadImg, ready, smooth, ease, bump, cover, glow, sunBeams, boyFromBehind, mulberry } from './film.js';
+import { thunder } from './sfx.js';
 
 const load = name => loadImg(`public/art/intro/${name}.webp`);
 const IMG = {
@@ -26,12 +27,12 @@ const KID_AT = [0.3, 0.985], KID_H = 0.42;
 // Shots, in order. `captions` are [from, text]: the caption comes in at `from` seconds into the
 // shot and the prologue waits there until the player clicks.
 const SHOTS = [
-  { key: 'today', dur: 9, captions: [[1.4, 'Amsterdam, 2026. Een stad vol water, fietsen… en muziek.']] },
-  { key: 'map', dur: 15, from: 'right', captions: [
+  { key: 'today', dur: 9, captions: [[1.4, 'Middelburg, 2026. Een stad vol water, fietsen… en muziek.']] },
+  { key: 'map', dur: 15, captions: [
     [2.8, 'De aarde werd steeds warmer. Het ijs smolt en de zee steeg.'],
     [11.6, 'Het water kwam steeds verder het land in.'],
   ] },
-  { key: 'future', dur: 17, from: 'left', captions: [
+  { key: 'future', dur: 17, captions: [
     [6.8, 'Het jaar 2126. De mensen zijn vertrokken naar hoger land.'],
     [8.6, 'De lucht is vies van stormen en branden. Wie naar buiten gaat, draagt een masker.'],
     [12.4, 'De stad is stil — er klinkt geen muziek meer. Maar één jongen is nog op zoek…'],
@@ -40,29 +41,52 @@ const SHOTS = [
 const FLOOD = [4.4, 7];   // after the first map caption the sea rises, taking this long
 const TILT = 7;           // the camera comes down from the storm to the street over this long
 const BOY = 10.2;         // after the smoke caption the boy appears on the quay
+// the two lightning flashes in the 2126 shot: when, and how near (the thunder comes a moment later)
+const FLASHES = [[3.2, 1], [15.3, 0.7]];
 
 export class Prologue extends Film {
   constructor(game) {
-    super(game, { shots: SHOTS, place: 'Amsterdam', next: 'future', seed: 5, wipe: true });
+    super(game, { shots: SHOTS, place: 'Middelburg', next: 'future', seed: 5 });
     const r = mulberry(23);
-    // birds over the canal: start x, height, speed, flap phase
-    this.birds = Array.from({ length: 5 }, () => [r(), 0.08 + r() * 0.2, 0.6 + r() * 0.5, r() * 6]);
+    // birds circling in the open sky over the canal (between the trees and the houses of
+    // today-street.webp): centre x, y and radii of their loop in picture fractions, speed, phase
+    this.birds = Array.from({ length: 5 }, () => [
+      0.6 + r() * 0.06, 0.16 + r() * 0.16, 0.025 + r() * 0.025, 0.015 + r() * 0.02, 0.25 + r() * 0.2, r() * 6,
+    ]);
     // smoke drifting through the future street: x, y, size, speed
     this.smoke = Array.from({ length: 9 }, () => [r(), 0.15 + r() * 0.7, 0.25 + r() * 0.3, 0.3 + r() * 0.6]);
     this.flood = null; // canvas for the flooded map, masked to how far the sea has come
   }
 
-  // 1. Amsterdam today: a slow pan along the canal on a fresh morning, birds flying over.
+  enter(from) {
+    super.enter(from);
+    this.heard = 0; // the story time the thunder was played up to
+  }
+
+  // Thunder a moment after each flash in the 2126 shot (js/sfx.js).
+  tick() {
+    const at = this.shots.find(s => s.key === 'future').start;
+    for (const [t, near] of FLASHES) if (this.heard < at + t && this.T >= at + t) thunder(0.7, near);
+    this.heard = this.T;
+  }
+
+  // 1. Middelburg today: a slow pan along the canal on a fresh morning, birds circling in the sky.
   today(ctx, t, vw, live) {
     const p = ease(t / 9);
-    cover(ctx, IMG.today, vw, 1.04 + 0.08 * p, 0.4 + 0.15 * p + 0.01 * Math.sin(live * 0.25), 0.5);
+    const at = cover(ctx, IMG.today, vw, 1.04 + 0.08 * p, 0.4 + 0.15 * p + 0.01 * Math.sin(live * 0.25), 0.5);
     sunBeams(ctx, vw, live, 0.35);
     this.drawMotes(ctx, live, vw, vw * 0.55, H * 0.35, 'rgba(255,250,230,', 0.4);
+    if (!at) return;
     ctx.save();
-    ctx.strokeStyle = INK; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
-    for (const [x, y, sp, ph] of this.birds) {
-      const bx = ((x + live * 0.025 * sp) % 1.2) * vw - vw * 0.1, by = H * y + Math.sin(live * sp + ph) * 6;
-      const flap = Math.sin(live * 9 * sp + ph) * 5, s = 9;
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+    for (const [cx, cy, rx, ry, sp, ph] of this.birds) {
+      // a slow loop that leans a little, so no two birds fly the same circle
+      const a = live * sp + ph;
+      const bx = at.x + (cx + rx * Math.cos(a) + rx * 0.3 * Math.sin(a * 2)) * at.w;
+      const by = at.y + (cy + ry * Math.sin(a)) * at.h;
+      // wings beat while climbing, and mostly glide on the way down
+      const climbing = Math.cos(a) < 0; // y grows downwards
+      const flap = (climbing ? Math.sin(live * 7 + ph) * 4 : 1.5 + Math.sin(live * 2 + ph)), s = at.w * 0.007;
       ctx.beginPath();
       ctx.moveTo(bx - s, by - flap); ctx.quadraticCurveTo(bx - s / 2, by - 3, bx, by);
       ctx.quadraticCurveTo(bx + s / 2, by - 3, bx + s, by - flap);

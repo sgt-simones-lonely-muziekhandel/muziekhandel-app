@@ -9,7 +9,7 @@
 // leaf is cut into strips that curl one after the other (`setCurl`), with light and shade on the
 // paper and a shadow cast on the page underneath (a cover is board: it hardly bends); a page can be
 // dragged with the mouse or a finger, and its corner lifts when pointed at.
-// ← → or a click on a page flip; Space takes the piece to the piano, on top of the book, so Terug
+// ← → or a click on a page flip; Enter (or Space) takes the piece to the piano, on top of the book, so Terug
 // comes back to this page. A piece from the Muziekschatten data (js/catalogue.js) has no notes yet:
 // its book is its scanned cover, the title page with all its makers, and a page saying the notes
 // are still to come; it can't go to the piano.
@@ -51,7 +51,7 @@ export function sheetView(ui, opts) {
     cls: `sheet ${noFade ? 'no-zoom' : ''}`,
     full: true,
     tip: parsed
-      ? 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op de spatiebalk om dit stuk op de piano te spelen.'
+      ? 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op Enter om dit stuk op de piano te spelen.'
       : 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug.',
   });
 
@@ -131,7 +131,7 @@ export function sheetView(ui, opts) {
       <button class="turn-btn prev" title="Terug bladeren (←)">‹</button>
       <button class="turn-btn next" title="Verder bladeren (→)">›</button>
       <p class="open-hint">Klik op het boek om het open te slaan</p>
-      <button class="btn brass play">Speel op de piano <kbd>spatie</kbd></button>
+      <button class="btn brass play">Speel op de piano <kbd>Enter</kbd></button>
     </div>`));
 
   const book = body.querySelector('.book');
@@ -320,7 +320,7 @@ export function sheetView(ui, opts) {
     onKey(e) {
       if (e.code === 'ArrowLeft') { e.preventDefault(); turn(-1); }
       if (e.code === 'ArrowRight') { e.preventDefault(); turn(1); }
-      if (e.code === 'Space') { e.preventDefault(); toPiano(); }
+      if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); if (!e.repeat) toPiano(); }
     },
   };
 }

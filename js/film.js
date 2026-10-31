@@ -10,6 +10,7 @@
 // taps (a pulsing ▶ on the caption shows it after a moment); then the caption fades and the story
 // goes on. While it waits only the story time stops, so the picture keeps living. Keys and clicks
 // without a caption don't skip anything.
+import { rain, loadThunder } from './sfx.js';
 
 export const H = 720;
 const XF = 2.2;        // seconds two shots dissolve into each other
@@ -72,6 +73,9 @@ export class Film {
     this.clock = 0;
     this.done = false;
     this.holding = null; // the caption the story is waiting on
+    this.rainSeen = 0;   // how hard it rained on screen in the last frame (see drawRain)
+    this.hushed = false; // true: no more rain sound, whatever is on screen
+    loadThunder();
     for (const c of this.captions) { c.released = null; c.since = null; c.shown = null; }
     this.game.setPlace(this.place);
   }
@@ -103,6 +107,8 @@ export class Film {
       else this.T += dt;
     }
     this.tick?.(this.holding ? 0 : dt);
+    // the rain sounds as hard as it rains on screen (0.3 is a downpour); none in the past
+    rain(this.hushed ? 0 : Math.min(1, this.rainSeen / 0.3));
     if (this.T >= this.total && !this.done) { this.done = true; this.game.goTo(this.next, { dissolve: this.out }); }
   }
 
@@ -110,6 +116,7 @@ export class Film {
     const vw = view.viewW, T = this.T;
     ctx.save();
     ctx.setTransform(view.base);
+    this.rainSeen = 0;
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, vw, H);
     if (this.wipe) this.drawWiped(ctx, vw, T);
@@ -229,6 +236,7 @@ export class Film {
   }
 
   drawRain(ctx, t, vw, alpha) {
+    this.rainSeen = Math.max(this.rainSeen, alpha * ctx.globalAlpha);
     ctx.save();
     ctx.strokeStyle = `rgba(190,205,225,${alpha})`;
     ctx.lineWidth = 1.3;

@@ -126,9 +126,9 @@ ASSETS = [
                                          "paper-5", "note-4", "paper-6", "paper-7", "note-5", "note-6"]}),
     ("opening_scene/3_Golden-Hour Canal Music Shop.png", "opaque", "intro/past-street", {}),
     ("opening_scene/4_Golden-Hour Canal Music Shop.png", "opaque", "intro/shop-front", {}),
-    # Prologue before the game: Amsterdam today (lines up with past-street), and the map of the
+    # Prologue before the game: Middelburg today (lines up with past-street), and the map of the
     # Netherlands before and after the sea rises (the two maps line up)
-    ("intro/Sunny Amsterdam Canal Street in Comic Style.png", "opaque", "intro/today-street", {}),
+    ("intro/Sunny Middelburg Canal Street in Comic Style.png", "opaque", "intro/today-street", {}),
     ("intro/Vintage Illustrated Map of the Netherlands.png", "opaque", "intro/map-now", {}),
     ("intro/Flooded Netherlands Fantasy Map.png", "opaque", "intro/map-flooded", {}),
     # Easter egg: the team on the gallery wall

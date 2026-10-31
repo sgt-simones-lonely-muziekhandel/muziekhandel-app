@@ -47,7 +47,7 @@ Each note is `pitch:duration`, separated by spaces. `|` bar lines are optional a
 notes: `E4:q E4:q F4:q G4:q | G4:q F4:q E4:q D4:q | C4:q C4:q D4:q E4:q | E4:q. D4:8 D4:h`
 ```
 
-Notes outside C3–G5 can be written but can't be played on the on-screen piano.
+Notes outside C4–G5 can be written; the player reaches them by shifting the keyboard an octave (← →).
 
 `parsePiece()` in `js/music.js` turns this into notes with MIDI numbers, staff positions, start times and bar numbers (plus `type`, `dotted`, `triplet`, `tieNext` / `tied` and `sound`, the length of a tied chain), and caches the result.
 

@@ -39,8 +39,8 @@ export const cachedComposer = id => composers.get(id);
 export const piecePage = page => get(`pieces?page=${page}`).then(d => ({ ...d, pieces: d.pieces.map(toPiece) }));
 export const loadPiece = id => get(`pieces/${encodeURIComponent(id)}`).then(toPiece);
 
-// One wall: { page, pages, total, composers }
-export const composerPage = page => get(`composers?page=${page}`);
+// All composers of the shop's music, most pieces first: { total, composers }
+export const allComposers = () => get('composers?all=1');
 // A composer with their pieces; no story yet (`bio`), that comes from Wikidata later.
 export const loadComposer = id => get(`composers/${encodeURIComponent(id)}`).then(c => {
   const composer = { ...c, title: '', bio: '', fact: '', pieces: c.pieces.map(toPiece) };

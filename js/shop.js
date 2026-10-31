@@ -8,6 +8,7 @@ import { TEAM } from './data.js';
 import { FRAME_TYPES, FRAME_SRC, TEAM_FRAME } from './frames.js';
 import { hitSpot, nearestSpot, clickSpots, drawLabel } from './hotspots.js';
 import { skyAt, currentHour } from './sky.js';
+import { meow, laugh, loadShopSounds } from './sfx.js';
 
 const W = 1440, H = 720;
 const FOOT_Y = 692;
@@ -94,6 +95,9 @@ const HOTSPOTS = [
   { id: 'next', label: 'Luisterhoek →', rects: [[1406, 120, 34, 560]], stands: [1400], action: g => g.goTo('corner') },
   { id: 'library', label: 'Bladmuziek', rects: [[1112, 205, 270, 391]], stands: [1250], action: g => g.ui.open('library') },
 ];
+// The cat asleep on top of the piano (painted in piano.webp): click it and it meows, right away,
+// without the boy walking over. No stand, so the keyboard never picks it instead of the piano.
+const CAT = { id: 'cat', label: 'Poes', rects: [[352, 308, 94, 40]], stands: [] };
 
 export class Shop {
   constructor(game) {
@@ -101,9 +105,11 @@ export class Shop {
     this.width = W;
     this.fitWidth = W;
     this.boy = new Boy(200);
+    this.boy.ground = 'wood';
     this.hovered = null;
     this.time = 0;
     this.greeted = false;
+    this.meowed = -9; // when the cat last meowed, for the little "Miauw!" above it
   }
 
   enter(from) {
@@ -112,8 +118,11 @@ export class Shop {
     this.boy.dir = back ? -1 : 1;
     this.boy.target = null;
     this.game.setPlace('Muziekhandel Simone');
+    loadShopSounds();
     if (!this.greeted) {
       this.greeted = true;
+      // the first time in: a deep "ho ho ho" from Meneer Simone, then he greets you
+      setTimeout(laugh, 350);
       setTimeout(() => this.game.ui.open('keeper', { greeting: true }), 900);
     }
   }
@@ -127,11 +136,12 @@ export class Shop {
   }
 
   click(wx, wy) {
+    if (hitSpot([CAT], wx, wy)) { meow(); this.meowed = this.time; return; }
     clickSpots(this, HOTSPOTS, wx, wy, 70, W - 40);
   }
 
   hover(wx, wy) {
-    this.hovered = hitSpot(HOTSPOTS, wx, wy)?.spot || null;
+    this.hovered = hitSpot([CAT, ...HOTSPOTS], wx, wy)?.spot || null;
     return !!this.hovered;
   }
 
@@ -195,6 +205,24 @@ export class Shop {
       ctx.drawImage(IMG.fg, 0, 0, 600 * k, IMG.fg.naturalHeight, 0, 0, 600, H);
     }
     if (lit) drawLabel(ctx, lit, this.time, W, lit === near && !this.hovered);
+    this.drawMeow(ctx);
+    ctx.restore();
+  }
+
+  // "Miauw!" floats up from the cat for a moment after it meows.
+  drawMeow(ctx) {
+    const t = this.time - this.meowed;
+    if (t > 1.2) return;
+    const [x, y, w] = CAT.rects[0];
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, t * 6) * Math.min(1, (1.2 - t) * 3);
+    ctx.font = '600 30px Caveat, cursive';
+    ctx.textAlign = 'left';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#f4e9d7'; ctx.fillStyle = '#2a1d12';
+    // beside the cat's head, clear of its label
+    const tx = x + w + 6, ty = y + 16 - t * 22;
+    ctx.strokeText('Miauw!', tx, ty);
+    ctx.fillText('Miauw!', tx, ty);
     ctx.restore();
   }
 

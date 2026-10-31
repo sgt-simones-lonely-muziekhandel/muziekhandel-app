@@ -86,29 +86,31 @@ export function parsePiece(piece) {
   return piece._parsed;
 }
 
-// Physical key positions (KeyboardEvent.code), so it works on QWERTY, QWERTZ and AZERTY alike.
-// Top letter row = middle/high notes, bottom row = low notes; the digits above are the black keys.
+// Physical key positions (KeyboardEvent.code), so it works whatever letters are printed on the keys.
+// Two rows, like a piano: the home row (A S D … Ò À Ù on an Italian keyboard) are the white keys
+// C4–G5; the row above (Q W E … È +) are the black keys, each sitting between the two white keys it
+// lies between. Where a piano has no black key (E–F, B–C) that key is silent: Q, R, I and È.
 export const KEYMAP = {
-  KeyZ: 48, KeyS: 49, KeyX: 50, KeyD: 51, KeyC: 52, KeyV: 53, KeyG: 54, KeyB: 55, KeyH: 56,
-  KeyN: 57, KeyJ: 58, KeyM: 59, Comma: 60, KeyL: 61, Period: 62, Semicolon: 63, Slash: 64,
-  KeyQ: 60, Digit2: 61, KeyW: 62, Digit3: 63, KeyE: 64, KeyR: 65, Digit5: 66, KeyT: 67,
-  Digit6: 68, KeyY: 69, Digit7: 70, KeyU: 71, KeyI: 72, Digit9: 73, KeyO: 74, Digit0: 75,
-  KeyP: 76, BracketLeft: 77, Equal: 78, BracketRight: 79,
+  KeyA: 60, KeyS: 62, KeyD: 64, KeyF: 65, KeyG: 67, KeyH: 69, KeyJ: 71,
+  KeyK: 72, KeyL: 74, Semicolon: 76, Quote: 77, Backslash: 79,
+  KeyW: 61, KeyE: 63, KeyT: 66, KeyY: 68, KeyU: 70,
+  KeyO: 73, KeyP: 75, BracketRight: 78,
 };
-// The computer keyboard covers C3–G5; it can be shifted whole octaves to reach the rest of the piano.
-export const KEYS_LOW = 48;   // C3
+// The computer keyboard covers C4–G5; it can be shifted whole octaves to reach the rest of the piano.
+export const KEYS_LOW = 60;   // C4
 export const KEYS_HIGH = 79;  // G5
-export const MAX_SHIFT = 3;   // octaves up or down
+export const MIN_SHIFT = -4;  // octaves down: down to A0
+export const MAX_SHIFT = 3;   // octaves up: up to C8
 // A full 88-key grand piano.
 export const PIANO_LOW = 21;  // A0
 export const PIANO_HIGH = 108; // C8
 
+// What is printed on these keys, until the browser tells us the user's own layout (Italian here).
 const DEFAULT_LABELS = {
-  KeyZ: 'Z', KeyS: 'S', KeyX: 'X', KeyD: 'D', KeyC: 'C', KeyV: 'V', KeyG: 'G', KeyB: 'B', KeyH: 'H',
-  KeyN: 'N', KeyJ: 'J', KeyM: 'M', Comma: ',', KeyL: 'L', Period: '.', Semicolon: ';', Slash: '/',
-  KeyQ: 'Q', Digit2: '2', KeyW: 'W', Digit3: '3', KeyE: 'E', KeyR: 'R', Digit5: '5', KeyT: 'T',
-  Digit6: '6', KeyY: 'Y', Digit7: '7', KeyU: 'U', KeyI: 'I', Digit9: '9', KeyO: 'O', Digit0: '0',
-  KeyP: 'P', BracketLeft: '[', Equal: '=', BracketRight: ']',
+  KeyQ: 'Q', KeyW: 'W', KeyE: 'E', KeyR: 'R', KeyT: 'T', KeyY: 'Y', KeyU: 'U', KeyI: 'I', KeyO: 'O',
+  KeyP: 'P', BracketLeft: 'È', BracketRight: '+',
+  KeyA: 'A', KeyS: 'S', KeyD: 'D', KeyF: 'F', KeyG: 'G', KeyH: 'H', KeyJ: 'J', KeyK: 'K', KeyL: 'L',
+  Semicolon: 'Ò', Quote: 'À', Backslash: 'Ù',
 };
 export const keyLabels = { ...DEFAULT_LABELS };
 
@@ -124,12 +126,8 @@ export async function loadKeyLabels() {
   } catch { /* not supported: keep QWERTY labels */ }
 }
 
-// The key we show on each piano key: top row from C4 up, bottom row below C4.
-// `shift` is the octave shift of the computer keyboard.
+// The key we show on each piano key; `shift` is the octave shift of the computer keyboard.
 export function keyCodeForMidi(midi, shift = 0) {
   midi -= shift * 12;
-  const codes = Object.keys(KEYMAP).filter(c => KEYMAP[c] === midi);
-  if (!codes.length) return null;
-  if (midi >= 60) return codes.find(c => !['Comma', 'KeyL', 'Period', 'Semicolon', 'Slash'].includes(c)) || codes[0];
-  return codes[0];
+  return Object.keys(KEYMAP).find(c => KEYMAP[c] === midi) || null;
 }

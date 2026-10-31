@@ -7,6 +7,8 @@
 // both sleeves painted on, which with the swinging arm pieces gave him four arms
 // (scripts/make_armless_torso.py takes them off).
 
+import { step } from './sfx.js';
+
 const ready = img => img.complete && img.naturalWidth > 0;
 
 // Joints in each piece's own pixels. `pivot` is where it hangs from; `end` is where the next piece
@@ -71,6 +73,8 @@ export class Boy {
     this.onArrive = null;
     this.speed = 230;
     this.lastHeight = 235;
+    this.ground = 'stone'; // what the footsteps sound like (see js/sfx.js); each scene sets it
+    this.steps = 0;        // footfalls so far, to hear each one once
   }
 
   walkTo(x, onArrive = null) {
@@ -107,6 +111,7 @@ export class Boy {
     this.stride += ((this.moving ? 1 : 0) - this.stride) * Math.min(1, dt * 9);
     // when stopping, let the legs come together instead of freezing mid-step
     if (!this.moving && this.stride > 0.02) this.phase += dt * 7 * this.stride;
+    this.footfall();
   }
 
   // Walking on the spot (going through a door): the legs keep moving while x stays put.
@@ -114,6 +119,15 @@ export class Boy {
     this.stride += (1 - this.stride) * Math.min(1, dt * 9);
     this.phase += dt * 8;
     this.idleT = 0;
+    this.footfall();
+  }
+
+  // A foot lands when its leg is furthest forward (phase π/2, then every π): a footstep sound,
+  // only while really walking, not while the legs come together after stopping.
+  footfall() {
+    const n = Math.floor((this.phase - Math.PI / 2) / Math.PI);
+    if (n !== this.steps && this.stride > 0.5) step(this.ground);
+    this.steps = n;
   }
 
   // Joint angles in radians, forward of straight down.

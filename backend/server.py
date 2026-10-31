@@ -10,7 +10,8 @@ on to it. Python's standard library only. See docs/features/backend.md.
 
     GET /api/pieces?page=N       one cabinet: 15 pieces with a printed cover, by title
     GET /api/pieces/<id>         one piece, with all its makers
-    GET /api/composers?page=N    one wall: 6 composers, most pieces in the shop first
+    GET /api/composers?page=N    6 composers, most pieces in the shop first
+    GET /api/composers?all=1     all of them (the portrait wall sorts and filters them itself)
     GET /api/composers/<id>      one composer, with their pieces in the shop
 """
 
@@ -57,8 +58,9 @@ class Virtuoso:
             hit = self.cache.get(query)
         if hit and time.monotonic() - hit[0] < CACHE_SECONDS:
             return hit[1]
-        url = self.endpoint + "?" + urllib.parse.urlencode({"query": query, "default-graph-uri": self.graph})
-        request = urllib.request.Request(url, headers={"Accept": "application/sparql-results+json"})
+        # POST: a query naming many pieces or composers is too long for a URL
+        form = urllib.parse.urlencode({"query": query, "default-graph-uri": self.graph}).encode()
+        request = urllib.request.Request(self.endpoint, data=form, headers={"Accept": "application/sparql-results+json"})
         with urllib.request.urlopen(request, timeout=30) as response:
             bindings = json.load(response)["results"]["bindings"]
         rows = [{k: v["value"] for k, v in b.items()} for b in bindings]
@@ -233,15 +235,20 @@ def composers(db, ids, counts=None):
     return result
 
 
-def composers_page(db, page):
+def composers_page(db, page, everyone=False):
+    """One page of composers, or (`everyone`) all of them as one page."""
     total = int(db.select(f"SELECT (COUNT(DISTINCT ?c) AS ?n) WHERE {{ {IN_SHOP} ?w s:composer ?c }}")[0]["n"])
-    if page >= pages(total, COMPOSERS_PER_PAGE):
+    if everyone:
+        page, limit = 0, ""
+    elif page >= pages(total, COMPOSERS_PER_PAGE):
         return {"page": page, "pages": pages(total, COMPOSERS_PER_PAGE), "total": total, "composers": []}
+    else:
+        limit = f"LIMIT {COMPOSERS_PER_PAGE} OFFSET {page * COMPOSERS_PER_PAGE}"
     rows = db.select(f"""
         SELECT ?c (COUNT(DISTINCT ?w) AS ?n) WHERE {{ {IN_SHOP} ?w s:composer ?c }}
-        GROUP BY ?c ORDER BY DESC(?n) ?c LIMIT {COMPOSERS_PER_PAGE} OFFSET {page * COMPOSERS_PER_PAGE}""")
+        GROUP BY ?c ORDER BY DESC(?n) ?c {limit}""")
     counts = {local_id(r["c"]): int(r["n"]) for r in rows}
-    return {"page": page, "pages": pages(total, COMPOSERS_PER_PAGE), "total": total,
+    return {"page": page, "pages": 1 if everyone else pages(total, COMPOSERS_PER_PAGE), "total": total,
             "composers": composers(db, list(counts), counts)}
 
 
@@ -258,7 +265,8 @@ def composer(db, i):
 ROUTES = [
     (re.compile(r"/api/pieces/?"), lambda db, query: pieces_page(db, page_number(query))),
     (re.compile(rf"/api/pieces/({ID.pattern})"), lambda db, query, i: piece(db, i)),
-    (re.compile(r"/api/composers/?"), lambda db, query: composers_page(db, page_number(query))),
+    (re.compile(r"/api/composers/?"),
+     lambda db, query: composers_page(db, page_number(query), everyone="all" in query)),
     (re.compile(rf"/api/composers/({ID.pattern})"), lambda db, query, i: composer(db, i)),
 ]
 

@@ -13,6 +13,9 @@ export const NO_PORTRAIT = 'public/art/portraits/unknown.webp';
 // with a `portrait` would show it.
 export const portraitOf = c => c?.portrait || NO_PORTRAIT;
 
+// Every composer's `music` (the kinds of music they are known for) is what the portrait wall can be
+// filtered on; use the words of MUSIC_KINDS, so a new composer lands under the right button.
+export const MUSIC_KINDS = ['Pianomuziek', 'Symfonieën', 'Opera', 'Ballet', 'Kerkmuziek', 'Concerten'];
 export const COMPOSERS = [
   {
     id: 'bach',
@@ -20,6 +23,7 @@ export const COMPOSERS = [
     short: 'Bach',
     years: '1685 – 1750',
     title: 'Meester van de kerkmuziek',
+    music: ['Kerkmuziek', 'Concerten'],
     born: '21 maart 1685, Eisenach (Duitsland)',
     died: '28 juli 1750, Leipzig (Duitsland)',
     bio: 'Bach kwam uit een enorme muzikantenfamilie: bijna alle Bachs maakten muziek. Hij speelde orgel in grote kerken en schreef meer dan 1000 stukken. Elke week maakte hij nieuwe muziek voor de kerk in Leipzig. Zijn muziek is als een puzzel: melodieën die precies in elkaar passen.',
@@ -49,6 +53,7 @@ export const COMPOSERS = [
     short: 'Mozart',
     years: '1756 – 1791',
     title: 'Het wonderkind',
+    music: ['Opera', 'Symfonieën', 'Pianomuziek', 'Concerten'],
     born: '27 januari 1756, Salzburg (Oostenrijk)',
     died: '5 december 1791, Wenen (Oostenrijk)',
     bio: 'Mozart was een wonderkind. Toen hij vijf was, schreef hij al zijn eerste stukjes. Met zijn vader en zus reisde hij door heel Europa om te spelen voor koningen en keizers. Hij schreef meer dan 600 stukken: opera\'s, symfonieën en vrolijke pianomuziek.',
@@ -76,6 +81,7 @@ export const COMPOSERS = [
     short: 'Beethoven',
     years: '1770 – 1827',
     title: 'De componist die niet opgaf',
+    music: ['Symfonieën', 'Pianomuziek', 'Concerten'],
     born: '17 december 1770, Bonn (Duitsland)',
     died: '26 maart 1827, Wenen (Oostenrijk)',
     bio: 'Beethoven groeide op in Bonn en verhuisde later naar Wenen. Hij werd steeds slechter horen en was op het laatst helemaal doof. Toch bleef hij componeren: hij hoorde de muziek in zijn hoofd. Zijn negende symfonie, met de "Ode an die Freude", schreef hij toen hij niets meer kon horen.',
@@ -105,6 +111,7 @@ export const COMPOSERS = [
     short: 'Chopin',
     years: '1810 – 1849',
     title: 'Dichter van de piano',
+    music: ['Pianomuziek'],
     born: '1 maart 1810, Żelazowa Wola (Polen)',
     died: '17 oktober 1849, Parijs (Frankrijk)',
     bio: 'Chopin werd geboren in Polen en verhuisde later naar Parijs. Hij schreef bijna alleen muziek voor de piano. Zijn muziek klinkt soms als zingen, soms als dansen: walsen, mazurka\'s en nocturnes (nachtmuziek).',
@@ -130,6 +137,7 @@ export const COMPOSERS = [
     short: 'Verdi',
     years: '1813 – 1901',
     title: 'Meester van de opera',
+    music: ['Opera', 'Kerkmuziek'],
     born: '10 oktober 1813, Le Roncole (Italië)',
     died: '27 januari 1901, Milaan (Italië)',
     bio: 'Verdi kwam uit een klein dorp in Italië, waar zijn ouders een herberg hadden. Hij werd de beroemdste operacomponist van Italië. In zijn opera\'s zingen mensen over liefde, verdriet en vrijheid. Zijn muziek werd zo bekend dat mensen de liedjes op straat zongen.',
@@ -158,6 +166,7 @@ export const COMPOSERS = [
     short: 'Tsjaikovski',
     years: '1840 – 1893',
     title: 'Meester van de melodie',
+    music: ['Ballet', 'Symfonieën', 'Opera', 'Concerten'],
     born: '7 mei 1840, Votkinsk (Rusland)',
     died: '6 november 1893, Sint-Petersburg (Rusland)',
     bio: 'Tsjaikovski werkte eerst als ambtenaar, maar wilde alleen maar muziek maken. Hij werd de beroemdste Russische componist. Hij schreef de muziek voor de balletten Het Zwanenmeer, De Schone Slaapster en De Notenkraker.',

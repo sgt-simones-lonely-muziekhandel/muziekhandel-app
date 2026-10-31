@@ -1,0 +1,36 @@
+# Sound effects
+
+Small sounds that make the world feel alive: footsteps, soft rain, thunder, the shop door, paper, and the chimes and gust of the time travel. Footsteps, rain, thunder, the time travel, the cat and the shopkeeper's laugh are **recordings** (free to use without credit: [Kenney](https://kenney.nl/assets/impact-sounds) and [BigSoundBank](https://bigsoundbank.com), CC0; the laugh from [Mixkit](https://mixkit.co), under its free sound-effects license); the door and paper are made in code with **Tone.js**. All in `js/sfx.js`, next to the music in [audio](audio.md). Nothing is loud: everything sits well under the music.
+
+## For the player
+
+- **Footsteps** while the boy walks, one for each foot landing, in time with his legs, soft and low: cobbles in the [1900 street](street.md), a wooden floor in the [shop](shop.md) and the [listening corner](listening-corner.md), a soft squish in the puddles of the [future street](future-street.md).
+- **The shop door** creaks open and the bell above it rings, going in and coming out.
+- **Rain**, soft, wherever it rains on screen, as hard as it rains there: always in the [future street](future-street.md); in the [prologue](prologue.md) growing on the map as the sea rises and in the 2126 shot; in the [story](story.md) only until the crate opens (then the weather goes quiet, so the eye stays on the light). Never in the past.
+- **Thunder** a moment after every lightning flash: in the future street, and the two flashes in the prologue's 2126 shot. In the future street also now and then a rumble from further away, without a flash (every 20–40 s).
+- **Paper** being slid out and picked up when you take sheet music from the cabinet ([sheet music](sheet-music.md); turning the pages already rustles, see `rustle()` in `js/audio.js`).
+- **The time travel** ([story](story.md)): a sparkling chime with a soft heavenly choir (a *halo*) as the lid pops off the tube and the light pours out; one short gust of wind with a little chime in it as the swirl starts, 2.5 seconds; it is quiet again well before the past has fully appeared.
+- **The cat** asleep on the [shop](shop.md)'s piano meows when you click it (a little "Miauw!" floats up beside it).
+- **Meneer Simone laughs** a deep, jolly "ho ho ho" the first time the boy walks into the shop, just before he greets you.
+
+Like the music, nothing sounds until the player has pressed **Start** (browsers only allow sound after a click).
+
+## How it's built
+
+`js/sfx.js` exports one function per sound; each does nothing until the audio context runs.
+
+- **Bus**: everything goes through one gain and a limiter; the bell and chimes also through a little reverb (`room`).
+- **Recordings** in `public/audio` (see its README), made by `scripts/import_sounds.py` from the downloads in `design/sounds`, as AAC (`.m4a`) so every browser plays them: five footsteps per ground (Kenney's concrete, wood and grass), rain and three thunders (`weather/`), and the sparkle, gust (2.5 s cut from the loudest part of a storm recording and shaped to swell and die away) and chime (`time-travel/`).
+- `step(ground)`: one of the five recordings for that ground (never the same twice in a row), a little lower (`playbackRate` 0.62–0.9) and muffled by a low-pass at 1600 Hz, so it sounds soft. The first step loads them. The boy (`js/boy.js`) plays it from `footfall()` when his walk cycle passes a footfall (phase π/2, then every π) while `stride` > 0.5, on his `ground`, which each scene sets.
+- `shopDoor()`: a sawtooth hinge creak with a wobbling pitch through a narrow band-pass, and a small brass bell (three sine partials at 1760 Hz × 1, 2.76, 5.4) struck three times as it swings. Called from `goInside()` and when the boy comes back out (`js/street.js`).
+- `thunder(delay, strength)`: one of three recorded rumbles (5–11 s, tails faded out), not one that is still playing, `delay` seconds from now, quieter for a lower `strength`. `loadThunder()` loads them ahead (the future street and the films call it when they start). `js/future.js` calls it 0.6–2 s after each flash, and with strength 0.5 every 20–40 s on its own; `Prologue.tick()` after each of its `FLASHES`.
+- `hushThunder()`: fades out any thunder still rolling, in 0.8 s. When the crate opens in the story, `Story.sounds()` calls it and sets `hushed`, which makes `Film.update()` set the rain to 0.
+- `rain(level)`: a 20 s recorded loop of gentle rain pattering on an umbrella (its end blended into its start, so there's no seam), through a low-pass at 3.5 kHz that takes the hiss off, so you hear soft separate drops; as loud as `level` (0–1). (Rain on puddles sounded like a steady stream: brighter, with fewer separate drops.) The scene sets it every frame; when nobody does for 0.3 s it fades out and is cleaned up by itself, so leaving a rainy scene stops it. The future street sets 1. In the films `Film.drawRain()` notes how hard it rains on screen (its alpha, times the shot's fade), and `Film.update()` sets the rain to that (0.3 = 1).
+- `pickUpPaper()`: pink noise through a band-pass that sweeps up and back down, with a little flap at the end. Called when a book is taken from the cabinet (`js/ui/library.js`).
+- `tubeSparkle()`: a bright recorded chime (*Chimes "Dream" #1*, 2.3 s), with only its very top taken off, and under it `halo()`: a soft choir "aah" on an open A major chord (detuned saw voices with a little vibrato, shaped into the vowel by band-pass filters at 750 and 1150 Hz, and a quiet sine shimmer an octave up) that swells in over 0.9 s and fades into a 4 s echo. `timeTravel()`: the gust, with the little chime 0.35 s in (softened by a low-pass at 6.5 kHz). `loadTimeTravel()` loads them when the story starts; `Story.sounds()` plays the sparkle at `LID_POP` and the gust at the start of the swirl (`SWIRL`), each once, when the story time passes it, so they wait with a caption like the picture does.
+- `meow()`: one of three small recorded meows (BigSoundBank, made equally loud), never the same twice in a row. `laugh()`: a recorded "ho ho ho" (Mixkit), played at 0.86 × speed so it's slower and deeper, with a touch of the room's echo. `loadShopSounds()` loads them; the street calls it when the boy arrives, so the laugh is ready at the door. In `js/shop.js` the cat is its own spot (`CAT`), checked before the others when clicking: it meows at once, without the boy walking over; it has no stand, so ↑ / Enter by the piano still opens the piano. The laugh plays 0.35 s after the first `enter()` (`greeted`), before the shopkeeper's greeting at 0.9 s.
+- **Levels**, as true peaks on the output against a piano note (−7 dB): rain −28 dB for its loudest drops (−38 typical), footsteps about −24, thunder −16 (−22 far away), the tube sparkle −19 with its halo −24 to −28 under it, the gust −14; the laugh −14, a meow −16; the door and paper sit 5–14 dB under the piano.
+
+## Known limits / next steps
+
+- A volume or mute button for the effects.

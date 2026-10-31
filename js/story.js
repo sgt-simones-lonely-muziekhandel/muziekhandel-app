@@ -10,6 +10,7 @@
 // A click, tap or ↑ / Enter / Space jumps to the next shot. The shared parts (timeline,
 // dissolves, captions, rain, dust) are in js/film.js.
 import { Film, H, load as loadImg, ready, smooth, ease, bump, cover, glow, sunBeams, boyFromBehind } from './film.js';
+import { loadTimeTravel, timeTravel, tubeSparkle, hushThunder } from './sfx.js';
 
 const load = name => loadImg(`public/art/intro/${name}.webp`);
 const IMG = {
@@ -55,11 +56,28 @@ export class Story extends Film {
     super.enter();
     this.particles = [];
     this.spawn = 0;
+    this.heard = 0; // the story time sounds were played up to
+    loadTimeTravel();
   }
 
   tick(dt) {
     if (this.timeIn('travel') > SHOTS[2].dur) this.swirlX = null;
     this.updateParticles(dt);
+    this.sounds();
+  }
+
+  // The sounds of the time travel (js/sfx.js). When the crate opens the rain and any thunder still
+  // rolling in from the future street fade out, so the eye can stay on the light. Then a sparkling
+  // chime with a soft heavenly choir as the lid pops off the tube, and one short gust of wind with
+  // a little chime as the swirl starts, about 2.5 seconds, so it is quiet again long before the
+  // past has fully come. They follow the story time, so they wait with it while a caption is up.
+  sounds() {
+    const at = (key, beat) => this.shots.find(s => s.key === key).start + beat;
+    const now = t => this.heard < t && this.T >= t;
+    if (now(at('crate', CRATE_FLASH))) { this.hushed = true; hushThunder(); }
+    if (now(at('tube', LID_POP))) tubeSparkle();
+    if (now(at('travel', SWIRL[0]))) timeTravel();
+    this.heard = this.T;
   }
 
   // over the shots: the flying music, and a gold bloom between the tube and the time travel,

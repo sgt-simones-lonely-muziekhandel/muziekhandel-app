@@ -11,6 +11,7 @@ import { piecePage } from '../catalogue.js';
 import { closedCoverRect } from './sheet.js';
 import { designedCover } from './cover.js';
 import { pager } from './pager.js';
+import { pickUpPaper } from '../sfx.js';
 
 export const CYLINDER_ART = 'public/art/items/cylinder/';
 const CYLINDERS = ['red', 'blue', 'green', 'cream'];
@@ -81,10 +82,20 @@ function flyToCentre(art, fullName, done) {
 
 // The cabinets. In the shop: the sheet music of the Muziekschatten collection, fifteen pieces to a
 // cabinet, fetched from the back end (js/catalogue.js) as the player walks along. Choosing music for
-// the piano: the pieces the game can play (they have notes), the songs of the SOM collection and the
-// composers' own pieces in a second cabinet. The cabinet in view is remembered for the next visit.
+// the piano: the pieces the game can play (they have notes): the songs of the SOM collection, as many
+// cabinets as they fill (each shelf holds five songs of its level, so a cabinet has five easy, five
+// middle and five hard ones), then the composers' own pieces. The cabinet in view is remembered for
+// the next visit.
+function songCabinets(pieces) {
+  const byLevel = [1, 2, 3].map(l => pieces.filter(p => Math.min(3, Math.max(1, p.level || 1)) === l));
+  const count = Math.max(1, ...byLevel.map(l => Math.ceil(l.length / COLS.length)));
+  return Array.from({ length: count }, (_, k) => ({
+    name: count > 1 ? `Liedjes uit de SOM-collectie · kast ${k + 1}` : 'Liedjes uit de SOM-collectie',
+    pieces: byLevel.flatMap(l => l.slice(k * COLS.length, (k + 1) * COLS.length)),
+  }));
+}
 const PIANO_CABINETS = [
-  { name: 'Liedjes uit de SOM-collectie', pieces: PIECES },
+  ...songCabinets(PIECES),
   { name: 'Muziek van de componisten', pieces: ALL_PIECES.filter(p => !PIECES.includes(p)) },
 ].filter(c => c.pieces.length);
 const lastCabinet = { shop: 0, piano: 0 };
@@ -133,6 +144,7 @@ export function libraryView(ui, { forPiano = false } = {}) {
           if (busy || nav?.moving) return;
           busy = true;
           setTimeout(() => { busy = false; }, 1400);
+          pickUpPaper();
           if (!forPiano) { flyToCentre(tube.querySelector('.cover-art'), composer.name, () => ui.open('sheet', { pieceId: p.id, noFade: true })); return; }
           // for the piano: the music is pulled out of its compartment and goes onto the piano
           tube.classList.add('pulled');

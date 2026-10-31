@@ -1,9 +1,10 @@
-// Outside: a canal quay in Amsterdam around 1900, built from the painted layers in
+// Outside: a canal quay in Middelburg around 1900, built from the painted layers in
 // public/art/past-street (sky, far, walk, foreground) with parallax, a real-time sky,
 // rippling canal water, flickering gas lamps, night lighting and cyclists.
 import { Boy } from './boy.js';
 import { skyAt, currentHour } from './sky.js';
 import { Cyclist } from './cyclist.js';
+import { shopDoor, loadShopSounds } from './sfx.js';
 
 const ART = 'public/art/past-street/';
 const load = name => { const i = new Image(); i.src = `${ART}${name}.webp`; return i; };
@@ -13,6 +14,9 @@ const skyArt = name => { const i = new Image(); i.src = `public/art/sky/${name}.
 const SUN = skyArt('sun'), MOON_GLOW = skyArt('moon-glow');
 const MOONS = [1, 2, 3, 4].map(n => skyArt(`moon-${n}`));
 const STARS = [1, 2, 3, 4, 5, 6].map(n => skyArt(`star-${n}`));
+// Wisps of cloud that drift past the moon: [seconds between them, offset, height (in moon
+// diameters from its centre), length (in moon diameters)].
+const MOON_WISPS = [[34, 0, 0.15, 1.6], [47, 21, -0.3, 1.2]];
 
 const LAYER_W = 2172, LAYER_H = 724;
 const K = 720 / LAYER_H;             // layer pixels → world units
@@ -37,6 +41,10 @@ const SHOP = { x0: 1640, x1: W, y0: 130, y1: 565 };
 const LAMPS = [[60, 214], [1348, 210]];
 // Gas lamps on the far side of the canal, in far.webp layer pixels.
 const FAR_LAMPS = [[89, 322], [680, 378], [817, 385], [939, 385], [1739, 359], [2122, 178]];
+// The same quay lamps in walk.webp layer pixels, and the box around each lamp's glass (half width,
+// above, below the flame, in layer pixels) for the unlit copy.
+const NEAR_LAMPS = LAMPS.map(([x, y]) => [Math.round(x / K), Math.round(y / K)]);
+const NEAR_GLASS = [40, 46, 52], FAR_GLASS = [14, 19, 21];
 // Canal water at the bottom of walk.webp, in layer pixels. Right of WATER_X0 the stone steps
 // go down into the water, so there only the rows below WATER_STEPS ripple.
 const WATER_TOP = 640, WATER_X0 = 1700, WATER_STEPS = 704;
@@ -74,9 +82,11 @@ export class Street {
     this.boy.dir = from === 'shop' ? -1 : 1;
     this.boy.target = null;
     this.door = from === 'shop' ? { t: 0, dir: -1 } : null;
+    loadShopSounds(); // so the shopkeeper's laugh is ready when the boy goes in
+    if (this.door) shopDoor();
     this.cyclists = [];
     this.nextCyclist = 4;
-    this.game.setPlace('Amsterdam, 1900');
+    this.game.setPlace('Middelburg, 1900');
   }
 
   get nearDoor() { return Math.abs(this.boy.x - DOOR_X) < 70; }
@@ -93,6 +103,7 @@ export class Street {
 
   goInside() {
     this.door = { t: 0, dir: 1 };
+    shopDoor();
   }
 
   // The pavement: along the railing, then lower in front of the shop.
@@ -149,13 +160,17 @@ export class Street {
 
     // far canal view, slower than the quay
     this.layer(ctx, view, FAR_PARALLAX, () => {
-      if (ready(FAR)) ctx.drawImage(nightTinted(FAR, sky.dark), 0, 0, W, 720);
+      if (ready(FAR)) {
+        ctx.drawImage(timeTinted(unlit(FAR, FAR_LAMPS, FAR_GLASS), sky), 0, 0, W, 720);
+        this.drawLitGlass(ctx, FAR, FAR_LAMPS, FAR_GLASS, sky);
+      }
       this.drawFarLamps(ctx, sky);
     });
 
     this.layer(ctx, view, 1, () => {
       if (ready(WALK)) {
-        ctx.drawImage(nightTinted(WALK, sky.dark), 0, 0, W, 720);
+        ctx.drawImage(timeTinted(unlit(WALK, NEAR_LAMPS, NEAR_GLASS), sky), 0, 0, W, 720);
+        this.drawLitGlass(ctx, WALK, NEAR_LAMPS, NEAR_GLASS, sky);
         this.drawWater(ctx, sky);
       }
       this.drawLights(ctx, sky);
@@ -204,7 +219,7 @@ export class Street {
     const a = open * 1.25; // up to ~72°
     const pw = w * Math.cos(a);
     ctx.save();
-    ctx.drawImage(nightTinted(WALK, sky.dark), x0 / K, y0 / K, w / K, h / K, x1 - pw, y0, pw, h);
+    ctx.drawImage(timeTinted(WALK, sky), x0 / K, y0 / K, w / K, h / K, x1 - pw, y0, pw, h);
     ctx.fillStyle = `rgba(20,12,6,${0.45 * Math.sin(a)})`;
     ctx.fillRect(x1 - pw, y0, pw, h);
     ctx.restore();
@@ -264,8 +279,11 @@ export class Street {
   }
 
   // Sun, moon and stars from public/art/sky, all light on transparency, added onto the sky colour.
+  // They live a little: the sun breathes, its rays turn slowly and shimmer, long faint beams wheel
+  // around it; the moon's halo breathes and now and then a wisp of cloud drifts past it.
   drawSkyBodies(ctx, sky, vw) {
     const arc = t => [vw * (0.1 + 0.8 * t), 380 - Math.sin(Math.PI * t) * 320];
+    const t = this.time;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     // stars come out one by one as it gets dark and twinkle by fading in and out
@@ -282,10 +300,41 @@ export class Street {
     if (sky.sun != null && ready(SUN)) {
       const [x, y] = arc(sky.sun);
       const low = 1 - Math.sin(Math.PI * Math.min(1, Math.max(0, sky.sun)));
-      const size = 170 * (1 + 0.25 * low);
+      const breath = Math.sin(t * 0.9);
+      const size = 170 * (1 + 0.25 * low) * (1 + 0.025 * breath);
+      // a warm halo that swells and shrinks
+      const halo = ctx.createRadialGradient(x, y, size * 0.2, x, y, size * 1.6);
+      halo.addColorStop(0, `rgba(255,214,140,${(0.16 + 0.06 * breath).toFixed(3)})`);
+      halo.addColorStop(1, 'rgba(255,226,150,0)');
       ctx.globalAlpha = 1;
+      ctx.fillStyle = halo;
+      ctx.fillRect(x - size * 1.6, y - size * 1.6, size * 3.2, size * 3.2);
+      // long faint beams wheeling slowly around it, each fading in and out
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(t * 0.03);
+      for (let i = 0; i < 12; i++) {
+        const a = 0.035 + 0.03 * Math.sin(t * 0.7 + i * 2.3);
+        const len = size * (1.5 + 0.35 * Math.sin(t * 0.45 + i * 1.3));
+        const beam = ctx.createLinearGradient(0, 0, len, 0);
+        beam.addColorStop(0, `rgba(255,236,180,${a.toFixed(3)})`); beam.addColorStop(1, 'rgba(255,236,180,0)');
+        ctx.fillStyle = beam;
+        ctx.beginPath(); ctx.moveTo(0, -size * 0.05); ctx.lineTo(len, 0); ctx.lineTo(0, size * 0.05); ctx.fill();
+        ctx.rotate(Math.PI * 2 / 12);
+      }
+      ctx.restore();
       ctx.filter = low > 0.35 ? `sepia(${(low - 0.35).toFixed(2)}) saturate(${(1 + low).toFixed(2)}) hue-rotate(${(-12 * low).toFixed(0)}deg)` : 'none';
-      ctx.drawImage(SUN, x - size / 2, y - size / 2, size, size);
+      // the painted sun (in its own colours, not added onto the bright sky), and a copy of its rays
+      // turning the other way over it, so they shimmer
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.translate(x, y);
+      ctx.rotate(-t * 0.04);
+      ctx.drawImage(SUN, -size / 2, -size / 2, size, size);
+      ctx.rotate(t * 0.1);
+      ctx.globalAlpha = 0.22 + 0.1 * Math.sin(t * 1.3);
+      ctx.drawImage(SUN, -size * 0.56, -size * 0.56, size * 1.12, size * 1.12);
+      ctx.restore();
       ctx.filter = 'none';
     }
     // the moon in today's phase: a crescent, half, gibbous or full moon, lit on the right while it
@@ -295,8 +344,10 @@ export class Street {
       const lit = (1 - Math.cos(2 * Math.PI * sky.phase)) / 2;
       const D = 58;
       if (lit > 0.03 && ready(MOON_GLOW)) {
-        ctx.globalAlpha = Math.min(1, sky.dark) * (0.25 + 0.45 * lit);
-        ctx.drawImage(MOON_GLOW, x - D * 2.6, y - D * 2.6, D * 5.2, D * 5.2);
+        // the halo breathes slowly
+        const breath = Math.sin(t * 0.6), g = D * 2.6 * (1 + 0.06 * breath);
+        ctx.globalAlpha = Math.min(1, sky.dark) * (0.25 + 0.45 * lit) * (0.85 + 0.15 * breath);
+        ctx.drawImage(MOON_GLOW, x - g, y - g, g * 2, g * 2);
       }
       const img = lit < 0.03 ? null : MOONS[lit < 0.35 ? 0 : lit < 0.65 ? 1 : lit < 0.93 ? 2 : 3];
       if (img && ready(img)) {
@@ -304,9 +355,27 @@ export class Street {
         const w = D * img.naturalWidth / img.naturalHeight;
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = 0.6 + 0.4 * Math.min(1, sky.dark);
+        ctx.save();
         ctx.translate(x, y);
         if (sky.phase > 0.5) ctx.scale(-1, 1);
         ctx.drawImage(img, D / 2 - w, -D / 2, w, D);
+        ctx.restore();
+      }
+      // thin wisps of cloud drift past the moon, one every so often
+      ctx.globalCompositeOperation = 'source-over';
+      for (const [period, off, dy, len] of MOON_WISPS) {
+        const p = ((t + off) % period) / (period * 0.45); // passing during the first 45% of its period
+        if (p >= 1) continue;
+        const wx = x + (p - 0.5) * D * 7, a = Math.sin(Math.PI * p) * 0.5 * Math.min(1, sky.dark);
+        const wisp = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+        wisp.addColorStop(0, 'rgba(70,82,112,0.9)'); wisp.addColorStop(1, 'rgba(70,82,112,0)');
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.translate(wx, y + dy * D);
+        ctx.scale(D * len, D * 0.22);
+        ctx.fillStyle = wisp;
+        ctx.beginPath(); ctx.arc(0, 0, 1, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
     }
     ctx.restore();
@@ -315,7 +384,7 @@ export class Street {
   // The canal: each thin row of painted water is drawn again shifted sideways by a slow wave,
   // stronger towards the front, so the reflections wobble. Glints of light come and go on top.
   drawWater(ctx, sky) {
-    const src = nightTinted(WALK, sky.dark), t = this.time;
+    const src = timeTinted(WALK, sky), t = this.time;
     for (let y = WATER_TOP; y < LAYER_H; y += 2) {
       const depth = (y - WATER_TOP) / (LAYER_H - WATER_TOP);
       const amp = 0.3 + 3.4 * depth * depth;
@@ -344,13 +413,27 @@ export class Street {
     return 0.86 + 0.07 * Math.sin(t * 11.3) + 0.05 * Math.sin(t * 23.7 + i) + 0.03 * Math.sin(t * 41) - dip;
   }
 
-  // By day the lamps glow softly; in the evening they light up the quay and the water.
+  // By day the lamps are off; as it gets dark they come on and light up the quay and the water.
   lampLevel(sky) {
-    return sky.lampsOn ? 0.3 + 0.7 * Math.min(1, (sky.dark - 0.3) / 0.4) : 0.3;
+    return Math.min(1, Math.max(0, (sky.dark - 0.25) / 0.45));
+  }
+
+  // The lit glass of the lamps, from the painting, over the unlit copy: it fades in at dusk.
+  drawLitGlass(ctx, img, lamps, [hw, up, down], sky) {
+    const lv = this.lampLevel(sky);
+    if (lv <= 0) return;
+    const src = timeTinted(img, sky);
+    ctx.save();
+    lamps.forEach(([x, y], i) => {
+      ctx.globalAlpha = lv * Math.min(1, this.flicker(i) + 0.1);
+      ctx.drawImage(src, x - hw, y - up, hw * 2, up + down, (x - hw) * K, (y - up) * K, hw * 2 * K, (up + down) * K);
+    });
+    ctx.restore();
   }
 
   drawFarLamps(ctx, sky) {
     const lv = this.lampLevel(sky);
+    if (lv <= 0) return;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     FAR_LAMPS.forEach(([lx, ly], i) => {
@@ -368,10 +451,11 @@ export class Street {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     LAMPS.forEach(([x, y], i) => {
+      if (lv <= 0) return;
       const f = this.flicker(i);
       // the flame: a small bright core in the glass
       const core = ctx.createRadialGradient(x, y, 1, x, y, 30);
-      core.addColorStop(0, `rgba(255,236,180,${0.7 * f * (0.4 + 0.6 * lv)})`); core.addColorStop(1, 'rgba(255,210,130,0)');
+      core.addColorStop(0, `rgba(255,236,180,${0.7 * f * lv})`); core.addColorStop(1, 'rgba(255,210,130,0)');
       ctx.fillStyle = core; ctx.fillRect(x - 30, y - 30, 60, 60);
       // the halo around it
       const r = (60 + 150 * lv) * (0.94 + 0.06 * f);
@@ -436,23 +520,73 @@ export class Street {
   }
 }
 
-// A painted layer darkened and tinted blue for the evening, only where the layer has pixels.
-// Cached per image and redrawn only when the darkness changes noticeably.
+// A painted layer in the light of the hour. The pictures are painted in a warm late-afternoon light:
+// at sunrise and sunset (`sky.painted`) they show as painted; by day they are cooled to plain
+// daylight (a little less golden, a touch brighter, a faint blue of the open sky); in the evening
+// they are darkened and tinted blue. Only where the layer has pixels. Cached per image and redrawn
+// only when the light changes noticeably.
 const tintCache = new Map();
-function nightTinted(img, dark) {
-  if (dark <= 0.01) return img;
-  const level = Math.round(dark * 50) / 50;
+function timeTinted(img, sky) {
+  const day = Math.round((1 - Math.min(1, sky.dark * 4)) * (1 - sky.painted) * 20) / 20;
+  const level = Math.round(sky.dark * 50) / 50;
+  if (level <= 0.01 && day <= 0) return img;
+  const key = `${level}/${day}`;
   let c = tintCache.get(img);
-  if (c?.level === level) return c.canvas;
+  if (c?.key === key) return c.canvas;
   const canvas = c?.canvas || document.createElement('canvas');
-  canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+  canvas.width = img.naturalWidth || img.width; canvas.height = img.naturalHeight || img.height;
   const g = canvas.getContext('2d');
+  g.clearRect(0, 0, canvas.width, canvas.height);
+  g.filter = day > 0 ? `saturate(${1 - 0.3 * day}) brightness(${1 + 0.06 * day})` : 'none';
   g.drawImage(img, 0, 0);
+  g.filter = 'none';
   g.globalCompositeOperation = 'source-atop';
-  g.fillStyle = `rgba(12,16,40,${level * 0.55})`;
-  g.fillRect(0, 0, canvas.width, canvas.height);
-  tintCache.set(img, { level, canvas });
+  if (day > 0) {
+    g.fillStyle = `rgba(150,190,240,${0.17 * day})`;
+    g.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  if (level > 0.01) {
+    g.fillStyle = `rgba(12,16,40,${level * 0.55})`;
+    g.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  g.globalCompositeOperation = 'source-over';
+  tintCache.set(img, { key, canvas });
   return canvas;
+}
+
+// The street pictures have their lamps painted lit. This is a copy (made once) with the glass of
+// each lamp turned off: inside an oval around the flame, the warm or pink bright pixels become dark,
+// cool glass, keeping their shading; the oval's edge fades so nothing shows a seam.
+const unlitCache = new Map();
+function unlit(img, lamps, [hw, up, down]) {
+  if (unlitCache.has(img)) return unlitCache.get(img);
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0);
+  for (const [lx, ly] of lamps) {
+    const x0 = Math.max(0, lx - hw), y0 = Math.max(0, ly - up);
+    const w = Math.min(c.width, lx + hw) - x0, h = Math.min(c.height, ly + down) - y0;
+    const box = g.getImageData(x0, y0, w, h), d = box.data;
+    for (let j = 0; j < h; j++) {
+      for (let i = 0; i < w; i++) {
+        const k = (j * w + i) * 4, r = d[k], gr = d[k + 1], b = d[k + 2];
+        const dx = (x0 + i - lx) / hw, dy = (y0 + j - ly) / (y0 + j < ly ? up : down);
+        const edge = Math.min(1, Math.max(0, (1 - dx * dx - dy * dy) * 3));
+        const lum = 0.3 * r + 0.59 * gr + 0.11 * b;
+        // warm or pink light (redder than blue), not the blue sky behind the glass
+        const warm = Math.min(1, Math.max(0, (r - b + 25) / 50)) * Math.min(1, Math.max(0, (lum - 90) / 70)) * edge;
+        if (warm <= 0) continue;
+        const v = 34 + lum * 0.3;
+        d[k] = r + (v * 0.82 - r) * warm;
+        d[k + 1] = gr + (v * 0.94 - gr) * warm;
+        d[k + 2] = b + (v * 1.08 + 6 - b) * warm;
+      }
+    }
+    g.putImageData(box, x0, y0);
+  }
+  unlitCache.set(img, c);
+  return c;
 }
 
 function mulberry(seed) {
