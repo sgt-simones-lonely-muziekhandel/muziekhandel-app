@@ -15,7 +15,7 @@ One document per feature: what it does for the player, how it's built, where the
 | Listening corner | [listening-corner.md](listening-corner.md) | `js/corner.js` |
 | Sheet music cabinet and viewer | [sheet-music.md](sheet-music.md) | `js/ui/library.js`, `js/ui/sheet.js`, `js/notation.js` |
 | Piano | [piano.md](piano.md) | `js/ui/piano.js`, `js/music.js` |
-| Audio (Salamander Grand Piano) | [audio.md](audio.md) | `js/audio.js` |
+| Audio (Salamander Grand Piano, other instruments) | [audio.md](audio.md) | `js/audio.js`, `js/instruments.js` |
 | Composers: portraits, biography and music | [composers.md](composers.md) | `js/ui/gallery.js`, `js/data.js` |
 | Gramophone | [gramophone.md](gramophone.md) | `js/ui/gramophone.js` |
 | Shopkeeper (help) | [shopkeeper.md](shopkeeper.md) | `js/ui/keeper.js` |

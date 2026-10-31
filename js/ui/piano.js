@@ -8,7 +8,8 @@ import {
   KEYMAP, keyLabels, keyCodeForMidi, PIANO_LOW, PIANO_HIGH, KEYS_LOW, KEYS_HIGH, MAX_SHIFT,
 } from '../music.js';
 import { renderPage, pageOfNote } from '../notation.js';
-import { noteOn, noteOff, playPiece, audioState, onAudioReady } from '../audio.js';
+import { noteOn, noteOff, playPiece, audioState, onAudioReady, setInstrument } from '../audio.js';
+import { INSTRUMENTS, instrumentById } from '../instruments.js';
 import { skyAt, currentHour } from '../sky.js';
 
 export function keyboardGuide() {
@@ -83,10 +84,15 @@ export function pianoView(ui, { pieceId } = {}) {
             <span class="oct-range"></span>
             <button class="btn wood small oct-up" title="Een octaaf hoger (→)">Hoger <span class="ico">›</span></button>
           </div>
+          <button class="btn wood small instr-btn" title="Kies een ander instrument"><span class="ico">♫</span> <span class="instr-name">Piano</span></button>
           <button class="pedal" title="Pedaal: houd Shift ingedrukt, of klik om het vast te zetten"><span class="pedal-foot"></span><span class="pedal-label">Pedaal</span></button>
         </div>
       </div>
       <div class="guide-pop paper" hidden></div>
+      <div class="instr-pop paper" hidden>
+        <h3 class="hand">Op welk instrument wil je spelen?</h3>
+        <div class="instr-families"></div>
+      </div>
       <div class="celebrate paper" hidden></div>
     </div>`));
 
@@ -391,8 +397,52 @@ export function pianoView(ui, { pieceId } = {}) {
       close.onclick = () => { guidePop.hidden = true; };
       guidePop.appendChild(close);
     }
+    instrPop.hidden = true;
     guidePop.hidden = !guidePop.hidden;
   };
+
+  // Other instruments: the keys (and Luister, Speel mee) can sound like a violin, a harp, a tuba…
+  // Grouped by family, as in an orchestra. The choice holds while the piano is open.
+  let instrument = 'piano';
+  const instrPop = $('.instr-pop');
+  const families = [...new Set(INSTRUMENTS.map(i => i.family))];
+  for (const fam of families) {
+    const group = h(`<section class="instr-family"><h4>${esc(fam)}</h4><div></div></section>`);
+    for (const inst of INSTRUMENTS.filter(i => i.family === fam)) {
+      const b = h(`<button class="instr" data-id="${inst.id}">${esc(inst.name)}</button>`);
+      b.onclick = () => chooseInstrument(inst.id);
+      group.querySelector('div').appendChild(b);
+    }
+    $('.instr-families').appendChild(group);
+  }
+  const markInstrument = () => {
+    instrPop.querySelectorAll('.instr').forEach(b => b.classList.toggle('on', b.dataset.id === instrument));
+    $('.instr-name').textContent = instrumentById(instrument).name;
+  };
+  function chooseInstrument(id) {
+    instrPop.hidden = true;
+    if (!audioState.ready) { setStatus('De piano wordt nog gestemd… even geduld!'); return; }
+    stopAll();
+    const inst = instrumentById(id);
+    instrument = id;
+    markInstrument();
+    $('.instr-btn').classList.add('loading');
+    setStatus(id === 'piano' ? 'Je speelt weer op de piano.' : `De ${inst.name.toLowerCase()} wordt gestemd…`);
+    setInstrument(id).then(() => {
+      if (instrument !== id) return;
+      $('.instr-btn').classList.remove('loading');
+      if (id !== 'piano') setStatus(`Je speelt nu op de ${inst.name.toLowerCase()}! Probeer maar.`);
+    }).catch(() => {
+      if (instrument !== id) return;
+      $('.instr-btn').classList.remove('loading');
+      instrument = 'piano';
+      markInstrument();
+      setInstrument('piano').catch(() => {});
+      setStatus(`De ${inst.name.toLowerCase()} kon niet geladen worden (geen internet?). Je speelt op de piano.`);
+    });
+  }
+  markInstrument();
+  $('.instr-btn').onclick = () => { guidePop.hidden = true; instrPop.hidden = !instrPop.hidden; };
 
   // A real (USB/MIDI) piano keyboard, when the browser supports it.
   let midiAccess = null;
@@ -423,7 +473,9 @@ export function pianoView(ui, { pieceId } = {}) {
   return {
     el,
     loadPiece,
-    onHide() { stopAll(); held.forEach(release); codeNotes.clear(); pedalLatched = false; setPedal(false); },
+    // the other views (gramophone, lessons) play the piano; the chosen instrument comes back here
+    onHide() { stopAll(); held.forEach(release); codeNotes.clear(); pedalLatched = false; setPedal(false); if (audioState.ready) setInstrument('piano').catch(() => {}); },
+    onShow() { if (instrument !== 'piano' && audioState.ready) setInstrument(instrument).catch(() => {}); },
     onKey(e) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { setPedal(true); return; }
@@ -449,6 +501,7 @@ export function pianoView(ui, { pieceId } = {}) {
     },
     destroy() {
       stopAll();
+      if (audioState.ready) setInstrument('piano').catch(() => {});
       held.forEach(m => noteOff(m));
       sustained.forEach(m => noteOff(m));
       midiAccess?.inputs.forEach(i => { i.onmidimessage = null; });

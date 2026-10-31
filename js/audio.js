@@ -1,8 +1,13 @@
-// Salamander Grand Piano via Tone.js, plus a "gramophone" colouring with crackle.
+// Salamander Grand Piano via Tone.js, plus a "gramophone" colouring with crackle. The piano view
+// can switch to another instrument (js/instruments.js): everything that plays through `voice`
+// then sounds like that; the piano stays loaded underneath.
+import { instrumentById, SAMPLE_BASE } from './instruments.js';
 
 const SALAMANDER = 'https://tonejs.github.io/audio/salamander/';
 
-let sampler = null;
+let sampler = null;  // the piano
+let voice = null;    // what plays now: the piano or the chosen instrument
+const others = {};   // instrument id → a promise of its sampler, once asked for
 let tone = null;     // lowpass that makes the gramophone sound old
 let crackle = null;
 let loading = null;
@@ -29,6 +34,7 @@ export function initAudio() {
     tone = new Tone.Filter(18000, 'lowpass').connect(reverb);
     sampler = new Tone.Sampler({ urls: salamanderUrls(), baseUrl: SALAMANDER, release: 1.2, volume: 8 }).connect(tone);
     await Tone.loaded();
+    voice = sampler;
     audioState.ready = true;
     audioState.listeners.forEach(fn => fn());
   })().catch(err => {
@@ -45,19 +51,35 @@ export const onAudioReady = fn => {
 
 const noteName = midi => Tone.Frequency(midi, 'midi').toNote();
 
+// Play everything with instrument `id` ('piano' for the piano). Its samples load the first time;
+// until then the piano keeps playing. Resolves when it can be heard.
+export function setInstrument(id) {
+  if (!audioState.ready) return Promise.reject(new Error('audio not ready'));
+  if (id === 'piano') { voice.releaseAll?.(); voice = sampler; return Promise.resolve(); }
+  const inst = instrumentById(id);
+  others[id] ??= new Promise((resolve, reject) => {
+    const s = new Tone.Sampler({
+      urls: inst.urls, baseUrl: `${SAMPLE_BASE}${id}/`, release: 1, volume: -2,
+      onload: () => resolve(s), onerror: reject,
+    }).connect(tone);
+  });
+  others[id].catch(() => { delete others[id]; });
+  return others[id].then(s => { voice.releaseAll?.(); voice = s; });
+}
+
 export function noteOn(midi, velocity = 0.8) {
   if (!audioState.ready) return;
-  sampler.triggerAttack(noteName(midi), Tone.now(), velocity);
+  voice.triggerAttack(noteName(midi), Tone.now(), velocity);
 }
 
 export function noteOff(midi) {
   if (!audioState.ready) return;
-  sampler.triggerRelease(noteName(midi), Tone.now() + 0.05);
+  voice.triggerRelease(noteName(midi), Tone.now() + 0.05);
 }
 
 export function strike(midi, seconds = 0.6, velocity = 0.8) {
   if (!audioState.ready) return;
-  sampler.triggerAttackRelease(noteName(midi), seconds, Tone.now(), velocity);
+  voice.triggerAttackRelease(noteName(midi), seconds, Tone.now(), velocity);
 }
 
 /**
@@ -70,6 +92,7 @@ export function strike(midi, seconds = 0.6, velocity = 0.8) {
 export function playPiece(parsed, { onNote, onKey, onEnd, tempoScale = 1 } = {}) {
   if (!audioState.ready) { onEnd?.(); return { stop() {} }; }
   const spb = parsed.secPerBeat / tempoScale;
+  const sampler = voice; // the instrument it started with plays it to the end
   const t0 = Tone.now() + 0.15;
   const off = parsed.offset;
   let next = 0, nextAcc = 0, shown = -1, stopped = false;

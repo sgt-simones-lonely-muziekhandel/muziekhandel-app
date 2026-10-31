@@ -391,7 +391,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .piano .piano-bar .btn:hover:not(:disabled), .piano .piano-foot .btn:hover:not(:disabled) { transform: translateY(-.1cqw); filter: brightness(1.15); }
 .piano .piano-bar .btn.on { color: #2e1c08; background: linear-gradient(#fff0b8, #f2c76b 55%, #c99a45); box-shadow: 0 0 .9cqw rgba(242, 199, 107, .8), inset 0 .1cqw .2cqw rgba(0, 0, 0, .25); }
 .piano .piano-bar .btn .ico, .piano .piano-foot .btn .ico { font-size: 1.1em; }
-.status { position: absolute; left: 30%; right: 22%; top: 90.2%; height: 5.8%; display: grid; place-items: center; text-align: center; font-weight: 800; font-size: 1.05cqw; line-height: 1.25; color: #f0d58e; text-shadow: 0 1px 2px #000; pointer-events: none; }
+.status { position: absolute; left: 28%; right: 27%; top: 90.2%; height: 5.8%; display: grid; place-items: center; text-align: center; font-weight: 800; font-size: 1.05cqw; line-height: 1.25; color: #f0d58e; text-shadow: 0 1px 2px #000; pointer-events: none; }
 .piano-body { position: absolute; inset: 0; pointer-events: none; }
 .piano-body > * { pointer-events: auto; }
 /* the 88 keys fill the key slot under the red felt (x 97–1548, y 582–738 of the picture) */
@@ -484,6 +484,20 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .night-shade { position: absolute; inset: 0; pointer-events: none; display: none; background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 40%, rgba(8, 5, 12, calc(var(--dark) * .55))); }
 .piano-wrap.night .night-shade { display: block; }
 
+/* the instrument button sits right, next to the pedal; while an instrument loads it breathes */
+.piano-foot .instr-btn { margin-left: auto; }
+.piano .piano-foot .instr-btn.loading { animation: instr-wait 1s ease-in-out infinite alternate; }
+@keyframes instr-wait { to { filter: brightness(1.5); } }
+/* the instruments, by family like in an orchestra */
+.instr-pop { position: absolute; z-index: 5; left: 50%; bottom: 13%; transform: translateX(-50%); width: min(900px, 94%); padding: 16px 22px 20px; }
+.instr-pop h3 { margin: 0 0 10px; text-align: center; }
+.instr-families { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; }
+.instr-family h4 { margin: 0 0 6px; font: 700 15px var(--font-head); font-variant: small-caps; letter-spacing: .06em; color: #8a2f1c; border-bottom: 1.5px solid rgba(74, 54, 38, .25); }
+.instr-family div { display: flex; flex-wrap: wrap; gap: 6px; }
+.instr { padding: 5px 11px; border-radius: 6px; border: 1.5px solid rgba(90, 61, 18, .45); background: rgba(255, 250, 235, .7); cursor: pointer; font: 600 16px var(--font-head); color: #2a1a0a; transition: background .12s, transform .12s; }
+.instr:hover { background: rgba(242, 199, 107, .35); transform: translateY(-1px); }
+.instr.on { background: linear-gradient(#f6dc96, #c99a45); border-color: #5a3d12; font-weight: 700; }
+@media (max-width: 800px) { .instr-families { grid-template-columns: 1fr 1fr; } }
 .guide-pop, .celebrate { position: absolute; z-index: 5; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(780px, 96%); padding: 20px 24px; text-align: center; }
 .guide-pop h3, .celebrate h3 { font-family: var(--font-head); font-size: 28px; margin: 0 0 12px; }
 .celebrate .stars { font-size: 60px; color: #e9b737; text-shadow: 0 3px 0 #8a5a12; animation: pop .6s ease; }

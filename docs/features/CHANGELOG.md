@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — More instruments on the piano
+
+Added:
+
+- [Piano](piano.md) / [audio](audio.md): an instrument plaque next to the pedal opens a choice of 21 instruments by family (orgel, harmonium, viool, cello, contrabas, harp, gitaren, fluit, klarinet, fagot, saxofoon, trompet, hoorn, trombone, tuba, xylofoon…) from the tonejs-instruments sample library (CC BY 3.0). Keys, *Luister* and *Speel mee* play on the chosen instrument; leaving the piano goes back to the piano sound.
+
 ## 2026-10-31 — Cascades in the intro, a smaller cylinder in the gramophone
 
 Changed:
