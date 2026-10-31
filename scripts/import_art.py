@@ -58,7 +58,7 @@ ASSETS = [
     ("music_store_internal/Ornate Golden Frames on Magenta.png", "sheet", "shop/frames",
      {"max": 768, "dilate": 6, "row": True, "names": ["oval-large", "rect-large", "oval-small", "rect-medium", "rect-small"]}),
     # Close-ups
-    ("music_store_internal/Antique Piano with Blank Sheet Music.png", "opaque", "closeups/piano", {}),
+    ("music_store_internal/Antique Piano with Blank Keybed.png", "opaque", "closeups/piano", {}),
     ("music_store_internal/Antique Wooden Display Cabinet Interior.png", "opaque", "closeups/cabinet", {}),
     ("music_store_internal/Vintage Green Damask Gallery Wall.png", "opaque", "closeups/gallery-wall", {}),
     ("music_store_internal/Antique Phonograph Chest in Sunlit Music Room.png", "opaque", "closeups/gramophone-corner", {}),
