@@ -22,8 +22,10 @@ const IMG = {
 const PAPERS = [1, 2, 3, 4, 5, 6, 7].map(n => load(`flying/paper-${n}`));
 const NOTES = [1, 2, 3, 4, 5, 6].map(n => load(`flying/note-${n}`));
 
-// The opening of the tube in hands-tube.webp, in its own pixels.
-const TUBE_TOP = [560, 70], TUBE_W = 265;
+// The opening of the tube in hands-tube.webp, in its own pixels: the centre, the tube's width,
+// and the inner rim as an ellipse (half-width, half-height, tilt) where the light comes out.
+const TUBE_TOP = [566, 82], TUBE_W = 265;
+const OPENING = { rx: 120, ry: 40, tilt: 0.12 };
 // Where the boy stands in the two street paintings (0–1 of the picture): on the quay bottom left,
 // solid ground in both the future and the past. His height as a part of the picture's height.
 const KID_AT = [0.3, 0.985], KID_H = 0.42;
@@ -107,17 +109,9 @@ export class Story extends Film {
     const top = [hx + TUBE_TOP[0] * k, hy + TUBE_TOP[1] * k];
     this.tubeTop = top;
     const open = t - LID_POP; // seconds since the lid came off
-    // the light first, behind the hands, rising out of the tube
-    if (open > 0 && ready(IMG.burst)) {
-      const s = ease(open / 1.5), bw = 560 * s * (1 + 0.04 * Math.sin(live * 3)), bh = bw * IMG.burst.naturalHeight / IMG.burst.naturalWidth;
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha *= 0.85 * s;
-      ctx.drawImage(IMG.burst, top[0] - bw / 2, top[1] - bh * 0.92, bw, bh);
-      ctx.restore();
-    }
-    glow(ctx, top[0], top[1], 120 + (open > 0 ? 160 * ease(open / 1.2) : 0), `rgba(255,205,120,${open > 0 ? 0.45 : 0.15})`);
+    glow(ctx, top[0], top[1], 120 + (open > 0 ? 160 * ease(open / 1.2) : 0), `rgba(255,205,120,${open > 0 ? 0.3 : 0.15})`);
     ctx.drawImage(IMG.hands, hx, hy, hw, hh);
+    if (open > 0) this.tubeLight(ctx, top, k, ease(open / 1.5), live);
     // the lid: on the tube, wobbling a little while we wait; then it pops up and tumbles away
     if (ready(IMG.lid)) {
       const lw = TUBE_W * k * 1.05, lh = lw * IMG.lid.naturalHeight / IMG.lid.naturalWidth;
@@ -133,6 +127,34 @@ export class Story extends Film {
       }
     }
     this.drawMotes(ctx, live, vw, top[0], top[1] - 100, 'rgba(255,220,150,', open > 0 ? 1 : 0.3);
+  }
+
+  // The light pouring out of the open tube: the inside of the opening glows, and the rays rise
+  // out of it (only above the rim's front edge, so they come from inside the tube, not behind it).
+  tubeLight(ctx, top, k, s, live) {
+    const rx = OPENING.rx * k, ry = OPENING.ry * k;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.translate(top[0], top[1]);
+    ctx.rotate(OPENING.tilt);
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.clip();
+    const g = ctx.createRadialGradient(0, 0, 2, 0, 0, rx);
+    g.addColorStop(0, `rgba(255,246,210,${0.95 * s})`); g.addColorStop(1, `rgba(255,190,90,${0.35 * s})`);
+    ctx.fillStyle = g;
+    ctx.fillRect(-rx, -ry, rx * 2, ry * 2);
+    ctx.restore();
+    if (ready(IMG.burst)) {
+      const bw = rx * 2 * 2.4 * (0.6 + 0.4 * s) * (1 + 0.03 * Math.sin(live * 3));
+      const bh = bw * IMG.burst.naturalHeight / IMG.burst.naturalWidth;
+      ctx.beginPath();
+      ctx.rect(-bw, -bh * 1.2, bw * 2, bh * 1.2);           // everything above the middle of the opening
+      ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);          // and the opening itself
+      ctx.clip();
+      ctx.globalAlpha *= 0.9 * s;
+      ctx.drawImage(IMG.burst, -bw / 2, -bh * 0.97, bw, bh);
+    }
+    ctx.restore();
   }
 
   // 3. The flooded street, the boy from behind on the quay. A swirl of light sweeps across from

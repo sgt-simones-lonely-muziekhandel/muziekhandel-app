@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Light from inside the tube
+
+Fixed:
+
+- [Story](story.md): when the lid comes off, the light now pours out of the inside of the tube (the opening glows and the rays rise out of it) instead of shining from behind the tube.
+
 ## 2026-10-31 — Slower films that wait for a click
 
 Changed:
