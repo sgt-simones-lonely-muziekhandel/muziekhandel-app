@@ -40,7 +40,7 @@ The source Gemini images are not in the repo; only `docs/design/` art is. Keep t
 
 Higher-quality art that would replace code drawings or fix limits:
 
-1. ~~Street in Amsterdam around 1900 as separate layers~~ — done, `public/art/past-street/`.
+1. ~~Street in Middelburg around 1900 as separate layers~~ — done, `public/art/past-street/`.
 2. The shopkeeper facing forward or towards the player, in 2–3 poses (talking, pointing); `characters/shopkeeper/` has one side-view pose plus body parts.
 3. ~~A cyclist~~ — done, `characters/cyclist-man/` and `cyclist-woman/` as puppets.
 4. ~~The shop interior with empty portrait frames~~ — done, `public/art/shop/`.

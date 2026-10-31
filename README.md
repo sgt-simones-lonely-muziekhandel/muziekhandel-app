@@ -44,10 +44,10 @@ rebuild.
 
 ## What's in the game
 
-- **Prologue** (`js/prologue.js`): the start. A short anime-like film: Amsterdam today, the sea rising over the map from 2026 to 2126, and the flooded street in smoky air.
+- **Prologue** (`js/prologue.js`): the start. A short anime-like film: Middelburg today, the sea rising over the map from 2026 to 2126, and the flooded street in smoky air.
 - **Future street** (`js/future.js`): the first playable scene. The same quay far in the future: flooded, ruined, raining. The boy (in his gas mask) finds a glowing crate with cylinders and sheet music; opening it leads to the past.
 - **Story** (`js/story.js`): the time travel as a short anime-like film: the crate, the cylinder tube opening, and the swirl that turns the flooded street into the past, dissolving into the street.
-- **Street** (`js/street.js`): Amsterdam around 1900, drawn live on a canvas. Canal and bridge on the left, houses and the shop on the right. The sky follows the visitor's real local time (`js/sky.js`); windows and street lamps light up in the evening. When the player stands still, people ride past on bikes (`js/cyclist.js`).
+- **Street** (`js/street.js`): Middelburg around 1900, drawn live on a canvas. Canal and bridge on the left, houses and the shop on the right. The sky follows the visitor's real local time (`js/sky.js`); windows and street lamps light up in the evening. When the player stands still, people ride past on bikes (`js/cyclist.js`).
 - **Shop** (`js/shop.js`): painted interior with hotspots: the sheet music cabinet, the piano, the portraits, Meneer Simone and the gramophone. Walk with ← → or click/tap an object.
 - **Sheet music** (`js/ui/library.js`, `js/ui/sheet.js`, `js/notation.js`): pick a tube from the cabinet, flip pages with ← →, Space takes the piece to the piano. Every note has a colour and a name, matching the piano keys.
 - **Piano** (`js/ui/piano.js`): Salamander Grand Piano through Tone.js (`js/audio.js`). Play with the computer keyboard (physical key positions, so QWERTY/AZERTY/Italian layouts all work and the real key labels are shown), mouse, touch, or a USB/MIDI keyboard. *Luister* plays the piece with the notes lighting up; *Speel mee* waits for the player to press each lit-up key. *Hulp* shows a picture of the computer keyboard with the notes painted on it.

@@ -21,7 +21,7 @@ class Game {
     this.viewW = 1280;
     this.ui = new UI(this);
     this.scenes = { prologue: new Prologue(this), future: new FutureStreet(this), story: new Story(this), street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
-    // the game starts with the prologue (Amsterdam today, the sea rising), then the flooded quay
+    // the game starts with the prologue (Middelburg today, the sea rising), then the flooded quay
     this.scene = this.scenes.prologue;
     this.running = false;
     this.bindInput();

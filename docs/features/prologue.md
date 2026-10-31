@@ -1,12 +1,12 @@
 # Prologue: where and when you are
 
-The short film that plays when the game starts, before the [future street](future-street.md). It tells the player where they are (Amsterdam), when (the year 2126), and why the city is flooded, in the same slow anime style as the [story](story.md): painted shots that drift and zoom and slowly dissolve into each other, with captions on paper strips. **Overslaan** (top left, where the help button usually is) or Esc skips it.
+The short film that plays when the game starts, before the [future street](future-street.md). It tells the player where they are (Middelburg), when (the year 2126), and why the city is flooded, in the same slow anime style as the [story](story.md): painted shots that drift and zoom and slowly dissolve into each other, with captions on paper strips. **Overslaan** (top left, where the help button usually is) or Esc skips it.
 
 The tone is calm and a little sad, never scary: nobody gets hurt, the people *moved to higher ground*, and it ends on hope (a boy still searching for the music).
 
 ## For the player
 
-1. **Amsterdam today** (*Amsterdam, 2026. Een stad vol water, fietsen… en muziek.*): the same canal as in the game, on a fresh morning: people on bikes, a boat with a Dutch flag, the music shop with guitars in the window. The camera pans slowly along it; birds fly over.
+1. **Middelburg today** (*Middelburg, 2026. Een stad vol water, fietsen… en muziek.*): the same canal as in the game, on a fresh morning: people on bikes, a boat with a Dutch flag, the music shop with guitars in the window. The camera pans slowly along it; birds fly over.
 2. **The map** (*De aarde werd steeds warmer. Het ijs smolt en de zee steeg.* / *Het water kwam steeds verder het land in.*): an old map of the Netherlands. A year counter top right counts from 2026 to 2126 while the sea creeps in from the coast over the low west and north; the weather grows darker and it starts to rain.
 3. **The year 2126** (*Het jaar 2126. De mensen zijn vertrokken naar hoger land.* / *De lucht is vies van stormen en branden. Wie naar buiten gaat, draagt een masker.* / *De stad is stil — er klinkt geen muziek meer. Maar één jongen is nog op zoek…*): the camera tilts down from the storm to the flooded street. Grey smoke drifts through, lightning flashes in the distance, and the boy in his gas mask appears on the quay. Then the picture dissolves into the playable [future street](future-street.md).
 
