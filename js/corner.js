@@ -39,6 +39,7 @@ export class Corner {
     this.width = W;
     this.fitWidth = W;
     this.boy = new Boy(170);
+    this.boy.ground = 'wood';
     this.hovered = null;
     this.time = 0;
   }

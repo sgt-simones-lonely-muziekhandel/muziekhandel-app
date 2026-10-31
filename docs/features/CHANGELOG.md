@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Sound effects
+
+Added:
+
+- [Sound effects](sound-effects.md) (`js/sfx.js`), made with Tone.js: footsteps in time with the walk (cobbles, wooden floor, puddles), the shop door creaking with its bell, distant thunder after the lightning in the future street, paper picked up from the cabinet, and wind and sparkling chimes during the time travel.
+
 ## 2026-10-31 — Painted sun, real moon phases, a few stars
 
 Changed:

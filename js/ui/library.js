@@ -8,6 +8,7 @@ import { frame, h, esc } from './ui.js';
 import { PIECES, ALL_PIECES, creditFor } from '../data.js';
 import { closedCoverRect } from './sheet.js';
 import { designedCover } from './cover.js';
+import { pickUpPaper } from '../sfx.js';
 
 export const CYLINDER_ART = 'public/art/items/cylinder/';
 const CYLINDERS = ['red', 'blue', 'green', 'cream'];
@@ -94,6 +95,7 @@ export function libraryView(ui, { forPiano = false } = {}) {
         if (busy) return;
         busy = true;
         setTimeout(() => { busy = false; }, 1400);
+        pickUpPaper();
         if (!forPiano) { flyToCentre(tube.querySelector('.cover-art'), composer.name, () => ui.open('sheet', { pieceId: p.id, noFade: true })); return; }
         // for the piano: the music is pulled out of its compartment and goes onto the piano
         tube.classList.add('pulled');

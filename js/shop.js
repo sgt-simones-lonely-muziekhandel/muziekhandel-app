@@ -98,6 +98,7 @@ export class Shop {
     this.width = W;
     this.fitWidth = W;
     this.boy = new Boy(200);
+    this.boy.ground = 'wood';
     this.hovered = null;
     this.time = 0;
     this.greeted = false;

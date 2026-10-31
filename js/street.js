@@ -4,6 +4,7 @@
 import { Boy } from './boy.js';
 import { skyAt, currentHour } from './sky.js';
 import { Cyclist } from './cyclist.js';
+import { shopDoor } from './sfx.js';
 
 const ART = 'public/art/past-street/';
 const load = name => { const i = new Image(); i.src = `${ART}${name}.webp`; return i; };
@@ -74,6 +75,7 @@ export class Street {
     this.boy.dir = from === 'shop' ? -1 : 1;
     this.boy.target = null;
     this.door = from === 'shop' ? { t: 0, dir: -1 } : null;
+    if (this.door) shopDoor();
     this.cyclists = [];
     this.nextCyclist = 4;
     this.game.setPlace('Amsterdam, 1900');
@@ -93,6 +95,7 @@ export class Street {
 
   goInside() {
     this.door = { t: 0, dir: 1 };
+    shopDoor();
   }
 
   // The pavement: along the railing, then lower in front of the shop.
