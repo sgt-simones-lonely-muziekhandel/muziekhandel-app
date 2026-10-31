@@ -2,6 +2,13 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Piano: the sheet plays along, buttons inside the picture
+
+Changed:
+
+- [Piano](piano.md): in free play with a piece loaded, the sheet now follows what is played: the next note of the piece turns green when played and the sheet moves on; any other key makes its note glow on the page. The lit note in *Luister* and *Speel mee* is stronger (coloured head, band and bigger name circle).
+- [Piano](piano.md): the button bar, octave buttons, status line and pedal were re-measured on the picture and now sit fully on the wooden ledge and the strip under the keys, inside the carved sides.
+
 ## 2026-10-31 — Gramophone without floating notes
 
 Changed:

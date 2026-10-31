@@ -143,6 +143,7 @@ export function pianoView(ui, { pieceId } = {}) {
   let parsed = null, page = -1, noteEls = new Map();
   let mode = 'free';           // free | listen | follow
   let player = null, idx = 0, mistakes = 0, slow = false;
+  let along = 0;               // free play: the next note of the piece on the desk
   const held = new Set();
   const codeNotes = new Map(); // computer key → the note it started, so a shift while holding still releases it
   let pedal = false, pedalLatched = false;
@@ -189,6 +190,13 @@ export function pianoView(ui, { pieceId } = {}) {
     keyEls.forEach(k => k.classList.remove('target', 'active', 'good', 'wrong'));
     noteEls.forEach(g => g.classList.remove('active'));
   };
+  // a short glow on a note of the sheet, in its colour
+  const flash = g => {
+    if (!g) return;
+    g.classList.remove('hit'); void g.getBoundingClientRect(); g.classList.add('hit');
+    clearTimeout(g.hitTimer);
+    g.hitTimer = setTimeout(() => g.classList.remove('hit'), 700);
+  };
   const markNote = (n, cls = 'active') => {
     showPage(pageOfNote(parsed, n, SYSTEMS));
     noteEls.forEach(g => g.classList.remove('active'));
@@ -200,6 +208,7 @@ export function pianoView(ui, { pieceId } = {}) {
     const piece = pieceById(id);
     parsed = parsePiece(piece);
     page = -1;
+    along = 0;
     $('.score-hint').hidden = true;
     $('.piece-name').innerHTML = `<b>${esc(piece.title)}</b> · ${esc(composerById(piece.composer).short)}`;
     ['.listen', '.follow', '.slow'].forEach(s => { $(s).hidden = false; });
@@ -210,6 +219,7 @@ export function pianoView(ui, { pieceId } = {}) {
   function stopAll() {
     player?.stop(); player = null;
     mode = 'free';
+    along = 0;
     clearMarks();
     noteEls.forEach(g => g.classList.remove('done'));
     $('.listen').classList.remove('on');
@@ -280,6 +290,30 @@ export function pianoView(ui, { pieceId } = {}) {
     setStatus('');
   }
 
+  // Free play with a piece on the desk: the sheet plays along. The next note of the piece, when it's
+  // played, turns green and the sheet moves on (turning the page when needed); any other key makes
+  // that note glow wherever it is on the page, so every key shows where it is written.
+  function playAlong(midi) {
+    const notes = parsed.notes;
+    while (along < notes.length && notes[along].rest) along++;
+    const n = notes[along];
+    if (n && n.midi === midi) {
+      showPage(pageOfNote(parsed, n, SYSTEMS));
+      const g = noteEls.get(n.i);
+      g?.classList.add('done');
+      flash(g);
+      along++;
+      while (along < notes.length && notes[along].rest) along++;
+      if (along >= notes.length) {
+        setStatus('Je hebt het hele stuk gespeeld! Speel het gerust nog eens.');
+        along = 0;
+        setTimeout(() => { if (mode === 'free') { noteEls.forEach(e => e.classList.remove('done')); showPage(0); } }, 1500);
+      }
+      return;
+    }
+    for (const [i, g] of noteEls) if (notes[i]?.midi === midi) flash(g);
+  }
+
   function press(midi) {
     if (held.has(midi)) return;
     held.add(midi);
@@ -289,6 +323,7 @@ export function pianoView(ui, { pieceId } = {}) {
     k?.classList.add('down');
     spark(midi);
     if (!audioState.ready) setStatus('De piano wordt nog gestemd… even geduld!');
+    if (mode === 'free' && parsed) playAlong(midi);
     if (mode === 'follow') {
       const n = parsed.notes[idx];
       if (n && midi === n.midi) {

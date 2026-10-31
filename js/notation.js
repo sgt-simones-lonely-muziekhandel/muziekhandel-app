@@ -28,7 +28,7 @@ function flag(x, y, up, count) {
 
 function noteSvg(n, x, y0) {
   const col = n.rest ? '#4a3626' : NOTE_COLORS[n.letter];
-  let s = `<g class="note${n.rest ? ' rest' : ''}" data-i="${n.i}">`;
+  let s = `<g class="note${n.rest ? ' rest' : ''}" data-i="${n.i}" style="--c:${col}">`;
   s += `<rect class="hl-box" x="${x - 18}" y="${y0 - 26}" width="36" height="${SYS_H - 22}" rx="12" fill="${col}"/>`;
   const dotted = [1.5, 3, 0.75].includes(n.dur);
   if (n.rest) {
