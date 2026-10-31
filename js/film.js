@@ -74,6 +74,7 @@ export class Film {
     this.done = false;
     this.holding = null; // the caption the story is waiting on
     this.rainSeen = 0;   // how hard it rained on screen in the last frame (see drawRain)
+    this.hushed = false; // true: no more rain sound, whatever is on screen
     loadThunder();
     for (const c of this.captions) { c.released = null; c.since = null; c.shown = null; }
     this.game.setPlace(this.place);
@@ -107,7 +108,7 @@ export class Film {
     }
     this.tick?.(this.holding ? 0 : dt);
     // the rain sounds as hard as it rains on screen (0.3 is a downpour); none in the past
-    rain(Math.min(1, this.rainSeen / 0.3));
+    rain(this.hushed ? 0 : Math.min(1, this.rainSeen / 0.3));
     if (this.T >= this.total && !this.done) { this.done = true; this.game.goTo(this.next, { dissolve: this.out }); }
   }
 

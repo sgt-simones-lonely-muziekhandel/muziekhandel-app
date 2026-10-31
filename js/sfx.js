@@ -93,6 +93,14 @@ export function thunder(delay = 1, strength = 1) {
   p.start(Tone.now() + delay);
 }
 
+// Thunder that is still rolling fades out quickly (the story wants quiet when the crate opens).
+export function hushThunder() {
+  for (const p of rumbles || []) if (p.state === 'started') {
+    p.volume.rampTo(-60, 0.8);
+    p.stop(Tone.now() + 0.9);
+  }
+}
+
 // Soft rain on puddles, a recorded loop. The scene sets how hard it rains (0–1) every frame with
 // rain(level); when that stops (another scene, or a film that's over) it fades out by itself.
 let shower = null;
@@ -151,6 +159,33 @@ export function loadTimeTravel() {
 export function tubeSparkle() {
   loadTimeTravel();
   if (travel?.sparkle.loaded) travel.sparkle.start();
+  halo();
+}
+
+// Under the sparkle, a halo: a soft choir singing "aah" on an open A major chord that swells up
+// slowly and fades into a long echo, as if heaven opens. Saw-wave voices, a little detuned and
+// wavering, shaped into the vowel by two band-pass filters (its formants, about 750 and 1150 Hz),
+// with a quiet high shimmer an octave above.
+let choir = null;
+function halo() {
+  if (!live()) return;
+  choir ??= (() => {
+    const hall = new Tone.Reverb({ decay: 4, wet: 0.65 }).connect(out());
+    const aah = [750, 1150].map(frequency => new Tone.Filter({ frequency, type: 'bandpass', Q: 4 }).connect(hall));
+    const waver = new Tone.Vibrato(5, 0.06);
+    aah.forEach(f => waver.connect(f));
+    const voices = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'fatsawtooth', count: 3, spread: 16 },
+      envelope: { attack: 0.9, decay: 0.4, sustain: 0.7, release: 1.8 }, volume: -22,
+    }).connect(waver);
+    const shimmer = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'sine' }, envelope: { attack: 1.2, decay: 0.3, sustain: 0.6, release: 2 }, volume: -36,
+    }).connect(hall);
+    return { voices, shimmer };
+  })();
+  const now = Tone.now();
+  choir.voices.triggerAttackRelease(['A3', 'E4', 'A4', 'C#5', 'E5'], 1.3, now);
+  choir.shimmer.triggerAttackRelease(['A5', 'E6'], 1.2, now + 0.2);
 }
 export function timeTravel() {
   loadTimeTravel();

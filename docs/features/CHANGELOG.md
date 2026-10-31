@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Quiet when the crate opens, a halo for the tube
+
+Changed:
+
+- [Sound effects](sound-effects.md) / [story](story.md): when the crate opens the rain and any thunder fade out, so the focus stays on the picture; the tube's chime gets a soft heavenly choir (a *halo*) swelling under it.
+
 ## 2026-10-31 — Rain, recorded thunder, the tube's chime
 
 Added / changed:
