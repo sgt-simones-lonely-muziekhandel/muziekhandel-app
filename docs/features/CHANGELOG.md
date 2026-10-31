@@ -2,6 +2,23 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Every validated SOM score in the shop: 37 songs in three cabinets
+
+Added:
+
+- [SOM scores](som-scores.md): all the hand-checked scores of sheet2midi's `validated/` (64 `.mxl`), 22 new songs: *Way Down South*, *Posthorn Galop*, *Oh, my Horsey*, *Black Train Blues*, *That Girl of Mine*, *Prikkebeen*, *Améthyste*, *Chocante*, *Meet me to-night in Dreamland*, *Hoe heet je?*, *Weet je, wat ik zou willen?*, *Valse miniature*, *Memory of Hawaii*, *Hompie-Kurkie*, *Het gaat alles voorbij*, *Flying-Patrol*, *In eenen nacht in mei*, *Ping Ping Ping*, *Señor en Señorita*, *Uit de Cantine*, *Witte Rozen*, *Keep Pretending*. Each has its scan pages as a book, its melody on the piano and, where the score has one, its piano accompaniment. The import reads songs split over several `.mxl`, two songs in one score, and piano solos (melody from the right hand).
+- [Sheet music](sheet-music.md): the songs fill three cabinets (*kast 1–3*), five easy, five middle and five hard songs to a cabinet; the composers' cabinet comes after them.
+
+Changed:
+
+- [Sheet music](sheet-music.md): *Speel op de piano* and its tip say **Enter** (Space still works).
+
+## 2026-10-31 — Pause and stop in one small set
+
+Changed:
+
+- [Piano](piano.md): *Luister* is now the play/pause button itself (▶ Luister → ❚❚ Pauze → ▶ Verder, also with Enter), with only a small round ■ beside it to stop, instead of two extra plaques (*Pauze* and *Stop*) in the row.
+
 ## 2026-10-31 — Names on the black keys
 
 Changed:

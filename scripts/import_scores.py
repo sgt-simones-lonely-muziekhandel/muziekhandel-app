@@ -38,7 +38,11 @@ SCAN_QUALITY = 72
 # `file`: the sheet2midi name (partituur_nl_hvssom_<file>). `cover`: the first scan page is the
 # printed cover, so it becomes the book's cover; without one the game draws a cover, with `emblem`
 # (an instrument) on it. `tempo`: quarter notes per minute, from the tempo word on the scan.
-# A piece out of a songbook names its `movement` (the .mvtN.mxl) and its scan `pages`.
+# A piece out of a songbook names its `movement` (the .mvtN.mxl, or a list of them played one after
+# the other) and its scan `pages`. A song Audiveris split over several .mvtN.mxl (one per page or
+# section) is read as all of them in order. `melodyFrom: "piano"`: the tune is the top line of the
+# piano's right hand (piano solos, and scores whose vocal part OMR got wrong); a score with no vocal
+# part at all does this by itself.
 SONGS = [
     {"file": "som_populair_n0174", "id": "oogen", "title": "Die Oogen van jou", "subtitle": "Slow-fox",
      "credit": "Wim Kreuer · tekst Arnold Frank", "creditShort": "Wim Kreuer", "tempo": 112, "cover": True},
@@ -74,7 +78,65 @@ SONGS += [
      "series": f"Album voor Mandoline en Viool · No. {k + 1}", "place": "Amsterdam · Holland"}
     for k, (tid, title, sub, credit, short, tempo) in enumerate(ALBUM_TUNES)
 ]
-LEVELS = 3  # the cabinet has three shelves of five: the 15 songs are ranked into 5 per level
+# More songs from the SOM collection, read from their scans (title page and first page of music).
+SONGS += [
+    {"file": "som_populair_158304_158304", "id": "waydown", "title": "Way Down South", "subtitle": "Swing fox-trot",
+     "credit": "Peter Packay · tekst Jim Mac Kilburn en Glen Powell", "creditShort": "Packay", "tempo": 150, "cover": True},
+    {"file": "som_populair_164991_164991", "id": "posthorn", "title": "Posthorn Galop", "subtitle": "Galop",
+     "credit": "H. Koenig", "creditShort": "Koenig", "tempo": 120, "cover": True},
+    {"file": "som_populair_165010_165010", "id": "horsey", "title": "Oh, my Horsey", "subtitle": "Cowboy-song",
+     "credit": "Ar Colijn · tekst Th. C. Warrens", "creditShort": "Colijn", "tempo": 104, "cover": True},
+    {"file": "som_populair_165808_165808", "movement": [1], "id": "blacktrain", "title": "Black Train Blues",
+     "subtitle": "Bright bounce", "credit": "Peter en Paul Prennessel · tekst Pol Stone", "creditShort": "Prennessel",
+     "tempo": 120, "cover": True, "pages": [1, 2, 3]},
+    {"file": "som_populair_165808_165808", "movement": [2], "id": "thatgirl", "title": "That Girl of Mine",
+     "subtitle": "Medium bounce", "credit": "Jimmy Toren en Jeff De Boeck · tekst Pol Stone",
+     "creditShort": "Toren & De Boeck", "tempo": 120, "cover": True, "pages": [1, 5, 6]},
+    {"file": "som_populair_166109_166109", "id": "prikkebeen", "title": "Prikkebeen", "subtitle": "Medio tempo",
+     "credit": "Bart Ekkers", "creditShort": "Ekkers", "tempo": 112, "cover": True},
+    {"file": "som_populair_166117_166117", "movement": [1, 2, 3], "id": "amethyste", "title": "Améthyste",
+     "subtitle": "Valse swing", "credit": "Rud Wharton en Pol Stone", "creditShort": "Wharton", "tempo": 160,
+     "cover": True, "pages": [1, 2, 3]},
+    {"file": "som_populair_166117_166117", "movement": [4, 5], "id": "chocante", "title": "Chocante",
+     "subtitle": "Valse portugaise", "credit": "Marcel Azzola en Rud Wharton", "creditShort": "Azzola", "tempo": 160,
+     "cover": True, "pages": [1, 5, 6]},
+    {"file": "som_populair_166327_166327", "id": "dreamland", "title": "Meet me to-night in Dreamland",
+     "subtitle": "Moderato", "credit": "Leo Friedman · tekst Beth Slater Whitson", "creditShort": "Friedman",
+     "tempo": 120, "cover": True},
+    {"file": "som_populair_167097_167097", "id": "hoeheetje", "title": "Hoe heet je?", "subtitle": "Moderato swing",
+     "credit": "Bart Ekkers", "creditShort": "Ekkers", "tempo": 120, "cover": False, "emblem": "mandolin"},
+    {"file": "som_populair_168335_168335", "id": "weetje", "title": "Weet je, wat ik zou willen?",
+     "subtitle": "Moderato swing", "credit": "Bart Ekkers", "creditShort": "Ekkers", "tempo": 116,
+     "cover": False, "emblem": "violin"},
+    {"file": "som_populair_168385_168385", "id": "valse", "title": "Valse miniature", "subtitle": "Tempo di valse",
+     "credit": "Bart Ekkers · bewerking P. Wijnnobel", "creditShort": "Ekkers", "tempo": 160,
+     "cover": False, "emblem": "violin", "melodyFrom": "piano"},
+    {"file": "som_populair_171522_171522", "id": "hawaii", "title": "Memory of Hawaii", "subtitle": "Slowly",
+     "credit": "Henk Breton · tekst D. Ace", "creditShort": "Breton", "tempo": 88, "cover": True},
+    {"file": "som_populair_172981_172981", "id": "hompie", "title": "Hompie-Kurkie", "subtitle": "Samba",
+     "credit": "Bart Ekkers, Jack Bess en Pi Scheffer", "creditShort": "Ekkers", "tempo": 112,
+     "cover": False, "emblem": "mandolin"},
+    {"file": "som_populair_n0216", "id": "voorbij", "title": "Het gaat alles voorbij", "subtitle": "Walslied",
+     "credit": "Fred Raymond · tekst Arnold Frank", "creditShort": "Raymond", "tempo": 132, "cover": True},
+    {"file": "som_populair_n0231", "id": "patrol", "title": "Flying-Patrol", "subtitle": "Polka de concert",
+     "credit": "Mac. A. Parr en Joop de Leur", "creditShort": "Parr & De Leur", "tempo": 112, "cover": True},
+    {"file": "som_populair_n0348", "id": "nachtinmei", "title": "In eenen nacht in mei", "subtitle": "Langzaam fox-trot",
+     "credit": "Peter Kreuder en Friedrich Schröder · tekst May Dale", "creditShort": "Kreuder", "tempo": 108,
+     "cover": True},
+    {"file": "som_populair_n0587", "id": "pingping", "title": "Ping Ping Ping", "subtitle": "Citerliedje",
+     "credit": "Tom Rays · tekst Jack Bess", "creditShort": "Rays", "tempo": 104, "cover": False, "emblem": "mandolin"},
+    {"file": "som_populair_n0641", "id": "senorita", "title": "Señor en Señorita", "subtitle": "Carioca",
+     "credit": "Peter Kreuder · tekst Th. C. Warrens", "creditShort": "Kreuder", "tempo": 140, "cover": True},
+    {"file": "som_populair_n0748", "id": "cantine", "title": "Uit de Cantine", "subtitle": "Vroolijke marsch-potpourri",
+     "credit": "Louis Noiret, Joop de Leur e.a.", "creditShort": "Noiret", "tempo": 116, "cover": True},
+    {"file": "som_populair_n0847", "id": "witterozen", "title": "Witte Rozen", "subtitle": "Moderato",
+     "credit": "Tummers · tekst E. Paoli", "creditShort": "Tummers", "tempo": 120, "cover": True},
+    # an orchestra's set of parts, one page per instrument: the tune is the first violin's (page 4)
+    {"file": "somsalon_188031_188031", "movement": [4], "id": "pretending", "title": "Keep Pretending",
+     "subtitle": "Moderato con espressione", "credit": "Guy Brain · bewerking Dolf van der Linden",
+     "creditShort": "Brain", "tempo": 96, "cover": False, "emblem": "violin", "pages": [4]},
+]
+LEVELS = 3  # the cabinet has three shelves (★ ★★ ★★★): the songs are ranked into equal thirds
 
 GRID = 24  # time is counted in 24ths of a quarter note: fits 32nds and all triplets used here
 # The game's duration tokens (js/music.js), in 24ths of a quarter.
@@ -84,18 +146,33 @@ STEPS = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 SHARP_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 
+def read_mxl(path):
+    with zipfile.ZipFile(path) as z:
+        container = ET.fromstring(z.read("META-INF/container.xml"))
+        inner = next(e.get("full-path") for e in container.iter() if e.tag == "rootfile")
+        return ET.fromstring(z.read(inner))
+
+
+def mvt_number(path):
+    m = re.search(r"\.mvt(\d+)\.mxl$", path.name)
+    return int(m.group(1)) if m else 0
+
+
 def load_score(folder, movement=None):
-    """The merged .xml of a song, its single .mxl, or one movement of a songbook."""
+    """The scores to read one after the other: the merged .xml of a song, else its .mxl files
+    (all its movements in order, or the ones `movement` names: a number or a list)."""
     xml = sorted(folder.glob("*.xml"))
     if xml and not movement:
-        return ET.parse(xml[0]).getroot()
-    mxl = sorted(folder.glob(f"*.mvt{movement}.mxl" if movement else "*.mxl"))
-    if len(mxl) != 1:
-        raise RuntimeError(f"{folder.name}: expected one .xml or one .mxl, found {len(mxl)} .mxl")
-    with zipfile.ZipFile(mxl[0]) as z:
-        container = ET.fromstring(z.read("META-INF/container.xml"))
-        path = next(e.get("full-path") for e in container.iter() if e.tag == "rootfile")
-        return ET.fromstring(z.read(path))
+        return [ET.parse(xml[0]).getroot()]
+    mxl = sorted(folder.glob("*.mxl"), key=mvt_number)
+    if movement:
+        wanted = movement if isinstance(movement, list) else [movement]
+        mxl = [f for f in mxl if mvt_number(f) in wanted]
+        if len(mxl) != len(wanted):
+            raise RuntimeError(f"{folder.name}: movements {wanted} not all there")
+    if not mxl:
+        raise RuntimeError(f"{folder.name}: no .xml or .mxl")
+    return [read_mxl(f) for f in mxl]
 
 
 def midi_of(note):
@@ -111,11 +188,9 @@ def pitch_token(midi, step, alter):
     return f"{SHARP_NAMES[midi % 12]}{midi // 12 - 1}"
 
 
-def read_part(part):
+def read_part(part, divisions=1, time=None):
     """Every measure of a part as a list of events with onsets, in GRID units from the bar line."""
     measures = []
-    divisions = 1
-    time = None
     for m in part.findall("measure"):
         attrs = m.find("attributes")
         if attrs is not None:
@@ -145,6 +220,7 @@ def read_part(part):
                     last_onset = cursor
                     cursor += dur
                 ev = {"onset": onset, "dur": dur, "voice": el.findtext("voice") or "1",
+                      "staff": el.findtext("staff") or "1",
                       "rest": el.find("rest") is not None,
                       "tie_start": any(t.get("type") == "start" for t in el.findall("tie")),
                       "tie_stop": any(t.get("type") == "stop" for t in el.findall("tie"))}
@@ -247,15 +323,51 @@ def accompaniment(parts, starts):
     return [[int(t), int(min(d, 8 * GRID)), m] for t, d, m in notes]
 
 
+def read_scores(roots):
+    """The vocal and the piano parts of one or more scores, played one after the other: the n-th
+    vocal (piano) part of each score follows on the n-th of the one before; a score with fewer
+    parts leaves the others silent for its bars. Divisions and time signature carry over."""
+    empty = lambda: {"events": [], "length": Fraction(0), "time": None, "implicit": False}
+    vocal, piano = [], []
+    divisions, time, done = 1, None, 0
+    for root in roots:
+        names = {sp.get("id"): (sp.findtext("part-name") or "") for sp in root.iter("score-part")}
+        got = ([], [])
+        for p in root.findall("part"):
+            got["piano" in names[p.get("id")].lower()].append(read_part(p, divisions, time))
+        bars = max(len(m) for g in got for m in g)
+        for into, new in zip((vocal, piano), got):
+            while len(into) < len(new):
+                into.append([empty() for _ in range(done)])
+            for k, part in enumerate(into):
+                more = new[k] if k < len(new) else []
+                part += more + [empty() for _ in range(bars - len(more))]
+        done += bars
+        # what the next score starts from
+        for m in root.iter("measure"):
+            if m.findtext("attributes/divisions"):
+                divisions = int(m.findtext("attributes/divisions"))
+            try:
+                time = (int(m.findtext("attributes/time/beats")), int(m.findtext("attributes/time/beat-type")))
+            except (TypeError, ValueError):
+                pass
+    return vocal, piano
+
+
+def right_hand(part):
+    """The top staff of a piano part: what the right hand plays."""
+    return [{**m, "events": [e for e in m["events"] if e["staff"] == "1"]} for m in part]
+
+
 def convert(song, folder):
-    root = load_score(folder, song.get("movement"))
-    names = {sp.get("id"): (sp.findtext("part-name") or "") for sp in root.iter("score-part")}
-    parts = {p.get("id"): read_part(p) for p in root.findall("part")}
-    vocal = [parts[k] for k in parts if "piano" not in names[k].lower()]
-    piano = [parts[k] for k in parts if "piano" in names[k].lower()]
-    if not vocal:
-        raise RuntimeError("no vocal part")
-    warnings = []
+    vocal, piano = read_scores(load_score(folder, song.get("movement")))
+    parts = {k: p for k, p in enumerate(vocal + piano)}
+    from_piano = song.get("melodyFrom") == "piano" or not any(e for p in vocal for m in p for e in m["events"])
+    if from_piano:
+        if not piano:
+            raise RuntimeError("no vocal part and no piano part")
+        vocal = [right_hand(p) for p in piano]
+    warnings = ["the melody is the piano's right hand"] if from_piano else []
 
     # one time signature for the whole song; OMR sometimes misses it, then the usual bar length decides
     times = Counter(m["time"] for p in parts.values() for m in p if m["time"])
@@ -286,6 +398,10 @@ def convert(song, folder):
     # the piano intro and outro are only heard, not written in the book
     bars = [tokens_for(melody[i], warnings, f"bar {i + 1}") for i in range(a, b + 1)]
     accomp = accompaniment(piano, starts)
+    if from_piano:
+        # the tune is played as the melody: leave it out of the accompaniment, or it sounds twice
+        tune = {(int(starts[i] + n["onset"]), n["midi"]) for i in range(count) for n in melody[i] if not n["rest"]}
+        accomp = [n for n in accomp if (n[0], n[2]) not in tune]
     piece = {
         "id": f"som-{song['id']}", "title": song["title"], "subtitle": song["subtitle"],
         "composer": None, "credit": song["credit"], "creditShort": song["creditShort"],
@@ -296,7 +412,8 @@ def convert(song, folder):
         "accompGrid": GRID,
         "accomp": accomp,
         "source": f"SOM · partituur_nl_hvssom_{song['file']}"
-                  + (f" · {song['movement']}" if song.get("movement") else ""),
+                  + (f" · {'+'.join(map(str, song['movement'])) if isinstance(song['movement'], list) else song['movement']}"
+                     if song.get("movement") else ""),
     }
     for key in ("emblem", "series", "place"):
         if song.get(key):
@@ -399,6 +516,15 @@ def main():
             print(f"  ! {w}")
         if len(warnings) > 5:
             print(f"  ! …and {len(warnings) - 5} more")
+
+    # a scan's pages no piece shows (another instrument's part, an advertisement) are not kept
+    used = {}
+    for piece in pieces:
+        used.setdefault(piece["scans"]["dir"], set()).update(piece["scans"]["pages"])
+    for folder, pages in used.items():
+        for f in (ROOT / folder).glob("page-*.webp"):
+            if int(f.stem.split("-")[1]) not in pages:
+                f.unlink()
 
     stats, scores = assign_levels(pieces)
     print("\nDifficulty (range in semitones, shares of black keys / short / odd values, mean leap,")

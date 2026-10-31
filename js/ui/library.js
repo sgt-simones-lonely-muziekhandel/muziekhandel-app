@@ -72,11 +72,20 @@ function flyToCentre(art, fullName, done) {
   });
 }
 
-// The cabinets: the songs of the SOM collection, and the composers' own pieces in a second one. The
-// player walks from one to the other with the arrows (or ← →, or a swipe); the cabinet in view
-// is remembered for the next visit.
+// The cabinets: the songs of the SOM collection, as many cabinets as they fill (each shelf holds
+// five songs of its level, so a cabinet has five easy, five middle and five hard ones), then the
+// composers' own pieces. The player walks from one to the other with the arrows (or ← →, or a
+// swipe); the cabinet in view is remembered for the next visit.
+function songCabinets(pieces) {
+  const byLevel = [1, 2, 3].map(l => pieces.filter(p => Math.min(3, Math.max(1, p.level || 1)) === l));
+  const count = Math.max(1, ...byLevel.map(l => Math.ceil(l.length / COLS.length)));
+  return Array.from({ length: count }, (_, k) => ({
+    name: count > 1 ? `Liedjes uit de SOM-collectie · kast ${k + 1}` : 'Liedjes uit de SOM-collectie',
+    pieces: byLevel.flatMap(l => l.slice(k * COLS.length, (k + 1) * COLS.length)),
+  }));
+}
 const CABINETS = [
-  { name: 'Liedjes uit de SOM-collectie', pieces: PIECES },
+  ...songCabinets(PIECES),
   { name: 'Muziek van de componisten', pieces: ALL_PIECES.filter(p => !PIECES.includes(p)) },
 ].filter(c => c.pieces.length);
 let lastCabinet = 0;

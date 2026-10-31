@@ -90,9 +90,10 @@ export function pianoView(ui, { pieceId } = {}) {
         <button class="btn wood read" hidden title="Bekijk de bladmuziek van dit stuk">Bladmuziek</button>
         <span class="piece-name"></span>
         <span class="spacer"></span>
-        <button class="btn brass listen" hidden>Luister</button>
-        <button class="btn brass pause" hidden title="Zet het liedje even stil"><span class="ico">❚❚</span><span class="pause-label">Pauze</span></button>
-        <button class="btn wood stop" hidden title="Stop het liedje"><span class="ico">■</span>Stop</button>
+        <span class="transport">
+          <button class="btn brass listen" hidden title="Luister naar het liedje (Enter)"><span class="ico">▶</span><span class="listen-label">Luister</span></button>
+          <button class="btn wood stop" hidden title="Stop het liedje" aria-label="Stop">■</button>
+        </span>
         <button class="btn brass follow" hidden title="De piano wacht tot je de goede toets speelt">Speel mee</button>
         <button class="btn brass rhythm" hidden title="Speel op tijd mee: de piano telt af en speelt de begeleiding">In de maat</button>
         <button class="btn wood practice-btn" hidden title="Kies een stukje, het tempo en meer">Oefenen</button>
@@ -318,14 +319,14 @@ export function pianoView(ui, { pieceId } = {}) {
     showPlayback(false);
   }
 
-  // Pauze and Stop, next to Luister, only while a song plays (or is paused). Pauze becomes Verder
-  // while paused.
+  // Luister is one play/pause button: ▶ Luister, while the song plays ❚❚ Pauze, while paused
+  // ▶ Verder. A small round ■ Stop sits next to it only while a song plays (or is paused).
   function showPlayback(on, isPaused = false) {
-    $('.pause').hidden = $('.stop').hidden = !on;
-    $('.pause').classList.toggle('on', isPaused);
-    $('.pause .ico').textContent = isPaused ? '▶' : '❚❚';
-    $('.pause .pause-label').textContent = isPaused ? 'Verder' : 'Pauze';
-    $('.pause').title = isPaused ? 'Luister verder' : 'Zet het liedje even stil';
+    const playing = on && !isPaused;
+    $('.stop').hidden = !on;
+    $('.listen .ico').textContent = playing ? '❚❚' : '▶';
+    $('.listen .listen-label').textContent = playing ? 'Pauze' : isPaused ? 'Verder' : 'Luister';
+    $('.listen').title = playing ? 'Zet het liedje even stil (Enter)' : isPaused ? 'Luister verder (Enter)' : 'Luister naar het liedje (Enter)';
   }
 
   // Pause: the song stops where it is; Verder (or Luister, or Enter) plays on from the note it was
@@ -338,11 +339,11 @@ export function pianoView(ui, { pieceId } = {}) {
     pausedAt = at;
     $('.listen').classList.add('on');
     showPlayback(true, true);
-    setStatus('Het liedje staat stil. Klik op Verder om verder te luisteren, of op Stop.');
+    setStatus('Het liedje staat stil. ▶ Verder (of Enter) speelt verder, ■ stopt.');
   }
 
   function listen() {
-    if (mode === 'listen') { stopAll(); setStatus(''); return; }
+    if (mode === 'listen') { pause(); return; }
     const from = mode === 'paused' ? pausedAt : null; // going on after a pause
     stopAll();
     if (!audioState.ready) { setStatus('De piano wordt nog gestemd… even geduld!'); return; }
@@ -653,7 +654,6 @@ export function pianoView(ui, { pieceId } = {}) {
   $('.pedal').onclick = () => { pedalLatched = !pedalLatched; setPedal(pedalLatched); };
   $('.lesson-btn').onclick = () => { stopAll(); ui.open('lessons'); };
   $('.listen').onclick = listen;
-  $('.pause').onclick = () => (mode === 'paused' ? listen() : pause());
   $('.stop').onclick = () => { stopAll(); setStatus(''); };
   $('.follow').onclick = follow;
   $('.rhythm').onclick = rhythm;

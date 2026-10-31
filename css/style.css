@@ -532,6 +532,11 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .piano .piano-bar .btn:hover:not(:disabled), .piano .piano-foot .btn:hover:not(:disabled) { transform: translateY(-.1cqw); filter: brightness(1.15); }
 .piano .piano-bar .btn.on { color: #2e1c08; background: linear-gradient(#fff0b8, #f2c76b 55%, #c99a45); box-shadow: 0 0 .9cqw rgba(242, 199, 107, .8), inset 0 .1cqw .2cqw rgba(0, 0, 0, .25); }
 .piano .piano-bar .btn .ico, .piano .piano-foot .btn .ico { font-size: 1.1em; }
+/* Luister (play/pause) and the small round Stop beside it, as one set */
+.piano .transport { display: inline-flex; align-items: center; gap: .3cqw; }
+.piano .transport .listen { min-width: 7.2cqw; justify-content: center; }
+.piano .transport .listen .ico { display: inline-block; width: 1.1em; text-align: center; font-size: .85em; }
+.piano .piano-bar .btn.stop { width: 2.1cqw; height: 2.1cqw; padding: 0; border-radius: 50%; justify-content: center; font-size: .95cqw; background: radial-gradient(circle at 50% 35%, #4a3221, #1d130b 70%); }
 .status { position: absolute; left: 28%; right: 27%; top: 90.2%; height: 5.8%; display: grid; place-items: center; text-align: center; font-weight: 800; font-size: 1.05cqw; line-height: 1.25; color: #f0d58e; text-shadow: 0 1px 2px #000; pointer-events: none; }
 .piano-body { position: absolute; inset: 0; pointer-events: none; }
 .piano-body > * { pointer-events: auto; }

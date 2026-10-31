@@ -45,7 +45,7 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
     title: 'Bladmuziek',
     cls: `sheet ${noFade ? 'no-zoom' : ''}`,
     full: true,
-    tip: 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op de spatiebalk om dit stuk op de piano te spelen.',
+    tip: 'Sla het boek open: klik op de rechterbladzijde of druk op →. Met ← blader je terug. Druk op Enter om dit stuk op de piano te spelen.',
   });
 
   // The pages in reading order. A real song: the pages of the original scan; when the second page
@@ -110,7 +110,7 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
       <button class="turn-btn prev" title="Terug bladeren (←)">‹</button>
       <button class="turn-btn next" title="Verder bladeren (→)">›</button>
       <p class="open-hint">Klik op het boek om het open te slaan</p>
-      <button class="btn brass play">Speel op de piano <kbd>spatie</kbd></button>
+      <button class="btn brass play">Speel op de piano <kbd>Enter</kbd></button>
     </div>`));
 
   const book = body.querySelector('.book');
