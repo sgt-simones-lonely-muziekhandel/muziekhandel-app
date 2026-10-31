@@ -3,7 +3,7 @@
 // and music) is still opened from a composer's sheet music.
 import { frame, h, esc, speak, SPEAKER } from './ui.js';
 import { CYLINDER_ART, cylinderColor, coverFor } from './library.js';
-import { TEAM, composerById, piecesBy } from '../data.js';
+import { TEAM, composerById, piecesBy, portraitOf, NO_PORTRAIT } from '../data.js';
 import { FRAME_TYPES, FRAME_SRC, TEAM_FRAME } from '../frames.js';
 
 // Where the frames hang on the close-up (1672 × 941): centre x, top y and height, in image pixels.
@@ -15,6 +15,8 @@ const HANG = [
 ];
 const TILT = [-1.2, 0.8, -0.6, 1];
 const pct = (v, of) => `${v / of * 100}%`;
+// a portrait that won't load becomes the silhouette
+const FALLBACK = `this.onerror = null; this.src = '${NO_PORTRAIT}'`;
 
 export function galleryView(ui) {
   const { el, stage } = frame(ui, {
@@ -83,7 +85,7 @@ export function composerView(ui, { composerId }) {
   body.appendChild(h(`
     <div class="composer-grid">
       <div class="composer-portrait">
-        <span class="gilt big"><img src="${c.portrait}" alt="${esc(c.name)}"></span>
+        <span class="gilt big"><img src="${portraitOf(c)}" alt="${esc(c.name)}" onerror="${FALLBACK}"></span>
         <div class="plaque"><b>${esc(c.name)}</b><small>${esc(c.years)} · ${esc(c.title)}</small></div>
       </div>
       <div class="bio paper-inner">

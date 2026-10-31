@@ -25,6 +25,7 @@ The six composers: Bach, Mozart, Beethoven, Chopin, Verdi, Tchaikovsky (*Tsjaiko
 
 - **Composer card**: a CSS grid, portrait (`p`) left over two rows, biography (`b`) and music (`m`) on the right. The music cards use `cylinderColor()` and `coverFor()` from `js/ui/library.js`, so the cylinder and the little cover on the button are the same as at the gramophone and in the cabinet.
 - On narrow screens portrait, biography and music stack vertically.
+- **No portrait**: `portraitOf(c)` in `js/data.js` gives a composer's portrait, or `NO_PORTRAIT` (`public/art/portraits/unknown.webp`, a silhouette in a wig, no one in particular) when they have none. A portrait that won't load switches to it too (`onerror`, on the shop wall, the wall close-up and the card). The makers of the real songs (`creditFor()`) get it as their `portrait`.
 - The `tree` data in `js/data.js` is no longer shown.
 
 ## Known limits / next steps

@@ -12,7 +12,7 @@ Changed:
 
 Changed:
 
-- [Listening corner](listening-corner.md): the crate is no longer clickable; only the gramophone opens the music.
+- [Listening corner](listening-corner.md): the chest of cylinders is no longer clickable; only the gramophone opens the music.
 
 ## 2026-10-31 — Sheet music: only the original, pages that bend
 
@@ -33,6 +33,18 @@ Changed:
 Changed:
 
 - [Portrait wall](composers.md): the shop wall and the gallery close-up show the four makers of the game (`portraits/team-1` … `team-4`) instead of the six composers, without composer names; clicking a painting opens *De makers van dit spel* with all four. Meneer Simone explains who they are. Name plaques appear once names are filled in in `TEAM` (`js/data.js`). The composer cards stay in the code but are no longer reachable from the shop.
+
+## 2026-10-31 — A silhouette for composers without a portrait
+
+Added:
+
+- [Composers](composers.md): a composer without a portrait, or whose portrait won't load, gets a silhouette in a wig (`portraits/unknown`) on the shop wall, the wall close-up and the composer card.
+
+## 2026-10-31 — The gramophone on its cabinet
+
+Changed:
+
+- [Listening corner](listening-corner.md): the gramophone is drawn whole, cabinet and all, standing on the floor between the chest and the armchair (the room's picture no longer has the round table it used to stand on).
 
 ## 2026-10-31 — More instruments on the piano
 

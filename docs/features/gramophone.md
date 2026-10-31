@@ -1,6 +1,6 @@
 # Gramophone
 
-A brass-horned gramophone and a cabinet of records to listen to. It stands on the round table in the [listening corner](listening-corner.md), the room to the right of the shop.
+A brass-horned gramophone and a cabinet of records to listen to. It stands on its own cabinet in the [listening corner](listening-corner.md), the room to the right of the shop.
 
 ## For the player
 

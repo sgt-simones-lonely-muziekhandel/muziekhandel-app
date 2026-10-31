@@ -5,6 +5,11 @@
 // next one. Bar lines "|" are optional and only for readability.
 import { SOM_PIECES } from './som-scores.js';
 
+// The portrait for a composer we have no picture of (or whose picture won't load): a silhouette
+// in a wig, no one in particular.
+export const NO_PORTRAIT = 'public/art/portraits/unknown.webp';
+export const portraitOf = c => c?.portrait || NO_PORTRAIT;
+
 export const COMPOSERS = [
   {
     id: 'bach',
@@ -258,6 +263,6 @@ export const composerById = id => COMPOSERS.find(c => c.id === id);
 // Who made a piece, for labels: one of the composers, or the makers of a real song (`credit`), who
 // have no portrait or story in the game (`id: null`).
 export const creditFor = piece => composerById(piece.composer)
-  || { id: null, name: piece.credit, short: piece.creditShort || piece.credit, years: '' };
+  || { id: null, name: piece.credit, short: piece.creditShort || piece.credit, years: '', portrait: NO_PORTRAIT };
 export const piecesBy = id => DEMO_PIECES.filter(p => p.composer === id);
 export const pieceById = id => ALL_PIECES.find(p => p.id === id);

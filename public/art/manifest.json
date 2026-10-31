@@ -982,5 +982,10 @@
     "file": "art/portraits/team-4.webp",
     "width": 544,
     "height": 768
+  },
+  "portraits/unknown": {
+    "file": "art/portraits/unknown.webp",
+    "width": 512,
+    "height": 768
   }
 }
