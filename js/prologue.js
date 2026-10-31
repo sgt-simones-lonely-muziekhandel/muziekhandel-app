@@ -5,8 +5,8 @@
 //   2. map     an old map of the Netherlands; the year counts up to 2126 while the sea creeps in
 //   3. future  the same street in 2126, flooded and quiet under smoky air; the camera tilts down
 //              from the storm to the boy on the quay, then dissolves into the future street
-// The shots slide into each other behind a seam of light (`wipe`), like the time travel in the
-// story. Each caption waits until the player clicks or taps (see js/film.js); Overslaan skips it all.
+// The shots slowly dissolve into each other. Each caption waits until the player clicks or taps
+// (see js/film.js); Overslaan skips it all.
 import { Film, H, load as loadImg, ready, smooth, ease, bump, cover, glow, sunBeams, boyFromBehind, mulberry } from './film.js';
 
 const load = name => loadImg(`public/art/intro/${name}.webp`);
@@ -27,11 +27,11 @@ const KID_AT = [0.3, 0.985], KID_H = 0.42;
 // shot and the prologue waits there until the player clicks.
 const SHOTS = [
   { key: 'today', dur: 9, captions: [[1.4, 'Amsterdam, 2026. Een stad vol water, fietsen… en muziek.']] },
-  { key: 'map', dur: 15, from: 'right', captions: [
+  { key: 'map', dur: 15, captions: [
     [2.8, 'De aarde werd steeds warmer. Het ijs smolt en de zee steeg.'],
     [11.6, 'Het water kwam steeds verder het land in.'],
   ] },
-  { key: 'future', dur: 17, from: 'left', captions: [
+  { key: 'future', dur: 17, captions: [
     [6.8, 'Het jaar 2126. De mensen zijn vertrokken naar hoger land.'],
     [8.6, 'De lucht is vies van stormen en branden. Wie naar buiten gaat, draagt een masker.'],
     [12.4, 'De stad is stil — er klinkt geen muziek meer. Maar één jongen is nog op zoek…'],
@@ -43,7 +43,7 @@ const BOY = 10.2;         // after the smoke caption the boy appears on the quay
 
 export class Prologue extends Film {
   constructor(game) {
-    super(game, { shots: SHOTS, place: 'Amsterdam', next: 'future', seed: 5, wipe: true });
+    super(game, { shots: SHOTS, place: 'Amsterdam', next: 'future', seed: 5 });
     const r = mulberry(23);
     // birds over the canal: start x, height, speed, flap phase
     this.birds = Array.from({ length: 5 }, () => [r(), 0.08 + r() * 0.2, 0.6 + r() * 0.5, r() * 6]);

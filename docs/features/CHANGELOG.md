@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — The prologue dissolves again
+
+Changed:
+
+- [Prologue](prologue.md): Amsterdam → map → 2126 slowly dissolve into each other again, without the seam of light and the swirl, which stays for the time travel in the [story](story.md).
+
 ## 2026-10-31 — Sound effects
 
 Added:

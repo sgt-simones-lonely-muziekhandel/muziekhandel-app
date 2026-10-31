@@ -1,6 +1,6 @@
 # Prologue: where and when you are
 
-The short film that plays when the game starts, before the [future street](future-street.md). It tells the player where they are (Amsterdam), when (the year 2126), and why the city is flooded, in the same slow anime style as the [story](story.md): painted shots that drift and zoom and **slide into each other** behind a seam of golden light, like the time travel in the story, with captions on paper strips. **Overslaan** (top left, where the help button usually is) or Esc skips it.
+The short film that plays when the game starts, before the [future street](future-street.md). It tells the player where they are (Amsterdam), when (the year 2126), and why the city is flooded, in the same slow anime style as the [story](story.md): painted shots that drift and zoom and slowly dissolve into each other, with captions on paper strips. **Overslaan** (top left, where the help button usually is) or Esc skips it.
 
 The tone is calm and a little sad, never scary: nobody gets hurt, the people *moved to higher ground*, and it ends on hope (a boy still searching for the music).
 
@@ -15,7 +15,7 @@ Made for young kids: when a caption has come in, the film waits until the player
 ## How it's built
 
 `js/prologue.js`, class `Prologue`, registered as the scene `prologue`; it is the first scene (`game.scene` in `js/main.js`), so the title screen's Start button plays it. Like the story it extends `Film` from `js/film.js` (timeline, dissolves, captions, rain, dust: see [story](story.md)) and ends with `game.goTo('future', { dissolve })`.
-- **Wipes** (`wipe: true`): `Film.drawWiped()` draws one shot, or two while the next comes in over 2.6 s (`WIPE`): a seam crosses the screen, from the right (*today → map*) or the left (*map → 2126*), as each shot's `from` says. The old shot slides 15% of the screen away with it, the new one slides 30% into place behind it (a parallax swing, never showing an edge), and `seam()` draws a soft band of warm light with the golden swirl (`intro/swirl.webp`) turning in it, strongest halfway. With it a **cascade** (`drawCascade()`) streams across in the same direction: 46 music notes (the story's `intro/flying/note-N`, each on a warm halo) and golden sparks, setting off one after the other from top to bottom like a waterfall on its side, each on its own wave, turning, fading in and out. Captions of a wiped-in shot wait until the wipe is over.
+- **Dissolves**: the shots fade slowly into each other (`Film`'s dissolve). `Film` can also *wipe* shots in behind a seam of golden light with a cascade of notes (`wipe: true`, `drawWiped()`); the prologue used that for a while but is back to plain dissolves, so the swirl stays special to the time travel in the [story](story.md).
 - **Captions in cascade**: the paper strip slides in from the right and its words follow one by one from left to right (`WORD_GAP` 0.07 s apart), each dropping into place; timed on the live clock, so a long caption finishes even while the story waits.
 - **Overslaan**: `Film.skip()` goes straight to `next` (fade through black). While a film is on, `#game.in-film` hides the help button and shows `#btn-skip`; Esc does the same (`game.back()`). The [story](story.md) has it too.
 
