@@ -248,15 +248,5 @@ export class Shop {
     ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
     if (ready(FRAME_IMG[f.type])) ctx.drawImage(FRAME_IMG[f.type], x, y, w, f.h);
     ctx.restore();
-    // brass name plaque
-    ctx.font = '700 11px "EB Garamond", serif';
-    const pw = ctx.measureText(f.short).width + 14, py = y + f.h + 3;
-    const g = ctx.createLinearGradient(0, py, 0, py + 15);
-    g.addColorStop(0, '#e9c97a'); g.addColorStop(1, '#a87d34');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.roundRect(f.cx - pw / 2, py, pw, 15, 3); ctx.fill();
-    ctx.strokeStyle = '#4a3216'; ctx.lineWidth = 1.2; ctx.stroke();
-    ctx.fillStyle = '#2a1a0a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(f.short, f.cx, py + 8);
   }
 }

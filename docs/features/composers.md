@@ -4,7 +4,7 @@ The portraits on the shop wall above the piano. Clicking them opens a close-up o
 
 ## For the player
 
-1. **Portrait wall** (*De componisten*), full screen: the close-up `public/art/closeups/gallery-wall.webp` (green damask wall, picture lamp, wainscot) with the six portraits in the same gilded frames as in the shop, two rows of three, slightly crooked like on a real wall, each with a brass name plaque. Pointing at a frame straightens it and makes it glow; click it to open the composer.
+1. **Portrait wall** (*De componisten*), full screen: the close-up `public/art/closeups/gallery-wall.webp` (green damask wall, picture lamp, wainscot) with the six portraits in the same gilded frames as in the shop, two rows of three, slightly crooked like on a real wall, without name plaques (the name shows when you open one). Pointing at a frame straightens it and makes it glow; click it to open the composer.
 2. **Composer card** (a paper card over the dimmed wall):
    - Large portrait with plaque.
    - Large portrait with plaque on the left.

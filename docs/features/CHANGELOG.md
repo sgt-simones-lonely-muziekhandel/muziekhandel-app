@@ -2,6 +2,13 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Portraits without name tags, the gramophone on its cabinet
+
+Changed:
+
+- [Composers](composers.md) / [shop](shop.md): the portraits on the wall (in the shop and in the close-up) no longer have brass name plaques; the name shows when you open a composer.
+- [Listening corner](listening-corner.md): the gramophone is drawn whole, cabinet and all, standing on the floor between the chest and the armchair (the room's picture no longer has the round table it used to stand on).
+
 ## 2026-10-31 — More instruments on the piano
 
 Added:

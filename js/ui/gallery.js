@@ -33,7 +33,6 @@ export function galleryView(ui) {
         <img class="face ${t.oval ? 'oval' : ''}" src="${c.portrait}" alt="${esc(c.name)}"
           style="left:${pct(l, t.w)};top:${pct(tp, t.h)};width:${pct(r - l, t.w)};height:${pct(b - tp, t.h)}">
         <img class="gilt-frame" src="${FRAME_SRC(COMPOSER_FRAME[c.id])}" alt="">
-        <span class="wall-plaque">${esc(c.short)}</span>
       </button>`);
     Object.assign(f.style, {
       left: pct(spot.cx - w / 2, BG_W), top: pct(spot.top, BG_H),
