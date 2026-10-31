@@ -4,8 +4,9 @@ One document per feature: what it does for the player, how it's built, where the
 
 | Feature | Document | Main files |
 |---|---|---|
-| Future street (the start) | [future-street.md](future-street.md) | `js/future.js` |
-| Story: the time travel | [story.md](story.md) | `js/story.js` |
+| Prologue (where and when you are) | [prologue.md](prologue.md) | `js/prologue.js`, `js/film.js` |
+| Future street | [future-street.md](future-street.md) | `js/future.js` |
+| Story: the time travel | [story.md](story.md) | `js/story.js`, `js/film.js` |
 | Street outside the shop | [street.md](street.md) | `js/street.js` |
 | Real-time sky | [sky.md](sky.md) | `js/sky.js` |
 | Cyclists | [cyclists.md](cyclists.md) | `js/cyclist.js` |
@@ -18,6 +19,7 @@ One document per feature: what it does for the player, how it's built, where the
 | Composers: portraits, biography and music | [composers.md](composers.md) | `js/ui/gallery.js`, `js/data.js` |
 | Gramophone | [gramophone.md](gramophone.md) | `js/ui/gramophone.js` |
 | Shopkeeper (help) | [shopkeeper.md](shopkeeper.md) | `js/ui/keeper.js` |
+| De notenles (theory for beginners) | [lessons.md](lessons.md) | `js/ui/lessons.js` |
 | Game shell, input and overlays | [game-shell.md](game-shell.md) | `index.html`, `js/main.js`, `js/ui/ui.js`, `css/style.css` |
 | Content data (composers and pieces) | [content-data.md](content-data.md) | `js/data.js` |
 | Real sheet music (SOM collection) | [som-scores.md](som-scores.md) | `tools/sheet2midi/`, `scripts/import_scores.py`, `js/som-scores.js` |

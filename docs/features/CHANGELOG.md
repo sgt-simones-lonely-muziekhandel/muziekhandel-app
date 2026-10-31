@@ -2,47 +2,25 @@
 
 Newest first. Each entry links to the feature document it touches.
 
-## 2026-10-31 — The whole SOM collection in the shop
+## 2026-10-31 — Cascades in the intro, a smaller cylinder in the gramophone
+
+Changed:
+
+- [Prologue](prologue.md): a cascade of music notes and golden sparks streams across the screen with every wipe, in its direction; the captions' words come in one by one from left to right.
+- [Gramophone](gramophone.md): the chosen cylinder in the showcase is smaller, with room around it and its label in view.
+
+## 2026-10-31 — Notenles, the piano on its new picture, sliding intro, Overslaan
 
 Added:
 
-- [Real sheet music](som-scores.md): the ten tunes of the *Album voor Mandoline en Viool* (one page each, melody only), so the cabinet holds the 15 songs of our SOM collection, five per shelf. The import works out each song's difficulty from its melody and ranks them into ★ / ★★ / ★★★.
-- [Real sheet music](som-scores.md) / [sheet music](sheet-music.md): songs without a printed cover get a drawn one (`js/ui/cover.js`, inline SVG): title, makers' names, an instrument, no portrait. An album tune's book starts with the album's own cover.
+- [De notenles](lessons.md): music theory for complete beginners in nine short chapters (high and low, the seven names, black and white keys, the staff, note lengths, rests, sharps and flats, bars and counting, a first tune), each with something to try. From the piano (*Notenles*) and from Meneer Simone.
+- [Prologue](prologue.md) / [game shell](game-shell.md): **Overslaan** replaces the help button during the films and skips them (Esc too).
 
 Changed:
 
-- [Content data](content-data.md): `PIECES` is the SOM songs; the composers' hand-written pieces are only on their cards in the [portrait gallery](composers.md). `scans.pages` is a list of page numbers, so the album's tunes share one scan folder.
-- [Real sheet music](som-scores.md): the period and the rights are settled (we have an agreement with SOM), so those caveats are gone.
-
-## 2026-10-31 — Real songs: every key lights up, scan-only books, back to the book, pipeline in the repo
-
-Changed:
-
-- [Piano](piano.md) / [audio](audio.md): in *Luister* every key lights up while it sounds, the accompaniment too (softer), so what you see is what you hear. `playPiece()` has an `onKey` callback.
-- [Sheet music](sheet-music.md) / [real sheet music](som-scores.md): the book of a real song is only the original scan; its coloured notes are on the piano.
-- [Sheet music](sheet-music.md) / [piano](piano.md): *Speel op de piano* opens the piano over the book, so *Terug* comes back to the same page, and the piano has a *Bladmuziek* button to see the book again.
-
-Added:
-
-- [Real sheet music](som-scores.md): the sheet2midi pipeline (`convert.py`, `merge.py`) and its validated scores are in `tools/sheet2midi/`; the scans and raw output stay out of git. `convert.py` finds Audiveris on Windows, macOS and Linux. `import_scores.py` reads from there by default.
-
-## 2026-10-31 — Real sheet music from the SOM collection
-
-Added:
-
-- [Real sheet music](som-scores.md): five real songs from the SOM collection, imported from the hand-checked scores of sheet2midi by the new `scripts/import_scores.py`. They stand in the cabinet with their printed covers; the book has the vocal melody in coloured notes and then the pages of the original scan; the piano teaches the melody; *Luister* and the gramophone play it with the real piano accompaniment.
-
-Changed:
-
-- [Content data](content-data.md) / [sheet music](sheet-music.md): the note format has triplets (`ht qt 8t 16t`), `16.`, `32` and ties (`~`); the engraver draws a 3 over triplets and tie arcs. Pieces can have makers without a composer card (`credit`), an accompaniment and scan pages.
-- [Audio](audio.md): `playPiece()` plays a tied chain as one note and plays an accompaniment under the melody.
-
-## 2026-10-31 — Piano: the sheet plays along, buttons inside the picture
-
-Changed:
-
-- [Piano](piano.md): in free play with a piece loaded, the sheet now follows what is played: the next note of the piece turns green when played and the sheet moves on; any other key makes its note glow on the page. The lit note in *Luister* and *Speel mee* is stronger (coloured head, band and bigger name circle).
-- [Piano](piano.md): the button bar, octave buttons, status line and pedal were re-measured on the picture and now sit fully on the wooden ledge and the strip under the keys, inside the carved sides.
+- [Piano](piano.md): placed on the new close-up picture: the keys fit the key slot under the red felt, the controls sit on the board under the keys. The buttons are redrawn as small screwed-on plaques (ebony and brass) in proportion to the picture.
+- [Prologue](prologue.md): the shots slide into each other behind a seam of golden light with the time-travel swirl, from the right and then from the left, instead of dissolving.
+- [Game shell](game-shell.md): the title screen is set in Playfair Display.
 
 ## 2026-10-31 — Gramophone without floating notes
 

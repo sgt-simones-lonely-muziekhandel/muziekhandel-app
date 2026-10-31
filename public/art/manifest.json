@@ -948,6 +948,21 @@
     "width": 1672,
     "height": 941
   },
+  "intro/today-street": {
+    "file": "art/intro/today-street.webp",
+    "width": 1672,
+    "height": 941
+  },
+  "intro/map-now": {
+    "file": "art/intro/map-now.webp",
+    "width": 1672,
+    "height": 941
+  },
+  "intro/map-flooded": {
+    "file": "art/intro/map-flooded.webp",
+    "width": 1672,
+    "height": 941
+  },
   "portraits/team-1": {
     "file": "art/portraits/team-1.webp",
     "width": 576,

@@ -71,6 +71,7 @@ export function pianoView(ui, { pieceId } = {}) {
         <button class="btn brass follow" hidden>Speel mee</button>
         <button class="btn wood slow" hidden title="Langzamer luisteren">Langzaam</button>
         <button class="btn wood names" title="Notennamen: letters of do-re-mi">C D E</button>
+        <button class="btn wood lesson-btn" title="Leer hoe noten werken">Notenles</button>
         <button class="btn wood guide-btn">Hulp</button>
       </div>
       <div class="status"></div>
@@ -370,6 +371,7 @@ export function pianoView(ui, { pieceId } = {}) {
   $('.oct-down').onclick = () => setShift(shift - 1);
   $('.oct-up').onclick = () => setShift(shift + 1);
   $('.pedal').onclick = () => { pedalLatched = !pedalLatched; setPedal(pedalLatched); };
+  $('.lesson-btn').onclick = () => { stopAll(); ui.open('lessons'); };
   $('.listen').onclick = listen;
   $('.follow').onclick = follow;
   $('.slow').onclick = () => { slow = !slow; $('.slow').classList.toggle('on', slow); };

@@ -5,10 +5,11 @@ import { pianoView } from './piano.js';
 import { galleryView, composerView } from './gallery.js';
 import { gramophoneView } from './gramophone.js';
 import { keeperView } from './keeper.js';
+import { lessonsView } from './lessons.js';
 
 const VIEWS = {
   library: libraryView, sheet: sheetView, piano: pianoView,
-  gallery: galleryView, composer: composerView, gramophone: gramophoneView, keeper: keeperView,
+  gallery: galleryView, composer: composerView, gramophone: gramophoneView, keeper: keeperView, lessons: lessonsView,
 };
 
 export function h(html) {

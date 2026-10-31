@@ -1,7 +1,9 @@
 import { Street } from './street.js';
 import { FutureStreet } from './future.js';
 import { Story } from './story.js';
+import { Prologue } from './prologue.js';
 import { Shop } from './shop.js';
+import { Film } from './film.js';
 import { Corner } from './corner.js';
 import { UI } from './ui/ui.js';
 import { initAudio, onAudioReady } from './audio.js';
@@ -18,9 +20,9 @@ class Game {
     this.camX = 0;
     this.viewW = 1280;
     this.ui = new UI(this);
-    this.scenes = { future: new FutureStreet(this), story: new Story(this), street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
-    // the game starts in the future, on the flooded quay
-    this.scene = this.scenes.future;
+    this.scenes = { prologue: new Prologue(this), future: new FutureStreet(this), story: new Story(this), street: new Street(this), shop: new Shop(this), corner: new Corner(this) };
+    // the game starts with the prologue (Amsterdam today, the sea rising), then the flooded quay
+    this.scene = this.scenes.prologue;
     this.running = false;
     this.bindInput();
     addEventListener('resize', () => this.resize());
@@ -71,8 +73,10 @@ class Game {
   }
 
   // One step back: from the listening corner to the shop, from the shop out onto the street.
+  // In a film it skips the film.
   back() {
     if (this.ui.isOpen) { this.ui.close(); return true; }
+    if (this.scene instanceof Film) { this.scene.skip(); return true; }
     const to = { corner: 'shop', shop: 'street' }[Object.keys(this.scenes).find(k => this.scenes[k] === this.scene)];
     if (!to) return false;
     this.goTo(to);
@@ -114,6 +118,9 @@ class Game {
     this.idleTime += dt;
     this.scene.update(dt, input);
     const s = this.scene;
+    // a film has an Overslaan button instead of the help button
+    const film = s instanceof Film;
+    if (film !== this.inFilm) { this.inFilm = film; document.getElementById('game').classList.toggle('in-film', film); }
     // camera follows the boy; scenes narrower than the screen are centred
     this.camX = s.width <= this.viewW
       ? (s.width - this.viewW) / 2
@@ -168,6 +175,7 @@ class Game {
       this.canvas.style.cursor = hit ? 'pointer' : 'default';
     });
     document.getElementById('btn-help').addEventListener('click', () => this.ui.open('keeper'));
+    document.getElementById('btn-skip').addEventListener('click', () => { if (this.scene instanceof Film) this.scene.skip(); });
   }
 }
 
@@ -186,7 +194,7 @@ document.getElementById('btn-start').addEventListener('click', () => {
   game.start();
 });
 
-// Allow ?scene=street or ?scene=shop for quick testing.
+// Allow ?scene=future, ?scene=street or ?scene=shop for quick testing.
 const qs = new URLSearchParams(location.search);
 if (qs.get('autostart') != null) {
   document.getElementById('title-screen').classList.add('gone');

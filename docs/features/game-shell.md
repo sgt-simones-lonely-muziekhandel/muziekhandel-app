@@ -4,8 +4,8 @@ The parts that hold everything together: the page, the title screen, the game lo
 
 ## For the player
 
-- **Title screen**: a swinging brass shop sign (*Muziekhandel Simone — sinds 1892*) over the dimmed empty shop room (`public/art/shop/back-wall.webp`), a big **▶ Start** button, and the controls in one line.
-- **HUD**: only the **?** help button top-right and the piano-loading chip. There is no place name: the pictures show where you are (the place name is only the browser tab title, `setPlace()`).
+- **Title screen**: a swinging brass shop sign (*Muziekhandel Simone — sinds 1892*) over the dimmed empty shop room (`public/art/shop/back-wall.webp`), a big **▶ Start** button, and the controls in one line, all set in Playfair Display (`--font-1900`), the typeface of the sheet music in the game.
+- **HUD**: only the **?** help button and the piano-loading chip; during the films (prologue, time travel) the help button makes way for **Overslaan ⏭**, which skips the film. There is no place name: the pictures show where you are (the place name is only the browser tab title, `setPlace()`).
 - **Scene changes** fade to black and back.
 - **Windows** (piano, cabinet, …) open on aged paper over a dimmed shop. Every window has **◀ Terug** (back one step) and **✕** (straight back to the shop); **Esc** and **Backspace** also go back.
 - **Back in the scenes**: with no window open, **Backspace** or **Esc** go one place back (listening corner → shop → street), and so does the browser's back button / a keyboard's back key (`game.back()`, with a `history` entry the game keeps refilling).
@@ -19,7 +19,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 ### Page — `index.html`, `css/style.css`
 
 - One full-screen `<canvas>` for the scenes, plus HTML layers for the HUD, overlays, fade and title screen.
-- Fonts from Google Fonts: Cinzel Decorative (titles, signs), EB Garamond (headings), Nunito Sans (body text), Caveat (handwritten labels), Noto Music (music symbols).
+- Fonts from Google Fonts: Playfair Display (the title screen, sheet-music covers and book), Cinzel Decorative (panel titles, signs), EB Garamond (headings), Nunito Sans (body text), Caveat (handwritten labels), Noto Music (music symbols).
 - **Paper**: `.paper` cards get stains and a vignette, and an SVG `feTurbulence` filter (`#rough`) makes their edges look torn. A noise texture over the whole game gives the paper grain.
 - **Buttons** are `.btn.wood` or `.btn.brass`, text only (no emoji; only ‹ › arrows on Terug / Vorige / Volgende), at least 46 px high for small fingers.
 - Colours are CSS variables taken from the design guide palette.
@@ -44,7 +44,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 
 ### Test URL parameters
 
-`?autostart` (starts in the future), `&scene=story` / `&scene=street` / `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
+`?autostart` (plays the prologue), `&scene=future` / `&scene=story` / `&scene=street` / `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
 
 ## Known limits / next steps
 

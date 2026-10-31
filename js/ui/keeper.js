@@ -14,6 +14,11 @@ const TOPICS = [
     go: ['piano', 'Naar de piano'],
   },
   {
+    q: 'Ik weet nog niks van muziek. Help!',
+    a: 'Geen zorgen, iedereen begint ergens! In mijn notenles leer je stap voor stap hoe noten werken: hoe ze heten, waar ze op de piano zitten, hoe je ze leest en hoe lang ze duren. En je mag overal zelf op drukken.',
+    go: ['lessons', 'Naar de notenles'],
+  },
+  {
     q: 'Waar is de bladmuziek?',
     a: 'In de grote kast, rechts naast mijn toonbank! In elke koker zit een opgerold muziekstuk. Haal er maar eentje uit. Met de pijltjes blader je, en met de spatiebalk speel je het op de piano.',
     go: ['library', 'Naar de kast'],
