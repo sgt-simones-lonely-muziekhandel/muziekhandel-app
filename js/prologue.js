@@ -48,8 +48,11 @@ export class Prologue extends Film {
   constructor(game) {
     super(game, { shots: SHOTS, place: 'Amsterdam', next: 'future', seed: 5 });
     const r = mulberry(23);
-    // birds over the canal: start x, height, speed, flap phase
-    this.birds = Array.from({ length: 5 }, () => [r(), 0.08 + r() * 0.2, 0.6 + r() * 0.5, r() * 6]);
+    // birds circling in the open sky over the canal (between the trees and the houses of
+    // today-street.webp): centre x, y and radii of their loop in picture fractions, speed, phase
+    this.birds = Array.from({ length: 5 }, () => [
+      0.6 + r() * 0.06, 0.16 + r() * 0.16, 0.025 + r() * 0.025, 0.015 + r() * 0.02, 0.25 + r() * 0.2, r() * 6,
+    ]);
     // smoke drifting through the future street: x, y, size, speed
     this.smoke = Array.from({ length: 9 }, () => [r(), 0.15 + r() * 0.7, 0.25 + r() * 0.3, 0.3 + r() * 0.6]);
     this.flood = null; // canvas for the flooded map, masked to how far the sea has come
@@ -67,17 +70,23 @@ export class Prologue extends Film {
     this.heard = this.T;
   }
 
-  // 1. Amsterdam today: a slow pan along the canal on a fresh morning, birds flying over.
+  // 1. Amsterdam today: a slow pan along the canal on a fresh morning, birds circling in the sky.
   today(ctx, t, vw, live) {
     const p = ease(t / 9);
-    cover(ctx, IMG.today, vw, 1.04 + 0.08 * p, 0.4 + 0.15 * p + 0.01 * Math.sin(live * 0.25), 0.5);
+    const at = cover(ctx, IMG.today, vw, 1.04 + 0.08 * p, 0.4 + 0.15 * p + 0.01 * Math.sin(live * 0.25), 0.5);
     sunBeams(ctx, vw, live, 0.35);
     this.drawMotes(ctx, live, vw, vw * 0.55, H * 0.35, 'rgba(255,250,230,', 0.4);
+    if (!at) return;
     ctx.save();
-    ctx.strokeStyle = INK; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
-    for (const [x, y, sp, ph] of this.birds) {
-      const bx = ((x + live * 0.025 * sp) % 1.2) * vw - vw * 0.1, by = H * y + Math.sin(live * sp + ph) * 6;
-      const flap = Math.sin(live * 9 * sp + ph) * 5, s = 9;
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+    for (const [cx, cy, rx, ry, sp, ph] of this.birds) {
+      // a slow loop that leans a little, so no two birds fly the same circle
+      const a = live * sp + ph;
+      const bx = at.x + (cx + rx * Math.cos(a) + rx * 0.3 * Math.sin(a * 2)) * at.w;
+      const by = at.y + (cy + ry * Math.sin(a)) * at.h;
+      // wings beat while climbing, and mostly glide on the way down
+      const climbing = Math.cos(a) < 0; // y grows downwards
+      const flap = (climbing ? Math.sin(live * 7 + ph) * 4 : 1.5 + Math.sin(live * 2 + ph)), s = at.w * 0.007;
       ctx.beginPath();
       ctx.moveTo(bx - s, by - flap); ctx.quadraticCurveTo(bx - s / 2, by - 3, bx, by);
       ctx.quadraticCurveTo(bx + s / 2, by - 3, bx + s, by - flap);

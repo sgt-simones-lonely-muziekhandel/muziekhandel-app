@@ -58,30 +58,107 @@ button { font: inherit; color: inherit; }
 #fade { position: absolute; inset: 0; background: #0d0905; opacity: 0; pointer-events: none; transition: opacity .45s ease; z-index: 20; }
 #fade.on { opacity: 1; }
 
-/* ---------- Title screen ---------- */
+/* ---------- Title screen ----------
+   The shop's own front at sunset (intro/shop-front.webp), the camera drifting slowly closer; on the
+   open left side the shop's sign: a green painted board in a gilded frame with gilt letters and two
+   lyres, like the sign above the door. */
 #title-screen {
-  position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 16px; text-align: center;
-  background: radial-gradient(ellipse at 50% 40%, rgba(242, 199, 107, .25), transparent 60%), linear-gradient(rgba(18, 12, 8, .55), rgba(18, 12, 8, .85)), url(../public/art/shop/back-wall.webp) center / cover;
-  transition: opacity .8s ease, visibility .8s;
+  position: absolute; inset: 0; z-index: 30; overflow: hidden; display: flex; align-items: center; padding: 16px 16px 16px 6vw;
+  background: #120c08; font-family: var(--font-1900); transition: opacity .8s ease, visibility .8s;
 }
 #title-screen.gone { opacity: 0; visibility: hidden; }
-.title-plaque {
-  padding: 18px 42px 16px; border-radius: 14px; color: #2a1a0a; position: relative;
-  background: linear-gradient(160deg, #f6dc96, #c99a45 55%, #a87a2e); border: 4px solid #5a3d12;
-  box-shadow: inset 0 2px 0 #fff4c8, inset 0 -3px 0 rgba(0, 0, 0, .2), 0 18px 40px rgba(0, 0, 0, .6);
-  animation: swing 5s ease-in-out infinite; transform-origin: 50% -40px;
+.title-bg { position: absolute; inset: 0; background: url(../public/art/intro/shop-front.webp) 62% 50% / cover; animation: title-drift 40s ease-in-out infinite alternate; }
+.title-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(14, 8, 4, .62), rgba(14, 8, 4, .3) 45%, rgba(14, 8, 4, 0) 70%), radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(10, 6, 3, .55));
 }
-.title-plaque::before, .title-plaque::after { content: ''; position: absolute; top: 10px; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff2c0, #6b4a18); }
-.title-plaque::before { left: 12px; } .title-plaque::after { right: 12px; }
-/* the whole title screen is set in Playfair Display (--font-1900), the printed sheet music of the time */
-#title-screen { font-family: var(--font-1900); }
-.title-small { font-family: var(--font-1900); font-style: italic; font-weight: 500; font-size: clamp(18px, 2.8vw, 28px); letter-spacing: .02em; }
-.title-plaque h1 { font-family: var(--font-1900); font-weight: 800; font-size: clamp(36px, 7vw, 72px); margin: 0; line-height: 1; letter-spacing: .06em; text-transform: uppercase; }
-.title-since { font-family: var(--font-1900); font-style: italic; font-weight: 500; font-size: clamp(14px, 1.8vw, 18px); }
-.title-sub { color: var(--paper); font-family: var(--font-1900); font-style: italic; font-weight: 500; font-size: clamp(18px, 2.4vw, 24px); margin: 0; text-shadow: 0 2px 6px #000; }
-.title-keys { color: var(--paper-2); opacity: .8; font-size: 15px; margin: 0; }
-#btn-start { font-family: var(--font-1900); font-weight: 800; letter-spacing: .04em; }
-@keyframes swing { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+@keyframes title-drift { from { transform: scale(1.02); } to { transform: scale(1.1) translate(-1.2%, -.6%); } }
+.title-main { position: relative; display: flex; flex-direction: column; align-items: center; gap: 22px; width: min(600px, 100%); text-align: center; }
+.title-sign {
+  position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 18px; width: 100%; padding: 22px 26px 16px;
+  border-radius: 6px; color: #f2cf7a;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .018) 0 2px, transparent 2px 7px),
+    radial-gradient(ellipse at 50% 30%, rgba(120, 170, 140, .18), transparent 70%),
+    linear-gradient(#25493b, #183428 70%, #142c22);
+  box-shadow:
+    inset 0 0 0 3px #10241b, inset 0 0 0 5px #c99a45, inset 0 0 0 6px #6b4a18, inset 0 0 0 11px #1c3b2f, inset 0 0 0 12px rgba(201, 154, 69, .6),
+    0 0 0 7px #2c1c0e, 0 0 0 9px #8a6a2a, 0 22px 50px rgba(0, 0, 0, .65);
+}
+/* small gilt rosettes in the corners */
+.title-sign::before, .title-sign::after {
+  content: ''; position: absolute; top: 14px; width: 10px; height: 10px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff1bd, #c99a45 55%, #6b4a18); box-shadow: 0 calc(100% + 0px) 0 transparent;
+}
+.title-sign::before { left: 14px; } .title-sign::after { right: 14px; }
+.title-sign .lyre { width: clamp(42px, 7vw, 70px); height: auto; filter: drop-shadow(0 2px 0 #0b1a13) drop-shadow(0 0 6px rgba(242, 199, 107, .25)); animation: lyre-glow 7s ease-in-out 2.2s infinite; }
+@keyframes lyre-glow { 0%, 100% { filter: drop-shadow(0 2px 0 #0b1a13) drop-shadow(0 0 6px rgba(242, 199, 107, .25)); } 12% { filter: drop-shadow(0 2px 0 #0b1a13) drop-shadow(0 0 14px rgba(255, 220, 140, .7)); } }
+/* the lyres' strings shiver as if plucked, when the gleam goes past */
+#lyre .strings { transform-box: fill-box; transform-origin: center; animation: pluck 7s linear 2.2s infinite; }
+@keyframes pluck { 0%, 8%, 20%, 100% { transform: none; } 10% { transform: scaleX(1.06) translateX(.5px); } 12% { transform: scaleX(.96) translateX(-.5px); } 14% { transform: scaleX(1.03) translateX(.3px); } 16% { transform: scaleX(.98) translateX(-.2px); } }
+/* The sign hangs on two chains from above: it comes down when the page opens, swings and settles,
+   then sways a little in the air. Its pivot is far above, where the chains hang from. */
+.title-sign { transform-origin: 50% -60vh; animation: sign-in 2s cubic-bezier(.3, .7, .3, 1) both, sign-sway 9s ease-in-out 2s infinite; }
+@keyframes sign-in {
+  0% { transform: translateY(-75vh) rotate(-2.5deg); }
+  45% { transform: translateY(0) rotate(1.6deg); }
+  65% { transform: rotate(-.9deg); }
+  82% { transform: rotate(.45deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes sign-sway { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(.35deg); } 75% { transform: rotate(-.3deg); } }
+.sign-chain {
+  position: absolute; bottom: calc(100% + 7px); width: 12px; height: 100vh; pointer-events: none;
+  background: radial-gradient(ellipse 38% 48% at 50% 50%, transparent 52%, #e9bd5c 58%, #8a6a2a 74%, transparent 80%) 0 0 / 100% 16px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .6));
+}
+.sign-chain.left { left: 16%; } .sign-chain.right { right: 16%; }
+/* the rest of the page comes in once the sign has arrived */
+.title-sub, #btn-start, .title-keys { animation: title-in .8s ease-out both; }
+.title-sub { animation-delay: 1.1s; } #btn-start { animation-delay: 1.35s; } .title-keys { animation-delay: 1.6s; }
+@keyframes title-in { from { opacity: 0; transform: translateY(10px); } }
+/* little notes rising from the lyres (main.js) */
+.title-note {
+  position: absolute; z-index: 1; pointer-events: none; font: 700 clamp(18px, 2.4vw, 28px) var(--font-music); color: #f2cf7a;
+  text-shadow: 0 0 8px rgba(255, 214, 120, .7), 0 2px 0 #0b1a13; animation: note-rise 3.2s ease-out forwards;
+}
+@keyframes note-rise {
+  0% { opacity: 0; transform: translate(0, 0) scale(.6) rotate(-8deg); }
+  15% { opacity: 1; }
+  50% { transform: translate(var(--drift), -60px) scale(1) rotate(6deg); }
+  100% { opacity: 0; transform: translate(calc(var(--drift) * -.5), -130px) scale(.9) rotate(-6deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-bg, .title-sign, .sign-small, .sign-name, .sign-since, .title-sign .lyre, #lyre .strings, .title-sub, #btn-start, .title-keys { animation: none; }
+  .title-note { display: none; }
+}
+.title-sign h1 { margin: 0; display: flex; flex-direction: column; align-items: center; line-height: 1; }
+/* gilt letters: a gold gradient clipped to the text, and over it a gleam of light that runs across
+   now and then */
+.sign-small, .sign-name, .sign-since {
+  background:
+    linear-gradient(105deg, transparent 42%, rgba(255, 252, 230, .95) 50%, transparent 58%) no-repeat,
+    linear-gradient(#fff1bd, #f2c76b 42%, #a87a2e 62%, #f6dc96);
+  background-size: 300% 100%, 100% 100%; background-position: 150% 0, 0 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 0 #0b1a13);
+  animation: gleam 7s ease-in-out 2.2s infinite;
+}
+.sign-name { animation-delay: 2.35s; } .sign-since { animation-delay: 2.5s; }
+@keyframes gleam { 0% { background-position: 150% 0, 0 0; } 18%, 100% { background-position: -50% 0, 0 0; } }
+.sign-small { font-weight: 700; font-size: clamp(20px, 3.3vw, 34px); letter-spacing: .14em; text-transform: uppercase; }
+.sign-name { font-weight: 800; font-size: clamp(42px, 8.5vw, 86px); letter-spacing: .08em; text-transform: uppercase; margin-top: .06em; }
+.sign-since { grid-column: 1 / -1; font-style: italic; font-weight: 500; font-size: clamp(13px, 1.6vw, 17px); letter-spacing: .08em; }
+.title-sub { color: var(--paper); font-style: italic; font-weight: 500; font-size: clamp(17px, 2.2vw, 23px); margin: 0; text-shadow: 0 2px 8px #000, 0 0 2px #000; }
+.title-keys { color: var(--paper-2); opacity: .85; font-family: var(--font-body); font-size: 14px; margin: 0; text-shadow: 0 1px 4px #000; }
+/* Start is an ordinary brass button, like every other button in the game, only a little bigger */
+#btn-start { min-height: 54px; padding: 10px 34px; font-size: 20px; }
+#btn-start .ico { font-size: .8em; }
+@media (max-width: 700px) {
+  #title-screen { padding: 16px; justify-content: center; }
+  .title-bg::after { background: linear-gradient(rgba(14, 8, 4, .35), rgba(14, 8, 4, .6)); }
+  .title-sign { gap: 4px 10px; padding: 18px 14px 14px; }
+}
 
 /* ---------- Buttons: wood and brass, always icon + text ---------- */
 .btn {
@@ -639,11 +716,48 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .gframe .face { position: absolute; object-fit: cover; object-position: 50% 15%; }
 .gframe .face.oval { border-radius: 50%; }
 .gframe .gilt-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
-.wall-plaque {
-  position: absolute; left: 50%; top: 100%; translate: -50% 35%; white-space: nowrap; padding: .15cqw .8cqw; border-radius: .3cqw;
-  font-family: var(--font-head); font-weight: 700; font-size: 1.05cqw; color: #2a1a0a;
-  background: linear-gradient(#e9c97a, #a87d34); border: 1.5px solid #4a3216;
+/* sorting and filters on the wainscot under the portraits: three brass buttons, each showing its
+   choice; pressed, the options fold open above it on a dark wooden board, the chosen one lit */
+.wall-filters { position: absolute; z-index: 4; display: flex; align-items: center; justify-content: center; gap: 2.2cqw; }
+.wf-menu { position: relative; }
+.wf-open {
+  display: flex; align-items: baseline; gap: .7cqw; min-width: 17cqw; justify-content: center; padding: .7cqw 1.4cqw .75cqw; border-radius: .6cqw; cursor: pointer;
+  font: 800 1.35cqw var(--font-body); color: #2a1a0a; white-space: nowrap;
+  background: linear-gradient(#f6dc96, #c99a45 60%, #a87a2e); border: .14cqw solid #5a3d12;
+  box-shadow: inset 0 .08cqw 0 #fff4c8, inset 0 -.15cqw 0 rgba(0, 0, 0, .2), 0 .3cqw 0 #5a3d12, 0 .5cqw 1cqw rgba(0, 0, 0, .45);
+  transition: transform .12s, filter .12s;
 }
+.wf-open:hover { transform: translateY(-.15cqw); filter: brightness(1.08); }
+.wf-open:focus-visible { outline: .2cqw solid #fff0b8; outline-offset: .2cqw; }
+.wf-label { font: 700 1.6cqw var(--font-hand); color: #5a3d12; }
+.wf-value { font-weight: 800; }
+.wf-open .caret { font-size: .8em; transition: transform .2s; }
+.wf-menu.open .caret { transform: rotate(180deg); }
+.wf-menu.open .wf-open { filter: brightness(1.1); }
+/* a filter in use: a small red seal on the button */
+.wf-menu.active .wf-open::after { content: ''; position: absolute; top: -.35cqw; right: -.35cqw; width: 1cqw; height: 1cqw; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #e0705a, #8a2f1c); border: .1cqw solid #4a1c14; }
+.wf-list {
+  position: absolute; left: 50%; bottom: calc(100% + 1cqw); translate: -50% 0; display: flex; flex-direction: column; gap: .4cqw; min-width: 100%; padding: .8cqw;
+  border-radius: .6cqw; background: linear-gradient(#3e2410, #2a170a); border: .15cqw solid #c99a45;
+  box-shadow: 0 0 0 .2cqw #2a170a, 0 1cqw 2.4cqw rgba(0, 0, 0, .6);
+}
+.wf-list[hidden] { display: none; }
+/* the little point under the board, towards its button */
+.wf-list::after { content: ''; position: absolute; left: 50%; top: 100%; translate: -50% 0; border: .7cqw solid transparent; border-top-color: #c99a45; }
+.wf-chip {
+  padding: .45cqw 1.2cqw .5cqw; border-radius: .35cqw; cursor: pointer; white-space: nowrap; text-align: left;
+  font: 700 1.2cqw var(--font-body); color: #e9d7b0; background: transparent; border: .12cqw solid transparent;
+  transition: background .15s, color .15s;
+}
+.wf-chip:hover, .wf-chip:focus-visible { outline: none; background: rgba(201, 154, 69, .2); color: #fff0c8; }
+.wf-chip.on { color: #2a1a0a; background: linear-gradient(#f6dc96, #c99a45 60%, #a87d34); border-color: #4a3216; }
+.wf-chip.on::before { content: '✓ '; }
+.wall-empty {
+  position: absolute; left: 50%; top: 32%; translate: -50% 0; margin: 0; padding: .8cqw 2cqw; border-radius: .4cqw;
+  font: 700 1.5cqw var(--font-1900); color: #2a1a0a; background: linear-gradient(#e9c97a, #a87d34); border: .15cqw solid #4a3216;
+}
+.wall-sign { top: 64.5%; bottom: auto; padding: .45cqw 1cqw; }
+.gallery .cab-nav { top: 37%; }
 .gilt {
   display: block; padding: 12px; border-radius: 6px; position: relative;
   background: linear-gradient(135deg, #f6dc96, #a87a2e 30%, #f0d58e 50%, #8a5f1f 75%, #e9c97a);

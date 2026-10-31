@@ -26,14 +26,37 @@
     <div id="fade"></div>
 
     <section id="title-screen">
-      <div class="title-plaque">
-        <div class="title-small">Muziekhandel</div>
-        <h1>Simone</h1>
-        <div class="title-since">— sinds 1892 —</div>
+      <div class="title-bg"></div>
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <linearGradient id="gilt" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0" stop-color="#fff1bd"/><stop offset=".35" stop-color="#e9bd5c"/>
+            <stop offset=".6" stop-color="#a87a2e"/><stop offset="1" stop-color="#f2cf7a"/>
+          </linearGradient>
+          <!-- a lyre, as painted on the shop's sign -->
+          <g id="lyre" fill="none" stroke="url(#gilt)" stroke-linecap="round">
+            <path d="M19 70 C8 54 6 32 14 20 C17 15 14 9 8 11" stroke-width="4.2"/>
+            <path d="M41 70 C52 54 54 32 46 20 C43 15 46 9 52 11" stroke-width="4.2"/>
+            <path d="M12 25 Q30 21 48 25" stroke-width="3.4"/>
+            <path class="strings" d="M24 24 V68 M28 23.5 V69 M32 23.5 V69 M36 24 V68" stroke-width="1.3"/>
+            <path d="M17 68 Q30 75 43 68" stroke-width="4.2"/>
+            <path d="M23 77 H37" stroke-width="4.6"/>
+            <path d="M30 72 V77" stroke-width="3.4"/>
+          </g>
+        </defs>
+      </svg>
+      <div class="title-main">
+        <div class="title-sign">
+          <span class="sign-chain left" aria-hidden="true"></span><span class="sign-chain right" aria-hidden="true"></span>
+          <svg class="lyre" viewBox="0 0 60 84" aria-hidden="true"><use href="#lyre"/></svg>
+          <h1><span class="sign-small">Muziekhandel</span><span class="sign-name">Simone</span></h1>
+          <svg class="lyre" viewBox="0 0 60 84" aria-hidden="true"><use href="#lyre"/></svg>
+          <span class="sign-since">sinds 1892 · Amsterdam</span>
+        </div>
+        <p class="title-sub">Speel, luister en ontdek muziek in Amsterdam, rond 1900.</p>
+        <button class="btn brass" id="btn-start"><span class="ico" aria-hidden="true">▶</span> Start</button>
+        <p class="title-keys">← → lopen &nbsp;·&nbsp; ↑ of Enter: naar binnen / bekijken &nbsp;·&nbsp; Esc: terug</p>
       </div>
-      <p class="title-sub">Speel, luister en ontdek muziek in Amsterdam, rond 1900.</p>
-      <button class="btn brass big" id="btn-start">Start</button>
-      <p class="title-keys">← → lopen &nbsp;·&nbsp; ↑ of Enter: naar binnen / bekijken &nbsp;·&nbsp; Esc: terug</p>
     </section>
   </div>
 

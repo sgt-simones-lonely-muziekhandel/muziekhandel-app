@@ -5,10 +5,10 @@ The sky above the street matches the visitor's real local time: dawn, day, sunse
 ## For the player
 
 - Morning: blue sky with a warm horizon, the sun rising on the left (it comes up from behind the houses).
-- Day: bright blue, white clouds, the painted sun (`sky/sun`) high in the sky.
+- Day: bright blue, white clouds, the painted sun (`sky/sun`) high in the sky. It is alive: it breathes in a soft warm halo, its rays shimmer (a faint copy turns the other way over it) and long faint beams wheel slowly around it.
 - Sunset: orange horizon, pink clouds; the sun is bigger and warmer near the horizon.
 - Evening: only a few of the brightest stars come out, one by one.
-- Night: dark blue, more stars (still only about two dozen, mostly small points, a few sparkling ones), twinkling by fading in and out; the moon in **today's real phase** (crescent, half, gibbous or full, lit on the right while it grows and on the left while it shrinks, none at new moon) with a soft glow; lit windows and street lamps.
+- Night: dark blue, more stars (still only about two dozen, mostly small points, a few sparkling ones), twinkling by fading in and out; the moon in **today's real phase** (crescent, half, gibbous or full, lit on the right while it grows and on the left while it shrinks, none at new moon) with a soft glow that breathes slowly, and now and then a thin wisp of cloud drifting past it; lit windows and street lamps.
 
 ## How it's built
 
@@ -21,8 +21,8 @@ The sky above the street matches the visitor's real local time: dawn, day, sunse
 - The street draws, in order (`Street.drawSky()`):
   1. the colour gradient for the hour, then the sky bodies (`Street.drawSkyBodies()`, art from `public/art/sky/`):
      - **stars**: 24, each with a picture (`star-1`/`star-2` small points, `star-3`…`star-6` sparkling, every sixth star), a size, and the darkness at which it comes out (`from`, 0.35–0.95), so the evening has only a few; they twinkle by fading and growing a little, drawn with `lighter`;
-     - **sun** (`sun`, 170 units, `lighter`): bigger and tinted warmer (canvas `filter`) the lower it is;
-     - **moon**: `moon-glow` (`lighter`, stronger the fuller the moon), then the phase picture chosen by the lit fraction `(1 − cos 2π·phase) / 2`: `moon-1` crescent, `moon-2` half, `moon-3` gibbous, `moon-4` full (none below 3%). The pictures are cut to the lit part, so their right edge is placed on the disc's right edge (58 units across); for a waning moon (`phase > 0.5`) it is mirrored;
+     - **sun** (`sun`, 170 units): bigger and tinted warmer (canvas `filter`) the lower it is. Behind it, added (`lighter`): a radial halo whose strength and the sun's size breathe (±2.5%, `sin(time · 0.9)`), and 12 long faint beams turning at 0.03 rad/s, each fading in and out and growing and shrinking. The disc itself is drawn normally (`source-over`, so it keeps its orange on a bright sky), turning very slowly, with a 12% larger copy at 22–32% opacity turning the other way so the painted rays shimmer;
+     - **moon**: `moon-glow` (`lighter`, stronger the fuller the moon), then the phase picture chosen by the lit fraction `(1 − cos 2π·phase) / 2`: `moon-1` crescent, `moon-2` half, `moon-3` gibbous, `moon-4` full (none below 3%). The pictures are cut to the lit part, so their right edge is placed on the disc's right edge (58 units across); for a waning moon (`phase > 0.5`) it is mirrored. The glow breathes (±6% size, ±15% strength). `MOON_WISPS` sends a soft grey-blue ellipse of cloud across the moon every 34 and 47 s (it takes 45% of that to pass), fading in and out;
   2. the painted sky blended in for its clouds only: `soft-light` at 80% by day (soft clouds in a blue sky) or `luminosity` at 30% at night (dark cloud shapes), weighted by `1 − painted`;
   3. the painted sky as it is, at opacity `painted`.
   The painting slides a little with the camera for depth.

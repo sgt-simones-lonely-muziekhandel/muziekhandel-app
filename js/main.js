@@ -5,7 +5,7 @@ import { Prologue } from './prologue.js';
 import { Shop } from './shop.js';
 import { Film } from './film.js';
 import { Corner } from './corner.js';
-import { UI, BACK_KEYS } from './ui/ui.js';
+import { UI } from './ui/ui.js';
 import { initAudio, onAudioReady } from './audio.js';
 import { loadKeyLabels } from './music.js';
 
@@ -158,8 +158,10 @@ class Game {
       this.idleTime = 0;
       if (!this.running) return;
       if (this.ui.isOpen) { this.ui.key(e); return; }
-      // ↓ (or S, Esc, Backspace) steps back: out of the corner into the shop, out of the shop onto the street
-      if ([...BACK_KEYS, 'KeyS'].includes(e.code)) { e.preventDefault(); this.back(); return; }
+      // In the scenes the arrows only walk (← →) and go in (↑): ↓ does nothing there. Esc or Backspace
+      // step back: out of the corner into the shop, out of the shop onto the street.
+      if (e.code === 'ArrowDown') { e.preventDefault(); return; }
+      if (e.code === 'Escape' || e.code === 'Backspace') { e.preventDefault(); this.back(); return; }
       if (keyDir[e.code]) { this.input[keyDir[e.code]] = true; e.preventDefault(); }
       if (['ArrowUp', 'Enter', 'KeyE', 'Space', 'KeyW'].includes(e.code)) { e.preventDefault(); this.scene.interact(); }
     });
@@ -197,6 +199,25 @@ document.getElementById('btn-start').addEventListener('click', () => {
   document.getElementById('title-screen').classList.add('gone');
   game.start();
 });
+
+// On the title screen little notes rise from the lyres of the shop's sign, one at a time, taking
+// turns; they stop once the game has started.
+const titleScreen = document.getElementById('title-screen');
+const lyres = titleScreen.querySelectorAll('.title-sign .lyre');
+let noteTurn = 0;
+const titleNotes = setInterval(() => {
+  if (titleScreen.classList.contains('gone')) { clearInterval(titleNotes); return; }
+  const lyre = lyres[noteTurn++ % lyres.length], r = lyre?.getBoundingClientRect(), box = titleScreen.getBoundingClientRect();
+  if (!r?.width) return;
+  const note = document.createElement('span');
+  note.className = 'title-note';
+  note.textContent = '♪♫♩♬'[Math.floor(Math.random() * 4)];
+  note.style.left = `${r.left - box.left + r.width * (0.2 + Math.random() * 0.5)}px`;
+  note.style.top = `${r.top - box.top + r.height * 0.1}px`;
+  note.style.setProperty('--drift', `${(Math.random() - 0.5) * 50}px`);
+  note.addEventListener('animationend', () => note.remove());
+  titleScreen.appendChild(note);
+}, 1500);
 
 // Allow ?scene=future, ?scene=street or ?scene=shop for quick testing.
 const qs = new URLSearchParams(location.search);

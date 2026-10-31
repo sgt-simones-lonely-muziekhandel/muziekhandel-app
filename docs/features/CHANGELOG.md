@@ -2,6 +2,54 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Portrait rows centred
+
+Changed:
+
+- [Composers](composers.md): a row of portraits that isn't full is centred on the wall.
+
+## 2026-10-31 — Sort and music only
+
+Changed:
+
+- [Composers](composers.md): the *Instrument* button is gone; the wall is sorted (*Sorteer*) and filtered on the kind of music (*Muziek*) only. The composers no longer carry an `instruments` list.
+
+## 2026-10-31 — Filter buttons, composers A–Z, a living shop sign
+
+Changed:
+
+- [Composers](composers.md): *Sorteer*, *Muziek* and *Instrument* are three buttons; each opens its options above it and shows what is chosen. The composers are in alphabetical order by default.
+- [Game shell](game-shell.md): the title sign comes down on chains, swings and keeps swaying gently; a gleam runs across its gilt letters, the lyres' strings shiver and little notes rise from them.
+
+Fixed:
+
+- [Composers](composers.md): the wall was empty when it opened (the frames' entrance animation started before the view was on the page and stayed stuck, invisible).
+
+## 2026-10-31 — Room for many composers, lamps off by day, Amsterdam by the hour, a real shop sign
+
+Added:
+
+- [Composers](composers.md): the portrait wall can be sorted (old → new, new → old, A–Z) and filtered on the kind of music (*Pianomuziek*, *Symfonieën*, *Opera*, *Ballet*, *Kerkmuziek*, *Concerten*) and the instruments (*Piano*, *Viool*, *Orkest*, *Zang*, *Orgel*, *Klavecimbel*), with brass plates on the wainscot. Ten composers to a wall; more walk on with arrows or ← →. Every composer has `music` and `instruments` in `js/data.js`.
+
+Changed:
+
+- [Composers](composers.md): no name plaques under the portraits.
+- [Street](street.md): the gas lamps are off by day (their painted glass turned dark) and come on at dusk. The houses take the light of the hour: plain daylight at noon, golden at sunrise and sunset, blue at night.
+- [Game shell](game-shell.md): the title screen is the shop's front on the canal, with the sign as a green board with gilt letters and lyres, like the sign above the door; *Start* is a brass button like the others.
+
+## 2026-10-31 — Birds in the sky, a living sun and moon
+
+Changed:
+
+- [Prologue](prologue.md): the birds in the first shot circle in the open sky over the canal, instead of flying across the trees and the houses.
+- [Sky](sky.md): the sun breathes in a warm halo, its rays shimmer and long faint beams wheel around it; it keeps its orange instead of washing out white. The moon's glow breathes, and now and then a wisp of cloud drifts past it.
+
+## 2026-10-31 — ↓ only in the windows
+
+Changed:
+
+- [Game shell](game-shell.md): in the street, the shop and the listening corner ↓ (and S) no longer go back: there the arrows only walk (← →) and go in (↑). In the windows ↓ still goes back one step.
+
 ## 2026-10-31 — One back button, ↓ goes back, every book bends, a calmer voice, two legs and two arms
 
 Changed:
