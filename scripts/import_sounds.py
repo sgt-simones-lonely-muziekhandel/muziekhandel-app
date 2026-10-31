@@ -4,7 +4,7 @@
 
 Sources (both CC0, free to use without credit):
 - kenney-impact/: footsteps from Kenney's Impact Sounds (https://kenney.nl/assets/impact-sounds)
-- bigsoundbank/: a strong wind and a small chime from BigSoundBank (https://bigsoundbank.com)
+- bigsoundbank/: wind, two chimes, rain and thunder from BigSoundBank (https://bigsoundbank.com)
 
 Everything is written as AAC (.m4a), which every browser plays. Needs numpy and soundfile
 (pip install soundfile) and macOS's afconvert for decoding mp3 and encoding AAC.
@@ -73,6 +73,24 @@ def main(src):
     # and a little chime in it, 2.2 s
     x, sr = read(os.path.join(src, 'bigsoundbank', 'chimes-butterfly-1 (2087).mp3'))
     write(fade(x[:int(2.2 * sr)], sr, 0.01, 0.7), sr, 'time-travel/chime')
+
+    # the sparkle as the lid comes off the tube and the light pours out: a brighter chime, 2.3 s
+    x, sr = read(os.path.join(src, 'bigsoundbank', 'chimes-dream-1 (2079).mp3'))
+    write(fade(x[:int(2.3 * sr)], sr, 0.01, 0.8), sr, 'time-travel/sparkle')
+
+    # rain on puddles, as a 20 s loop: the 1.5 s after the cut are blended into its start, so it
+    # repeats without a seam
+    x, sr = read(os.path.join(src, 'bigsoundbank', 'rain-on-puddle (1290).mp3'))
+    n, c, a = int(20 * sr), int(1.5 * sr), int(10 * sr)
+    loop = x[a:a + n].copy()
+    k = np.linspace(0, np.pi / 2, c)
+    loop[:c] = loop[:c] * np.sin(k) + x[a + n:a + n + c] * np.cos(k)
+    write(loop, sr, 'weather/rain')
+
+    # distant thunder, three different rumbles, with their tails faded out
+    for i, (name, length, tail) in enumerate([('thunder-2 (3113)', 5.1, 0.6), ('thunder-3 (3114)', 10, 2.5), ('thunder-7 (3180)', 11, 3)]):
+        x, sr = read(os.path.join(src, 'bigsoundbank', name + '.mp3'))
+        write(fade(x[:int(length * sr)], sr, 0.05, tail), sr, f'weather/thunder-{i}')
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@
 // The shots slowly dissolve into each other. Each caption waits until the player clicks or taps
 // (see js/film.js); Overslaan skips it all.
 import { Film, H, load as loadImg, ready, smooth, ease, bump, cover, glow, sunBeams, boyFromBehind, mulberry } from './film.js';
+import { thunder } from './sfx.js';
 
 const load = name => loadImg(`public/art/intro/${name}.webp`);
 const IMG = {
@@ -40,6 +41,8 @@ const SHOTS = [
 const FLOOD = [4.4, 7];   // after the first map caption the sea rises, taking this long
 const TILT = 7;           // the camera comes down from the storm to the street over this long
 const BOY = 10.2;         // after the smoke caption the boy appears on the quay
+// the two lightning flashes in the 2126 shot: when, and how near (the thunder comes a moment later)
+const FLASHES = [[3.2, 1], [15.3, 0.7]];
 
 export class Prologue extends Film {
   constructor(game) {
@@ -50,6 +53,18 @@ export class Prologue extends Film {
     // smoke drifting through the future street: x, y, size, speed
     this.smoke = Array.from({ length: 9 }, () => [r(), 0.15 + r() * 0.7, 0.25 + r() * 0.3, 0.3 + r() * 0.6]);
     this.flood = null; // canvas for the flooded map, masked to how far the sea has come
+  }
+
+  enter(from) {
+    super.enter(from);
+    this.heard = 0; // the story time the thunder was played up to
+  }
+
+  // Thunder a moment after each flash in the 2126 shot (js/sfx.js).
+  tick() {
+    const at = this.shots.find(s => s.key === 'future').start;
+    for (const [t, near] of FLASHES) if (this.heard < at + t && this.T >= at + t) thunder(0.7, near);
+    this.heard = this.T;
   }
 
   // 1. Amsterdam today: a slow pan along the canal on a fresh morning, birds flying over.

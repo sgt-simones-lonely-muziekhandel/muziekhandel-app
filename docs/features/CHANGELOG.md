@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Rain, recorded thunder, the tube's chime
+
+Added / changed:
+
+- [Sound effects](sound-effects.md): soft rain wherever it rains on screen (the future street, the prologue's map and 2126 shot, the story until the past), as hard as it rains there; recorded thunder (instead of a synthesized rumble too low for laptop speakers) after every lightning flash, in the future street and the prologue, plus a distant rumble now and then in the future street; a sparkling recorded chime again as the lid comes off the tube in the [story](story.md). Recordings from BigSoundBank (CC0).
+
 ## 2026-10-31 — Recorded footsteps, a short gust for the time travel
 
 Changed:

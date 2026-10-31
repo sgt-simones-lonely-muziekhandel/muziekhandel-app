@@ -10,7 +10,7 @@
 // A click, tap or ↑ / Enter / Space jumps to the next shot. The shared parts (timeline,
 // dissolves, captions, rain, dust) are in js/film.js.
 import { Film, H, load as loadImg, ready, smooth, ease, bump, cover, glow, sunBeams, boyFromBehind } from './film.js';
-import { loadTimeTravel, timeTravel } from './sfx.js';
+import { loadTimeTravel, timeTravel, tubeSparkle } from './sfx.js';
 
 const load = name => loadImg(`public/art/intro/${name}.webp`);
 const IMG = {
@@ -66,12 +66,15 @@ export class Story extends Film {
     this.sounds();
   }
 
-  // The sound of the time travel (js/sfx.js): one short gust of wind with a little chime as the
-  // swirl starts, about 2.5 seconds, so it is quiet again long before the past has fully come.
-  // It follows the story time, so it waits with it while a caption is up.
+  // The sounds of the time travel (js/sfx.js): a sparkling chime as the lid pops off the tube, and
+  // one short gust of wind with a little chime as the swirl starts, about 2.5 seconds, so it is
+  // quiet again long before the past has fully come. They follow the story time, so they wait
+  // with it while a caption is up.
   sounds() {
-    const swirl = this.shots.find(s => s.key === 'travel').start + SWIRL[0];
-    if (this.heard < swirl && this.T >= swirl) timeTravel();
+    const at = (key, beat) => this.shots.find(s => s.key === key).start + beat;
+    const now = t => this.heard < t && this.T >= t;
+    if (now(at('tube', LID_POP))) tubeSparkle();
+    if (now(at('travel', SWIRL[0]))) timeTravel();
     this.heard = this.T;
   }
 

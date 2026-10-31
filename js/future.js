@@ -5,7 +5,7 @@
 // with phonograph cylinders and sheet music stands on the quay. Clicking it starts the story
 // (js/story.js), which ends in the past.
 import { Boy } from './boy.js';
-import { thunder } from './sfx.js';
+import { thunder, loadThunder, rain } from './sfx.js';
 
 const ART = 'public/art/future-street/';
 const load = name => { const i = new Image(); i.src = `${ART}${name}.webp`; return i; };
@@ -57,6 +57,8 @@ export class FutureStreet {
     this.boy.dir = 1;
     this.boy.target = null;
     this.opening = null;
+    this.nextRumble = 12 + Math.random() * 15;
+    loadThunder();
     this.game.setPlace('De toekomst');
   }
 
@@ -105,6 +107,10 @@ export class FutureStreet {
       this.nextFlash = 8 + Math.random() * 12;
       thunder(0.6 + Math.random() * 1.4); // far away, so the rumble comes a moment later
     }
+    // now and then a rumble from further away, without a flash
+    this.nextRumble -= dt;
+    if (this.nextRumble <= 0) { thunder(0, 0.5); this.nextRumble = 20 + Math.random() * 20; }
+    rain(1);
   }
 
   draw(ctx, view) {

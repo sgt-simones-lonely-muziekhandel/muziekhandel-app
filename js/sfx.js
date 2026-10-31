@@ -1,7 +1,8 @@
-// Sound effects: footsteps and the time travel's gust of wind are recordings (public/audio, made by
-// scripts/import_sounds.py); the shop door with its bell, distant thunder and paper being picked up
-// are made with Tone.js. They play once the player has pressed Start (the browser only allows
-// sound after a click); before that, or when Tone isn't there, every function quietly does nothing.
+// Sound effects. Recordings (public/audio, made by scripts/import_sounds.py): footsteps, rain,
+// thunder and the time travel's chimes and gust of wind. Made with Tone.js: the shop door with its
+// bell and paper being picked up. They play once the player has pressed Start (the browser only
+// allows sound after a click); before that, or when Tone isn't there, every function quietly does
+// nothing.
 
 const live = () => typeof Tone !== 'undefined' && Tone.context.state === 'running';
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -73,26 +74,45 @@ export function shopDoor() {
   });
 }
 
-// ---- thunder -----------------------------------------------------------------------------
-// Far away: a low rumble that rolls in, grumbles on for a few seconds and dies away. `delay`
-// seconds after the flash, since the sound takes a while to get here.
-export function thunder(delay = 1) {
+// ---- weather -----------------------------------------------------------------------------
+// Distant thunder: one of three recorded rumbles, `delay` seconds from now (the sound takes a
+// while to get here after the flash), `strength` 0–1 for nearer or further away.
+let rumbles = null;
+const RUMBLES = [0, 1, 2].map(i => `public/audio/weather/thunder-${i}.m4a`);
+// Loads the rumbles ahead, so the first flash isn't silent; rainy scenes call it when they start.
+export function loadThunder() {
+  if (live()) rumbles ??= RUMBLES.map(url => new Tone.Player({ url, volume: -13 }).connect(out()));
+}
+export function thunder(delay = 1, strength = 1) {
+  loadThunder();
+  if (!rumbles) return;
+  const free = rumbles.filter(p => p.loaded && p.state !== 'started');
+  if (!free.length) return;
+  const p = free[Math.floor(Math.random() * free.length)];
+  p.volume.value = -13 + 20 * Math.log10(Math.max(0.05, strength));
+  p.start(Tone.now() + delay);
+}
+
+// Soft rain on puddles, a recorded loop. The scene sets how hard it rains (0–1) every frame with
+// rain(level); when that stops (another scene, or a film that's over) it fades out by itself.
+let shower = null;
+export function rain(level) {
   if (!live()) return;
-  const at = Tone.now() + delay, len = rand(3.5, 5.5);
-  const gain = new Tone.Gain(0).connect(out());
-  const low = new Tone.Filter({ frequency: 260, type: 'lowpass', rolloff: -24 }).connect(gain);
-  const noise = new Tone.Noise('brown').connect(low);
-  // the rumble: it swells and falls back a few times, louder at the start
-  const curve = Array.from({ length: 48 }, (_, i) => {
-    const p = i / 47;
-    const shape = Math.min(1, p * 8) * Math.pow(1 - p, 1.4);
-    return shape * (0.55 + 0.45 * Math.abs(Math.sin(p * rand(9, 15)))) * 0.45;
-  });
-  gain.gain.setValueAtTime(0, at);
-  gain.gain.setValueCurveAtTime(curve, at, len);
-  low.frequency.setValueCurveAtTime([340, 220, 160, 120], at, len);
-  noise.start(at).stop(at + len + 0.1);
-  setTimeout(() => [noise, low, gain].forEach(n => n.dispose()), (delay + len + 1) * 1000);
+  if (!shower) {
+    const gain = new Tone.Gain(0).connect(out());
+    const player = new Tone.Player({ url: 'public/audio/weather/rain.m4a', loop: true, autostart: true }).connect(gain);
+    shower = { gain, player, seen: 0 };
+    shower.timer = setInterval(() => {
+      if (performance.now() - shower.seen < 300) return;
+      const r = shower;
+      shower = null;
+      clearInterval(r.timer);
+      r.gain.gain.rampTo(0, 1);
+      setTimeout(() => { r.player.stop(); r.player.dispose(); r.gain.dispose(); }, 1500);
+    }, 150);
+  }
+  shower.seen = performance.now();
+  shower.gain.gain.rampTo(0.1 * Math.max(0, Math.min(1, level)), 0.4);
 }
 
 // ---- paper -------------------------------------------------------------------------------
@@ -114,8 +134,9 @@ export function pickUpPaper() {
 }
 
 // ---- the time travel ---------------------------------------------------------------------
-// One short gust of wind with a little chime in it (BigSoundBank, CC0), as the swirl carries the
-// boy to the past: 2.5 seconds, then quiet. Loaded when the story starts (`loadTimeTravel()`).
+// A sparkling chime as the lid comes off the tube, and one short gust of wind with a little chime
+// in it as the swirl carries the boy to the past: 2.5 seconds, then quiet (BigSoundBank, CC0).
+// Loaded when the story starts (`loadTimeTravel()`).
 let travel = null;
 export function loadTimeTravel() {
   if (!live() || travel) return;
@@ -123,7 +144,13 @@ export function loadTimeTravel() {
   travel = {
     gust: new Tone.Player({ url: 'public/audio/time-travel/gust.m4a', volume: -12 }).connect(out()),
     chime: new Tone.Player({ url: 'public/audio/time-travel/chime.m4a', volume: -18 }).connect(chimeSoft),
+    // the sparkle keeps more of its shine: only the very top is taken off
+    sparkle: new Tone.Player({ url: 'public/audio/time-travel/sparkle.m4a', volume: -14 }).connect(new Tone.Filter({ frequency: 11000, type: 'lowpass' }).connect(out())),
   };
+}
+export function tubeSparkle() {
+  loadTimeTravel();
+  if (travel?.sparkle.loaded) travel.sparkle.start();
 }
 export function timeTravel() {
   loadTimeTravel();
