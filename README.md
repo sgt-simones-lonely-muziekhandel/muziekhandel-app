@@ -14,6 +14,9 @@ python3 -m http.server 8765
 # open http://localhost:8765
 ```
 
+With Nix: `nix run` serves the game the same way (`PORT=9000 nix run` for another port), and
+`nix develop` gives a shell with Python and the packages the scripts in `scripts/` and `tools/` need.
+
 Opening `index.html` straight from disk won't work, because browsers block JS modules on `file://`.
 The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the internet.
 
