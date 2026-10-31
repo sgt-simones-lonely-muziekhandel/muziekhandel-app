@@ -4,7 +4,7 @@
 import { Boy } from './boy.js';
 import { skyAt, currentHour } from './sky.js';
 import { Cyclist } from './cyclist.js';
-import { shopDoor } from './sfx.js';
+import { shopDoor, loadShopSounds } from './sfx.js';
 
 const ART = 'public/art/past-street/';
 const load = name => { const i = new Image(); i.src = `${ART}${name}.webp`; return i; };
@@ -75,6 +75,7 @@ export class Street {
     this.boy.dir = from === 'shop' ? -1 : 1;
     this.boy.target = null;
     this.door = from === 'shop' ? { t: 0, dir: -1 } : null;
+    loadShopSounds(); // so the shopkeeper's laugh is ready when the boy goes in
     if (this.door) shopDoor();
     this.cyclists = [];
     this.nextCyclist = 4;

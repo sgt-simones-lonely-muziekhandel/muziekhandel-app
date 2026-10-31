@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — A cat that meows, a laugh at the door
+
+Added:
+
+- [Shop](shop.md) / [sound effects](sound-effects.md): the cat on the piano can be clicked and meows (BigSoundBank, CC0), with a little "Miauw!"; Meneer Simone laughs a deep "ho ho ho" the first time you walk in (Mixkit, free license).
+
 ## 2026-10-31 — One back button, ↓ goes back, every book bends, a calmer voice, two legs and two arms
 
 Changed:

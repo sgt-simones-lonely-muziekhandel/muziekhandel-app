@@ -2,9 +2,11 @@
 
     python scripts/import_sounds.py ../design/sounds
 
-Sources (both CC0, free to use without credit):
-- kenney-impact/: footsteps from Kenney's Impact Sounds (https://kenney.nl/assets/impact-sounds)
-- bigsoundbank/: wind, two chimes, rain and thunder from BigSoundBank (https://bigsoundbank.com)
+Sources (free to use without credit):
+- kenney-impact/: footsteps from Kenney's Impact Sounds (https://kenney.nl/assets/impact-sounds), CC0
+- bigsoundbank/: wind, chimes, rain, thunder and meows from BigSoundBank (https://bigsoundbank.com), CC0
+- mixkit/: the shopkeeper's laugh from Mixkit (https://mixkit.co), under the Mixkit Sound Effects
+  Free License (free, also commercially, without credit; not to be passed on as a loose sound)
 
 Everything is written as AAC (.m4a), which every browser plays. Needs numpy and soundfile
 (pip install soundfile) and macOS's afconvert for decoding mp3 and encoding AAC.
@@ -92,6 +94,15 @@ def main(src):
     for i, (name, length, tail) in enumerate([('thunder-2 (3113)', 5.1, 0.6), ('thunder-3 (3114)', 10, 2.5), ('thunder-7 (3180)', 11, 3)]):
         x, sr = read(os.path.join(src, 'bigsoundbank', name + '.mp3'))
         write(fade(x[:int(length * sr)], sr, 0.05, tail), sr, f'weather/thunder-{i}')
+
+    # the cat on the piano: three small meows, made equally loud
+    for i, n in enumerate(['0494', '1472', '1473']):
+        x, sr = read(os.path.join(src, 'bigsoundbank', f'little-meow-of-a-cat ({n}).mp3'))
+        write(fade(x / np.abs(x).max() * 0.9, sr, 0.005, 0.05), sr, f'shop/meow-{i}')
+
+    # Meneer Simone's "ho ho ho" when you first come in (the game plays it a little slower and lower)
+    x, sr = read(os.path.join(src, 'mixkit', 'santa-claus-ho-ho-ho-laughing (418).mp3'))
+    write(fade(x[:int(1.2 * sr)], sr, 0.01, 0.3), sr, 'shop/laugh')
 
 
 if __name__ == '__main__':

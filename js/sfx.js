@@ -196,3 +196,32 @@ export function timeTravel() {
   if (travel.gust.loaded) travel.gust.start(now);
   if (travel.chime.loaded) travel.chime.start(now + 0.35);
 }
+
+// ---- the shop ----------------------------------------------------------------------------
+// The cat on the piano meows when clicked (one of three small meows, BigSoundBank, CC0), and
+// Meneer Simone laughs a deep "ho ho ho" the first time the boy comes in (Mixkit, free license),
+// played a little slower and lower than recorded so it bellows, with a touch of the room's echo.
+// `loadShopSounds()` loads them ahead; the street calls it, so the laugh is ready at the door.
+let shopSounds = null;
+export function loadShopSounds() {
+  if (!live() || shopSounds) return;
+  shopSounds = {
+    meows: [0, 1, 2].map(i => new Tone.Player({ url: `public/audio/shop/meow-${i}.m4a`, volume: -14 }).connect(out())),
+    laugh: new Tone.Player({ url: 'public/audio/shop/laugh.m4a', volume: -18, playbackRate: 0.86 }).connect(out()).connect(room),
+    last: -1,
+  };
+}
+export function meow() {
+  loadShopSounds();
+  if (!shopSounds) return;
+  // a different meow each time
+  let i = Math.floor(Math.random() * 2);
+  if (i >= shopSounds.last) i++;
+  shopSounds.last = i;
+  const p = shopSounds.meows[i];
+  if (p.loaded) p.start();
+}
+export function laugh() {
+  loadShopSounds();
+  if (shopSounds?.laugh.loaded) shopSounds.laugh.start();
+}
