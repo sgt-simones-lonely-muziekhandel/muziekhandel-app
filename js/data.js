@@ -1,6 +1,9 @@
-// Composers and pieces. Demo content: replace or extend with the Muziekschatten data.
+// Composers and pieces. Demo content, plus real sheet music from the SOM collection (js/som-scores.js,
+// made by scripts/import_scores.py).
 // Note format: "<pitch>:<duration>", pitch like C4, F#4, Bb3 or r (rest);
-// durations: w h. h q. q 8. 8 16. Bar lines "|" are optional and only for readability.
+// durations: w h. h q. q 8. 8 16. 16 32, triplets ht qt 8t 16t; a trailing ~ ties the note to the
+// next one. Bar lines "|" are optional and only for readability.
+import { SOM_PIECES } from './som-scores.js';
 
 export const COMPOSERS = [
   {
@@ -175,7 +178,7 @@ export const COMPOSERS = [
   },
 ];
 
-export const PIECES = [
+const DEMO_PIECES = [
   {
     id: 'kortjakje',
     title: 'Ah, vous dirai-je, Maman',
@@ -241,6 +244,16 @@ export const PIECES = [
   },
 ];
 
+// The shop's music, in the cabinet and the cylinder chest: the 15 real songs of the SOM collection
+// (5 to a shelf). The hand-written demo pieces are the composers' own music, reached from their
+// cards in the portrait gallery.
+export const PIECES = SOM_PIECES;
+export const ALL_PIECES = [...SOM_PIECES, ...DEMO_PIECES];
+
 export const composerById = id => COMPOSERS.find(c => c.id === id);
-export const piecesBy = id => PIECES.filter(p => p.composer === id);
-export const pieceById = id => PIECES.find(p => p.id === id);
+// Who made a piece, for labels: one of the composers, or the makers of a real song (`credit`), who
+// have no portrait or story in the game (`id: null`).
+export const creditFor = piece => composerById(piece.composer)
+  || { id: null, name: piece.credit, short: piece.creditShort || piece.credit, years: '' };
+export const piecesBy = id => DEMO_PIECES.filter(p => p.composer === id);
+export const pieceById = id => ALL_PIECES.find(p => p.id === id);

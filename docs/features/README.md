@@ -15,11 +15,12 @@ One document per feature: what it does for the player, how it's built, where the
 | Sheet music cabinet and viewer | [sheet-music.md](sheet-music.md) | `js/ui/library.js`, `js/ui/sheet.js`, `js/notation.js` |
 | Piano | [piano.md](piano.md) | `js/ui/piano.js`, `js/music.js` |
 | Audio (Salamander Grand Piano) | [audio.md](audio.md) | `js/audio.js` |
-| Composers: portraits, biography, family tree | [composers.md](composers.md) | `js/ui/gallery.js`, `js/data.js` |
+| Composers: portraits, biography and music | [composers.md](composers.md) | `js/ui/gallery.js`, `js/data.js` |
 | Gramophone | [gramophone.md](gramophone.md) | `js/ui/gramophone.js` |
 | Shopkeeper (help) | [shopkeeper.md](shopkeeper.md) | `js/ui/keeper.js` |
 | Game shell, input and overlays | [game-shell.md](game-shell.md) | `index.html`, `js/main.js`, `js/ui/ui.js`, `css/style.css` |
 | Content data (composers and pieces) | [content-data.md](content-data.md) | `js/data.js` |
+| Real sheet music (SOM collection) | [som-scores.md](som-scores.md) | `tools/sheet2midi/`, `scripts/import_scores.py`, `js/som-scores.js` |
 | Art assets | [assets.md](assets.md) | `assets/`, `tools/build_assets.py` |
 
 ## Conventions

@@ -3,3 +3,9 @@ __pycache__/
 .DS_Store
 node_modules/
 dist/
+
+# sheet2midi pipeline: the PDF scans (~700 MB) and the raw Audiveris output stay local
+tools/sheet2midi/scans
+tools/sheet2midi/output
+tools/sheet2midi/**/*.omr
+tools/sheet2midi/**/*.log

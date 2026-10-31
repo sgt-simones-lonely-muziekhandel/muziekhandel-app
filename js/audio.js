@@ -61,22 +61,41 @@ export function strike(midi, seconds = 0.6, velocity = 0.8) {
 }
 
 /**
- * Play a parsed piece. Notes are scheduled a little ahead of time so a stop() is
- * near-instant. onNote(note) fires when each note starts sounding.
+ * Play a parsed piece: the melody, and under it the piano accompaniment when the piece has one
+ * (softer). The melody starts `parsed.offset` beats in, after the piano's introduction. Notes are
+ * scheduled a little ahead of time so a stop() is near-instant. onNote(note) fires when each melody
+ * note (or rest) starts; onKey(midi, down, part) fires when any key goes down or comes up, with
+ * part 'melody' or 'accomp', so a keyboard on screen can show every note that sounds.
  */
-export function playPiece(parsed, { onNote, onEnd, tempoScale = 1 } = {}) {
+export function playPiece(parsed, { onNote, onKey, onEnd, tempoScale = 1 } = {}) {
   if (!audioState.ready) { onEnd?.(); return { stop() {} }; }
   const spb = parsed.secPerBeat / tempoScale;
   const t0 = Tone.now() + 0.15;
-  let next = 0, shown = -1, stopped = false;
-  const notes = parsed.notes;
-  const end = t0 + parsed.totalBeats * spb;
+  const off = parsed.offset;
+  let next = 0, nextAcc = 0, shown = -1, stopped = false;
+  const notes = parsed.notes, accomp = parsed.accomp;
+  const beats = Math.max(off + parsed.totalBeats, ...accomp.map(a => a.start + a.dur));
+  const end = t0 + beats * spb;
+  const at = n => t0 + (off + n.start) * spb;
+  const melLen = n => n.sound * spb * 0.92, accLen = a => a.dur * spb * 0.95;
+
+  // every key down / up, in time order (an up before a down at the same moment)
+  const keys = [];
+  for (const n of notes) if (!n.rest && !n.tied) keys.push([at(n), true, n.midi, 'melody'], [at(n) + melLen(n), false, n.midi, 'melody']);
+  for (const a of accomp) keys.push([t0 + a.start * spb, true, a.midi, 'accomp'], [t0 + a.start * spb + accLen(a), false, a.midi, 'accomp']);
+  keys.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+  let nextKey = 0;
+  const down = [];
 
   const timer = setInterval(() => {
     const now = Tone.now();
-    while (next < notes.length && t0 + notes[next].start * spb < now + 0.3) {
+    while (next < notes.length && at(notes[next]) < now + 0.3) {
       const n = notes[next++];
-      if (!n.rest) sampler.triggerAttackRelease(noteName(n.midi), n.dur * spb * 0.92, t0 + n.start * spb, 0.75);
+      if (!n.rest && !n.tied) sampler.triggerAttackRelease(noteName(n.midi), melLen(n), at(n), 0.75);
+    }
+    while (nextAcc < accomp.length && t0 + accomp[nextAcc].start * spb < now + 0.3) {
+      const a = accomp[nextAcc++];
+      sampler.triggerAttackRelease(noteName(a.midi), accLen(a), t0 + a.start * spb, 0.38);
     }
   }, 40);
 
@@ -85,8 +104,14 @@ export function playPiece(parsed, { onNote, onEnd, tempoScale = 1 } = {}) {
     if (stopped) return;
     const now = Tone.now();
     let i = shown;
-    while (i + 1 < notes.length && t0 + notes[i + 1].start * spb <= now) i++;
-    if (i !== shown) { shown = i; onNote?.(notes[i]); }
+    while (i + 1 < notes.length && at(notes[i + 1]) <= now) i++;
+    if (i !== shown && i >= 0) { shown = i; onNote?.(notes[i]); }
+    while (onKey && nextKey < keys.length && keys[nextKey][0] <= now) {
+      const [, on, midi, part] = keys[nextKey++];
+      const j = down.findIndex(d => d[0] === midi && d[1] === part);
+      if (on) down.push([midi, part]); else if (j >= 0) down.splice(j, 1); else continue;
+      onKey(midi, on, part);
+    }
     if (now >= end + 0.2) { stop(); onEnd?.(); return; }
     raf = requestAnimationFrame(tick);
   };
@@ -97,9 +122,10 @@ export function playPiece(parsed, { onNote, onEnd, tempoScale = 1 } = {}) {
     stopped = true;
     clearInterval(timer);
     cancelAnimationFrame(raf);
+    down.splice(0).forEach(([midi, part]) => onKey(midi, false, part));
     sampler.releaseAll(Tone.now() + 0.05);
   }
-  return { stop, duration: parsed.totalBeats * spb };
+  return { stop, duration: beats * spb };
 }
 
 // Gramophone mode: narrow the sound and add surface noise.
