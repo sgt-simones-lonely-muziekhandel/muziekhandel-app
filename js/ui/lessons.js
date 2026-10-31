@@ -19,7 +19,7 @@ function miniKeys(lo, hi, { names = true, onPress } = {}) {
   for (let m = lo; m <= hi; m++) {
     const info = midiInfo(m);
     const k = h(`<button class="mk-key ${info.black ? 'b' : 'w'}" style="--c:${NOTE_COLORS[info.letter]}" aria-label="${labelFor(info.letter, info.acc)}${info.oct}">
-      ${!info.black && names ? `<span>${labelFor(info.letter)}</span>` : ''}</button>`);
+      ${names ? `<span>${labelFor(info.letter, info.acc)}</span>` : ''}</button>`);
     if (info.black) {
       k.style.left = `${whites.filter(w => w < m).length * ww - ww * 0.31}%`;
       k.style.width = `${ww * 0.62}%`;

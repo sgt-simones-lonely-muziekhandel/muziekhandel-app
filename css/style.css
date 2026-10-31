@@ -550,7 +550,8 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 }
 .kname, .kcap { opacity: 0; transition: opacity .15s; pointer-events: none; }
 .kname { font-family: var(--font-head); font-weight: 800; font-size: max(9px, 1.05cqw); color: #fff; white-space: nowrap; }
-.key.black .kname { display: none; }
+/* a black key is narrow: its name (C♯, D♯…) is smaller and may stick out a little either side */
+.key.black .kname { font-size: max(8px, .8cqw); letter-spacing: -.02em; padding-bottom: .2cqw; }
 .kcap {
   position: absolute; bottom: calc(100% + 1.6cqw); left: 50%; translate: -50% 0; z-index: 4;
   min-width: 2.2cqw; padding: .25cqw .5cqw; border-radius: .5cqw; text-align: center;
@@ -1011,6 +1012,7 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 2px 6px; border-r
 .mk-key.w { height: 100%; background: #f8f1e1; border: 1px solid #7a6650; border-top: 0; border-radius: 0 0 6px 6px; }
 .mk-key.b { position: absolute; top: 0; height: 60%; z-index: 2; background: #1d1816; border: 1px solid #000; border-top: 0; border-radius: 0 0 4px 4px; }
 .mk-key span { font: 800 15px var(--font-body); color: var(--c); }
+.mk-key.b span { font-size: 11px; white-space: nowrap; }
 .mk-key.lit, .mk-key.found { background: color-mix(in srgb, var(--c) 80%, #fff); transition-duration: 0s; }
 .mk-key.b.lit { background: var(--c); }
 .mk-key.lit span, .mk-key.found span { color: #fff; }

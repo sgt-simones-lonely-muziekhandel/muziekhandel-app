@@ -25,7 +25,7 @@ On the left the chapters, numbered (the open one red, the ones already read gree
 `js/ui/lessons.js`, `lessonsView()`, the view `lessons` (a wide paper panel, `frame()`).
 
 - `CHAPTERS`: `{ title, text, build(lesson) }`; `build` returns the elements for the try-box. `show(i)` stops what is playing, fills the page and marks the list.
-- `miniKeys(lo, hi, { names, onPress })`: a small keyboard of DOM buttons in the note colours (`NOTE_COLORS`); a press plays the key (`strike()` from [audio](audio.md)) and lights it (`.lit`); `light(midi, ms, cls)` lights a key from code (`.nope` for a wrong key, `.target` / `.found` for the games).
+- `miniKeys(lo, hi, { names, onPress })`: a small keyboard of DOM buttons in the note colours (`NOTE_COLORS`); with `names` every key carries its name in its colour, the black keys too (*C♯*, *D♯*…, smaller); a press plays the key (`strike()` from [audio](audio.md)) and lights it (`.lit`); `light(midi, ms, cls)` lights a key from code (`.nope` for a wrong key, `.target` / `.found` for the games).
 - `staff(notes, { time, tempo, bars })`: a line of music from a note string in the format of [content data](content-data.md), engraved by `renderPage()` from `js/notation.js`, so it looks like the sheet on the piano; a click on a note plays it and makes it glow (`.hit`).
 - `lesson.play(staff, counter)`: plays the staff with `playPiece()`, lighting each note as it sounds; the counter's beat lights up every beat (timers of `secPerBeat`).
 - Without the piano samples yet, a line says *De piano wordt nog gestemd…*.

@@ -2,6 +2,13 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Names on the black keys
+
+Changed:
+
+- [Piano](piano.md): a black key that sounds (pressed, in *Luister* or next in *Speel mee*) shows its name too (*C♯*, *F♯*…), smaller, as the white keys already did.
+- [Lessons](lessons.md): the small keyboards that show note names name the black keys too.
+
 ## 2026-10-31 — Pause and stop while listening
 
 Added:
