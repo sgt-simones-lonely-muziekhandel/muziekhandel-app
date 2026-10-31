@@ -2,6 +2,13 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Overslaan always works, a server without stale code
+
+Changed:
+
+- [Game shell](game-shell.md): `scripts/serve.py` serves the game like `python3 -m http.server`, but tells the browser to check every file for a newer version, so it never runs a mix of old and new scripts (that made Overslaan disappear or do nothing). See the [README](../../README.md).
+- [Story](story.md) / [prologue](prologue.md): Overslaan clicked while a film is still fading in no longer swallows the skip.
+
 ## 2026-10-31 — Portraits without name tags, the gramophone on its cabinet
 
 Changed:
