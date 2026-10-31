@@ -7,12 +7,12 @@ The second object in the shop, and the heart of the game: play freely, or load a
 - **The empty music desk** asks *Wat wil je doen?* with two choices written on the sheet: **Een liedje leren** (a glowing button: choose sheet music, and the piano shows which keys to play; it opens the cabinet) and **Gewoon spelen** (just press the keys and play whatever you like). The status line says the same.
 - **Play** with the computer keyboard, the mouse or a finger on a touch screen.
 - **All 88 keys** of a grand piano (A0–C8) are on screen and can be clicked or touched.
-- **Octaves**: the computer keyboard plays 2½ octaves at a time, marked by a brass bar above those keys. **← / →** or the *◀ Lager* / *Hoger ▶* buttons slide it one octave down or up (3 octaves each way), so every key can be reached; the current range is shown between the buttons (e.g. *C3 – G5*).
-- **Pedaal** (sustain pedal): hold **Shift**, or click the brass pedal to lock it down (click again to lift it). While it's down, released notes keep ringing; they stop when the pedal comes up.
+- **Octaves**: the computer keyboard plays 1½ octaves at a time, marked by a brass bar above those keys. **← / →** or the *◀ Lager* / *Hoger ▶* buttons slide it one octave down or up (4 octaves down, 3 up), so every key can be reached; the current range is shown between the buttons (e.g. *C4 – G5*).
+- **Pedaal** (sustain pedal): hold the **space bar**, or click the brass pedal to lock it down (click again to lift it). While it's down, released notes keep ringing; they stop when the pedal comes up.
 - **Kies muziek** opens the [sheet music cabinet](sheet-music.md); the chosen piece appears above the keys.
 - **Bladmuziek** (once a piece is on the desk) shows its book again: when the piano was opened from that book it goes back to it, at the same page; otherwise the book opens over the piano, and *Speel op de piano* (or *Terug*) comes back.
 - **Free play with a piece on the desk**: the sheet plays along with you. When you play the next note of the piece, it turns green on the sheet and the sheet moves on (turning the page when needed); at the end you get *Je hebt het hele stuk gespeeld!* and the sheet starts again. Any other key makes that note glow for a moment wherever it is written on the page, so every key you play shows where it is on the sheet.
-- **Luister** (or Space): the piano plays the piece. Every key lights up while it sounds: the melody note on the sheet *and* on its key, and for [real songs](som-scores.md) the accompaniment too, in a softer colour (during the piano's introduction the status line says so).
+- **Luister** (or **Enter**; Enter again stops it): the piano plays the piece. Every key lights up while it sounds: the melody note on the sheet *and* on its key, and for [real songs](som-scores.md) the accompaniment too, in a softer colour (during the piano's introduction the status line says so).
 - **Learning a song, step by step** (as a piano teacher would; the status line suggests the order: listen, play along, then in time):
   1. **Luister**: the piano plays it (at the practice tempo, with the metronome if on).
   2. **Speel mee**: the piano waits. The note to play glows on the sheet and its key glows with a beam of light and shows the computer key to press; the **next** note shows faintly (sheet and key outline), so the hand can get ready. The right key turns green and moves on, and the **accompaniment answers**: what the piano plays under the melody up to the next note sounds at the practice tempo, so the song grows under your fingers. A wrong key shakes; after two wrong tries the status helps: *Iets hoger!* / *Iets lager!* and which key.
@@ -29,29 +29,28 @@ The second object in the shop, and the heart of the game: play freely, or load a
 
 ## The keyboard guide (the picture for learners)
 
-A drawing of the computer keyboard with every key that plays a note painted in that note's colour and labelled with the note name, plus six short rules:
+A drawing of the computer keyboard with every key that plays a note painted in that note's colour and labelled with the note name, plus six short rules. Only two rows are drawn, the two that play:
 
-1. Letters are the white keys.
-2. Digits (and the keys between them) are the black keys.
-3. Top letter row (Q W E…) = high notes, bottom row (Z X C…) = low notes.
-4. ← and → shift the keyboard an octave lower or higher, to reach all 88 keys.
-5. Hold Shift for the pedal.
+1. The home row (A S D …) is the white keys.
+2. The row above (W E T Y U …) is the black keys; Q, R, I and È are silent, as there is no black key there on a piano.
+3. ← and → shift the keyboard an octave lower or higher, to reach all 88 keys.
+4. Hold the space bar for the pedal.
+5. Enter presses *Luister* (Enter again stops).
 6. In *Speel mee*, the note that lights up on the sheet lights up on the piano too: press that key.
 
 The same picture is shown by the [shopkeeper](shopkeeper.md) when asked *Hoe speel ik piano?*.
 
 ## Key mapping
 
-Without an octave shift the computer keyboard covers C3–G5 (19 white keys); each shift moves every key 12 semitones (`KEYS_LOW`, `KEYS_HIGH`, `MAX_SHIFT` in `js/music.js`). Notes that would fall outside A0–C8 do nothing. Keys are matched by **physical position** (`KeyboardEvent.code`), so the layout works the same on QWERTY, AZERTY, QWERTZ or Italian keyboards. In Chrome/Edge the labels on the piano show the letters printed on the player's own keyboard (`navigator.keyboard.getLayoutMap()`); other browsers show QWERTY labels.
+Only two rows of the computer keyboard play, laid out like a piano: the home row is the white keys and the row above is the black keys, each black key sitting between the two white keys it lies between on the keyboard. Digits, the bottom row and the other keys play nothing. Without an octave shift the keys cover C4–G5 (12 white keys); each shift moves every key 12 semitones, from 4 octaves down (A0) to 3 up (C8) (`KEYS_LOW`, `KEYS_HIGH`, `MIN_SHIFT`, `MAX_SHIFT` in `js/music.js`). Notes that would fall outside A0–C8 do nothing. Keys are matched by **physical position** (`KeyboardEvent.code`), so the layout works the same on QWERTY, AZERTY, QWERTZ or Italian keyboards. In Chrome/Edge the labels on the piano show the letters printed on the player's own keyboard (`navigator.keyboard.getLayoutMap()`); other browsers show the Italian labels (È + Ò À Ù).
 
-| Row | Keys (QWERTY) | Notes |
+| Row | Keys (Italian) | Notes |
 |---|---|---|
-| Digits | 2 3 · 5 6 7 · 9 0 · = | C#4 D#4 · F#4 G#4 A#4 · C#5 D#5 · F#5 |
-| Top letters | Q W E R T Y U I O P [ ] | C4 D4 E4 F4 G4 A4 B4 C5 D5 E5 F5 G5 |
-| Home row | S D · G H J · L ; | C#3 D#3 · F#3 G#3 A#3 · C#4 D#4 |
-| Bottom letters | Z X C V B N M , . / | C3 D3 E3 F3 G3 A3 B3 C4 D4 E4 |
+| Top letters (black) | Q W E R T Y U I O P È + | – C#4 D#4 – F#4 G#4 A#4 – C#5 D#5 – F#5 |
+| Home row (white) | A S D F G H J K L Ò À Ù | C4 D4 E4 F4 G4 A4 B4 C5 D5 E5 F5 G5 |
 | ← / → | | octave down / up |
-| Shift (hold) | | sustain pedal |
+| Space (hold) | | sustain pedal |
+| Enter | | *Luister* (again: stop) |
 
 Middle C (C4) has a small star.
 
@@ -69,7 +68,7 @@ C red · D orange · E yellow · F green · G teal · A blue · B purple. Sharps
 - `js/ui/piano.js`, `pianoView()`:
   - Keys are DOM elements for the full range `PIANO_LOW`–`PIANO_HIGH` (A0–C8); black keys are positioned over the gaps between white keys. `buildKeys()` redraws them (hidden note names and key caps, the brass `.kb-window` bar) whenever the octave shift or note names change.
   - **Octave shift**: `shift` is added (× 12) to the `KEYMAP` note of each computer key. `codeNotes` remembers which note each held computer key started, so shifting while a key is down still releases the right note. In *Speel mee* the keyboard slides along by itself when the next note is out of reach.
-  - **Pedal**: `setPedal()`. While it's down, `release()` puts notes in `sustained` instead of stopping them; when it comes up, every sustained note that isn't still held is stopped. Shift holds it, the pedal button latches it. Pointer events use pointer capture so a key releases even if the finger slides off.
+  - **Pedal**: `setPedal()`. While it's down, `release()` puts notes in `sustained` instead of stopping them; when it comes up, every sustained note that isn't still held is stopped. The space bar holds it, the pedal button latches it. Pointer events use pointer capture so a key releases even if the finger slides off.
   - **Instruments**: the list is `js/instruments.js` (`INSTRUMENTS`: id, Dutch name, family, sample notes). The popover (`.instr-pop`) is built from it, one `.instr-family` per family; `chooseInstrument(id)` stops playback, calls `setInstrument()` from [audio](audio.md), and on failure goes back to the piano with a message. `onHide`/`destroy` reset to the piano, `onShow` puts the chosen one back.
 - **Learning** (`free`, `listen`, `follow`, `rhythm`):
   - `sections`: every four bars (`SECTION_BARS`) with music in them, `{ bar, from, to, label }` in beats; `section` −1 is the whole piece. `stretch()` / `inStretch(n)` limit everything to it; `showPage()` adds `.out` to notes outside it.

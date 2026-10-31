@@ -9,7 +9,7 @@
 // leaf is cut into strips that curl one after the other (`setCurl`), with light and shade on the
 // paper and a shadow cast on the page underneath (a cover is board: it hardly bends); a page can be
 // dragged with the mouse or a finger, and its corner lifts when pointed at.
-// ← → or a click on a page flip; Space takes the piece to the piano, on top of the book, so Terug
+// ← → or a click on a page flip; Enter (or Space) takes the piece to the piano, on top of the book, so Terug
 // comes back to this page.
 import { frame, h, esc } from './ui.js';
 import { coverHtml, SHEET_ART } from './library.js';
@@ -297,7 +297,7 @@ export function sheetView(ui, { pieceId, noFade = false, fromPiano = false }) {
     onKey(e) {
       if (e.code === 'ArrowLeft') { e.preventDefault(); turn(-1); }
       if (e.code === 'ArrowRight') { e.preventDefault(); turn(1); }
-      if (e.code === 'Space') { e.preventDefault(); toPiano(); }
+      if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); if (!e.repeat) toPiano(); }
     },
   };
 }

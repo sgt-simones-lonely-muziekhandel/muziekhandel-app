@@ -12,7 +12,7 @@ The third object in the shop: Meneer Simone, the friendly owner with the moustac
   | *Wat kan ik hier doen?* | Everything in the shop | — |
   | *Hoe speel ik piano?* | Keys, *Speel mee*, plus the [keyboard guide](piano.md#the-keyboard-guide-the-picture-for-learners) | Naar de piano |
   | *Ik weet nog niks van muziek. Help!* | The [notenles](lessons.md), step by step | Naar de notenles |
-  | *Waar is de bladmuziek?* | The cabinet, ← →, Space | Naar de kast |
+  | *Waar is de bladmuziek?* | The cabinet, ← →, Enter | Naar de kast |
   | *Wie zijn die mensen aan de muur?* | Composers | Naar de schilderijen |
   | *Mag ik muziek luisteren?* | The gramophone, in the listening corner to the right | Naar de grammofoon |
 

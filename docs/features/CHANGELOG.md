@@ -2,6 +2,13 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Two rows on the piano, Space for the pedal, Enter to listen
+
+Changed:
+
+- [Piano](piano.md): only two rows of the computer keyboard play, like a piano: the home row (A S D F G H J K L Ò À Ù) is the white keys C4–G5, the row above (Q W E R T Y U I O P È +) the black keys, each between its two white keys (Q, R, I and È are silent: no black key there). The digits and the bottom row no longer play. The octave shift reaches one octave further down, to A0. The pedal is the space bar instead of Shift; *Luister* is Enter. The keyboard guide shows just those two rows.
+- [Sheet music](sheet-music.md): Enter (as well as Space) takes the piece to the piano; the [shopkeeper](shopkeeper.md) says Enter.
+
 ## 2026-10-31 — Portrait rows centred
 
 Changed:

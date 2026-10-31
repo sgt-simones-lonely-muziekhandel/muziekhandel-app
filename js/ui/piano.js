@@ -9,7 +9,7 @@ import { frame, h, esc } from './ui.js';
 import { pieceById, creditFor } from '../data.js';
 import {
   parsePiece, midiInfo, labelFor, NOTE_COLORS,
-  KEYMAP, keyLabels, keyCodeForMidi, PIANO_LOW, PIANO_HIGH, KEYS_LOW, KEYS_HIGH, MAX_SHIFT,
+  KEYMAP, keyLabels, keyCodeForMidi, PIANO_LOW, PIANO_HIGH, KEYS_LOW, KEYS_HIGH, MIN_SHIFT, MAX_SHIFT,
 } from '../music.js';
 import { renderPage, pageOfNote } from '../notation.js';
 import { noteOn, noteOff, playPiece, audioState, audioNow, onAudioReady, setInstrument } from '../audio.js';
@@ -19,12 +19,10 @@ import { skyAt, currentHour } from '../sky.js';
 export function keyboardGuide() {
   // A picture of the computer keyboard with the piano notes painted on the keys.
   const rows = [
-    { offset: 0.5, keys: ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal'] },
-    { offset: 1, keys: ['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight'] },
-    { offset: 1.3, keys: ['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon'] },
-    { offset: 1.8, keys: ['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash'] },
+    { offset: 0, keys: ['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight'] },
+    { offset: 0.3, keys: ['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Backslash'] },
   ];
-  const fallback = { Digit1: '1', Digit4: '4', Digit8: '8', Minus: '-', KeyA: 'A', KeyF: 'F', KeyK: 'K' };
+  const fallback = {};
   const cap = code => {
     const midi = KEYMAP[code];
     const label = keyLabels[code] || fallback[code] || '';
@@ -40,11 +38,11 @@ export function keyboardGuide() {
         ${rows.map(r => `<div class="kb-row" style="--off:${r.offset}">${r.keys.map(cap).join('')}</div>`).join('')}
       </div>
       <ol class="kb-steps">
-        <li><span class="step-ico white"></span><span><b>Letters</b> zijn de <b>witte</b> toetsen.</span></li>
-        <li><span class="step-ico black"></span><span><b>Cijfers</b> en de toetsen ertussen zijn de <b>zwarte</b> toetsen.</span></li>
-        <li><span class="step-ico"><kbd>Q</kbd></span><span>Bovenste rij (Q W E…) = <b>hoge</b> noten. Onderste rij (Z X C…) = <b>lage</b> noten.</span></li>
+        <li><span class="step-ico white"></span><span>De middelste rij (<b>A S D …</b>) zijn de <b>witte</b> toetsen.</span></li>
+        <li><span class="step-ico black"></span><span>De rij erboven (<b>W E T Y U …</b>) zijn de <b>zwarte</b> toetsen. Q, R, I en È zijn stil: daar heeft de piano geen zwarte toets.</span></li>
         <li><span class="step-ico"><kbd>←</kbd><kbd>→</kbd></span><span>Met <b>←</b> en <b>→</b> schuif je het toetsenbord een <b>octaaf</b> lager of hoger. Zo kun je alle 88 toetsen spelen.</span></li>
-        <li><span class="step-ico"><kbd>Shift</kbd></span><span>Houd <b>Shift</b> ingedrukt voor het <b>pedaal</b>: de noten klinken dan door.</span></li>
+        <li><span class="step-ico"><kbd>Spatie</kbd></span><span>Houd de <b>spatiebalk</b> ingedrukt voor het <b>pedaal</b>: de noten klinken dan door.</span></li>
+        <li><span class="step-ico"><kbd>Enter</kbd></span><span>Met <b>Enter</b> druk je op <b>Luister</b>: de piano speelt het liedje voor (nog eens Enter: stop).</span></li>
         <li><span class="step-ico glow"></span><span>Kies <b>Speel mee</b>: de noot die oplicht op het blad, licht ook op de piano op. Druk op die toets!</span></li>
       </ol>
     </div>`);
@@ -74,7 +72,7 @@ export function pianoView(ui, { pieceId } = {}) {
     cls: 'piano',
     closeup: 'public/art/closeups/piano.webp',
     full: true,
-    tip: 'Zo leer je een liedje: 1. Luister. 2. Speel mee: de piano wacht tot je de toets speelt die oplicht. 3. In de maat: de piano telt af en speelt mee, en jij speelt op tijd. Met Oefenen kies je een stukje en speel je langzamer. Met ← en → ga je een octaaf lager of hoger, met Shift trap je het pedaal in.',
+    tip: 'Zo leer je een liedje: 1. Luister. 2. Speel mee: de piano wacht tot je de toets speelt die oplicht. 3. In de maat: de piano telt af en speelt mee, en jij speelt op tijd. Met Oefenen kies je een stukje en speel je langzamer. Met ← en → ga je een octaaf lager of hoger, met de spatiebalk trap je het pedaal in, met Enter luister je.',
   });
 
   body.appendChild(h(`
@@ -109,7 +107,7 @@ export function pianoView(ui, { pieceId } = {}) {
             <button class="btn wood small oct-up" title="Een octaaf hoger (→)">Hoger <span class="ico">›</span></button>
           </div>
           <button class="btn wood small instr-btn" title="Klik hier en kies een ander instrument: viool, fluit, trompet, harp…"><span class="ico">♫</span><span class="instr-text"><small>Instrument</small><b class="instr-name">Piano</b></span><span class="caret">▾</span></button>
-          <button class="pedal" title="Pedaal: houd Shift ingedrukt, of klik om het vast te zetten"><span class="pedal-foot"></span><span class="pedal-label">Pedaal</span></button>
+          <button class="pedal" title="Pedaal: houd de spatiebalk ingedrukt, of klik om het vast te zetten"><span class="pedal-foot"></span><span class="pedal-label">Pedaal</span></button>
         </div>
       </div>
       <div class="guide-pop paper" hidden></div>
@@ -167,7 +165,7 @@ export function pianoView(ui, { pieceId } = {}) {
     Object.assign(bar.style, { left: `${first * ww}%`, width: `${(last - first + 1) * ww}%` });
     keysEl.appendChild(bar);
     $('.oct-range').textContent = `${noteLabel(Math.max(lo, PIANO_LOW))} – ${noteLabel(Math.min(hi, PIANO_HIGH))}`;
-    $('.oct-down').disabled = shift <= -MAX_SHIFT;
+    $('.oct-down').disabled = shift <= MIN_SHIFT;
     $('.oct-up').disabled = shift >= MAX_SHIFT;
   };
   const noteLabel = m => { const i = midiInfo(m); return labelFor(i.letter, i.acc) + i.oct; };
@@ -197,7 +195,7 @@ export function pianoView(ui, { pieceId } = {}) {
   buildKeys();
 
   function setShift(s) {
-    s = Math.max(-MAX_SHIFT, Math.min(MAX_SHIFT, s));
+    s = Math.max(MIN_SHIFT, Math.min(MAX_SHIFT, s));
     if (s === shift) return;
     shift = s;
     buildKeys();
@@ -382,7 +380,7 @@ export function pianoView(ui, { pieceId } = {}) {
     }
     // slide the computer keyboard along when the note is out of its reach
     let s = shift;
-    while (n.midi < KEYS_LOW + s * 12 && s > -MAX_SHIFT) s--;
+    while (n.midi < KEYS_LOW + s * 12 && s > MIN_SHIFT) s--;
     while (n.midi > KEYS_HIGH + s * 12 && s < MAX_SHIFT) s++;
     if (s !== shift) { shift = s; buildKeys(); }
     const k = keyEls.get(n.midi);
@@ -750,7 +748,7 @@ export function pianoView(ui, { pieceId } = {}) {
     onShow() { if (instrument !== 'piano' && audioState.ready) setInstrument(instrument).catch(() => {}); },
     onKey(e) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { setPedal(true); return; }
+      if (e.code === 'Space') { e.preventDefault(); setPedal(true); return; }
       if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
         e.preventDefault();
         if (!e.repeat) setShift(shift + (e.code === 'ArrowLeft' ? -1 : 1));
@@ -764,10 +762,10 @@ export function pianoView(ui, { pieceId } = {}) {
         press(midi);
         return;
       }
-      if (e.code === 'Space' && parsed) { e.preventDefault(); mode === 'follow' || mode === 'rhythm' ? stopAll() : listen(); }
+      if (e.code === 'Enter' && parsed) { e.preventDefault(); if (e.repeat) return; mode === 'follow' || mode === 'rhythm' ? stopAll() : listen(); }
     },
     onKeyUp(e) {
-      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { if (!e.shiftKey) setPedal(pedalLatched); return; }
+      if (e.code === 'Space') { setPedal(pedalLatched); return; }
       const midi = codeNotes.get(e.code);
       if (midi != null) { codeNotes.delete(e.code); release(midi); }
     },
