@@ -1,6 +1,6 @@
 # Street outside the shop
 
-The past: after the [future street](future-street.md), the player stands on the same canal quay in Amsterdam around 1900: the canal in front, a view down a second canal with an arched bridge and a church tower behind, and the music shop on the right.
+The past: after the [future street](future-street.md), the player stands on the same canal quay in Middelburg around 1900: the canal in front, a view down a second canal with an arched bridge and a church tower behind, and the music shop on the right.
 
 ## For the player
 

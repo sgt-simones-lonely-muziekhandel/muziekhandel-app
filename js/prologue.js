@@ -1,7 +1,7 @@
 // The prologue, played before the game starts: where and when the player is, and why the city is
 // flooded. Three painted shots from public/art/intro, in the same slow anime style as the story
 // (shared parts in js/film.js):
-//   1. today   Amsterdam in 2026: the canal on a fresh morning, bikes, boats, birds
+//   1. today   Middelburg in 2026: the canal on a fresh morning, bikes, boats, birds
 //   2. map     an old map of the Netherlands; the year counts up to 2126 while the sea creeps in
 //   3. future  the same street in 2126, flooded and quiet under smoky air; the camera tilts down
 //              from the storm to the boy on the quay, then dissolves into the future street
@@ -27,7 +27,7 @@ const KID_AT = [0.3, 0.985], KID_H = 0.42;
 // Shots, in order. `captions` are [from, text]: the caption comes in at `from` seconds into the
 // shot and the prologue waits there until the player clicks.
 const SHOTS = [
-  { key: 'today', dur: 9, captions: [[1.4, 'Amsterdam, 2026. Een stad vol water, fietsen… en muziek.']] },
+  { key: 'today', dur: 9, captions: [[1.4, 'Middelburg, 2026. Een stad vol water, fietsen… en muziek.']] },
   { key: 'map', dur: 15, captions: [
     [2.8, 'De aarde werd steeds warmer. Het ijs smolt en de zee steeg.'],
     [11.6, 'Het water kwam steeds verder het land in.'],
@@ -46,7 +46,7 @@ const FLASHES = [[3.2, 1], [15.3, 0.7]];
 
 export class Prologue extends Film {
   constructor(game) {
-    super(game, { shots: SHOTS, place: 'Amsterdam', next: 'future', seed: 5 });
+    super(game, { shots: SHOTS, place: 'Middelburg', next: 'future', seed: 5 });
     const r = mulberry(23);
     // birds circling in the open sky over the canal (between the trees and the houses of
     // today-street.webp): centre x, y and radii of their loop in picture fractions, speed, phase
@@ -70,7 +70,7 @@ export class Prologue extends Film {
     this.heard = this.T;
   }
 
-  // 1. Amsterdam today: a slow pan along the canal on a fresh morning, birds circling in the sky.
+  // 1. Middelburg today: a slow pan along the canal on a fresh morning, birds circling in the sky.
   today(ctx, t, vw, live) {
     const p = ease(t / 9);
     const at = cover(ctx, IMG.today, vw, 1.04 + 0.08 * p, 0.4 + 0.15 * p + 0.01 * Math.sin(live * 0.25), 0.5);

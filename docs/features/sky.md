@@ -34,5 +34,5 @@ Add `?uur=` to the URL to fake the time, for example `index.html?uur=21.5` for 2
 
 ## Known limits / next steps
 
-- Sunrise and sunset are fixed times, not calculated for Amsterdam's season. A small sun-position formula with the date could make them exact.
+- Sunrise and sunset are fixed times, not calculated for Middelburg's season. A small sun-position formula with the date could make them exact.
 - The shop interior doesn't change with the time: its windows always show dusk.

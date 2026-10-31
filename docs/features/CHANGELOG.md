@@ -25,7 +25,7 @@ Fixed:
 
 - [Composers](composers.md): the wall was empty when it opened (the frames' entrance animation started before the view was on the page and stayed stuck, invisible).
 
-## 2026-10-31 — Room for many composers, lamps off by day, Amsterdam by the hour, a real shop sign
+## 2026-10-31 — Room for many composers, lamps off by day, Middelburg by the hour, a real shop sign
 
 Added:
 
@@ -49,6 +49,18 @@ Changed:
 Changed:
 
 - [Game shell](game-shell.md): in the street, the shop and the listening corner ↓ (and S) no longer go back: there the arrows only walk (← →) and go in (↑). In the windows ↓ still goes back one step.
+
+## 2026-10-31 — The game is set in Middelburg
+
+Changed:
+
+- The game takes place in Middelburg instead of Amsterdam: the title screen, the [prologue](prologue.md) (*Middelburg, 2026…*), the place in the tab of the [street](street.md) (*Middelburg, 1900*), the docs and the comments. Two real facts still say Amsterdam: Mozart's concerts in 1765–66 ([composers](composers.md)), and the city of the publisher printed on the real SOM sheet music ([SOM scores](som-scores.md)).
+
+## 2026-10-31 — A cat that meows, a laugh at the door
+
+Added:
+
+- [Shop](shop.md) / [sound effects](sound-effects.md): the cat on the piano can be clicked and meows (BigSoundBank, CC0), with a little "Miauw!"; Meneer Simone laughs a deep "ho ho ho" the first time you walk in (Mixkit, free license).
 
 ## 2026-10-31 — One back button, ↓ goes back, every book bends, a calmer voice, two legs and two arms
 
@@ -115,7 +127,7 @@ Changed:
 
 Changed:
 
-- [Prologue](prologue.md): Amsterdam → map → 2126 slowly dissolve into each other again, without the seam of light and the swirl, which stays for the time travel in the [story](story.md).
+- [Prologue](prologue.md): Middelburg → map → 2126 slowly dissolve into each other again, without the seam of light and the swirl, which stays for the time travel in the [story](story.md).
 
 ## 2026-10-31 — Sound effects
 
@@ -247,11 +259,11 @@ Changed:
 
 - [Prologue](prologue.md) and [story](story.md): slower, for five-year-olds. Each caption now waits until the player clicks or taps (a pulsing ▶ appears on it after a moment), and the next thing (the crate opening, the lid popping, the swirl, the sea rising) only happens after the click. The picture keeps moving gently while it waits. Keys no longer skip, and clicking without a caption does nothing. Dissolves between shots are slower too.
 
-## 2026-10-31 — Prologue: Amsterdam today, the sea rising, the year 2126
+## 2026-10-31 — Prologue: Middelburg today, the sea rising, the year 2126
 
 Added:
 
-- [Prologue](prologue.md): the game now opens with a short film before the [future street](future-street.md): Amsterdam today, an old map of the Netherlands where the sea creeps in while the year counts from 2026 to 2126, and the flooded street in smoky air with the boy appearing on the quay. It tells kids where and when they are and why the city is flooded, calm and never scary.
+- [Prologue](prologue.md): the game now opens with a short film before the [future street](future-street.md): Middelburg today, an old map of the Netherlands where the sea creeps in while the year counts from 2026 to 2126, and the flooded street in smoky air with the boy appearing on the quay. It tells kids where and when they are and why the city is flooded, calm and never scary.
 
 Changed:
 
@@ -445,7 +457,7 @@ Removed:
 
 - `assets/shop-interior.jpg` and its step in `tools/build_assets.py` ([assets](assets.md)).
 
-## 2026-10-30 — Painted Amsterdam street
+## 2026-10-30 — Painted Middelburg street
 
 Changed:
 
@@ -459,7 +471,7 @@ Changed:
 
 Added:
 
-- [Street](street.md) in Amsterdam around 1900, with canal crossing, houses and the music shop.
+- [Street](street.md) in Middelburg around 1900, with canal crossing, houses and the music shop.
 - [Real-time sky](sky.md) that follows the visitor's local time.
 - [Cyclists](cyclists.md) who ride past while the player is idle.
 - [Player character](player.md) from the 8-frame walk cycle.

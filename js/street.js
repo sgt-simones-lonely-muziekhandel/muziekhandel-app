@@ -1,10 +1,10 @@
-// Outside: a canal quay in Amsterdam around 1900, built from the painted layers in
+// Outside: a canal quay in Middelburg around 1900, built from the painted layers in
 // public/art/past-street (sky, far, walk, foreground) with parallax, a real-time sky,
 // rippling canal water, flickering gas lamps, night lighting and cyclists.
 import { Boy } from './boy.js';
 import { skyAt, currentHour } from './sky.js';
 import { Cyclist } from './cyclist.js';
-import { shopDoor } from './sfx.js';
+import { shopDoor, loadShopSounds } from './sfx.js';
 
 const ART = 'public/art/past-street/';
 const load = name => { const i = new Image(); i.src = `${ART}${name}.webp`; return i; };
@@ -82,10 +82,11 @@ export class Street {
     this.boy.dir = from === 'shop' ? -1 : 1;
     this.boy.target = null;
     this.door = from === 'shop' ? { t: 0, dir: -1 } : null;
+    loadShopSounds(); // so the shopkeeper's laugh is ready when the boy goes in
     if (this.door) shopDoor();
     this.cyclists = [];
     this.nextCyclist = 4;
-    this.game.setPlace('Amsterdam, 1900');
+    this.game.setPlace('Middelburg, 1900');
   }
 
   get nearDoor() { return Math.abs(this.boy.x - DOOR_X) < 70; }
