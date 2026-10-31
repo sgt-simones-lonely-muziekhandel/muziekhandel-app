@@ -2,6 +2,12 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — A silhouette for composers without a portrait
+
+Added:
+
+- [Composers](composers.md): a composer without a portrait, or whose portrait won't load, gets a silhouette in a wig (`portraits/unknown`) on the shop wall, the wall close-up and the composer card.
+
 ## 2026-10-31 — The gramophone on its cabinet
 
 Changed:

@@ -4,7 +4,7 @@
 // lamps light up, following the real time like the street. Walking out on the right leads to
 // the listening corner (js/corner.js).
 import { Boy } from './boy.js';
-import { COMPOSERS } from './data.js';
+import { COMPOSERS, portraitOf, NO_PORTRAIT } from './data.js';
 import { FRAME_TYPES, FRAME_SRC, COMPOSER_FRAME } from './frames.js';
 import { hitSpot, nearestSpot, clickSpots, drawLabel } from './hotspots.js';
 import { skyAt, currentHour } from './sky.js';
@@ -73,7 +73,8 @@ const FRAMES = [
 ];
 for (const f of FRAMES) {
   f.type = COMPOSER_FRAME[f.composer];
-  f.portrait = load(COMPOSERS.find(c => c.id === f.composer).portrait);
+  f.portrait = load(portraitOf(COMPOSERS.find(c => c.id === f.composer)));
+  f.portrait.onerror = function () { this.onerror = null; this.src = NO_PORTRAIT; };
   f.short = COMPOSERS.find(c => c.id === f.composer).short;
 }
 
