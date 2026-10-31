@@ -22,7 +22,8 @@ The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the 
 | Parameter | Effect |
 |---|---|
 | `?uur=21.5` | Pretend it's 21:30, to see the sky at another time of day |
-| `?autostart` | Skip the title screen (starts in the future) |
+| `?autostart` | Skip the title screen (plays the prologue) |
+| `?autostart&scene=future` | Start on the future street |
 | `?autostart&scene=story` | Play the time-travel story |
 | `?autostart&scene=street` | Start in the past, on the street |
 | `?autostart&scene=shop` | Start inside the shop |
@@ -30,7 +31,8 @@ The piano samples (Salamander Grand Piano), Tone.js and the fonts load from the 
 
 ## What's in the game
 
-- **Future street** (`js/future.js`): the start. The same quay far in the future: flooded, ruined, raining. The boy (in his gas mask) finds a glowing crate with cylinders and sheet music; opening it leads to the past.
+- **Prologue** (`js/prologue.js`): the start. A short anime-like film: Amsterdam today, the sea rising over the map from 2026 to 2126, and the flooded street in smoky air.
+- **Future street** (`js/future.js`): the first playable scene. The same quay far in the future: flooded, ruined, raining. The boy (in his gas mask) finds a glowing crate with cylinders and sheet music; opening it leads to the past.
 - **Story** (`js/story.js`): the time travel as a short anime-like film: the crate, the cylinder tube opening, and the swirl that turns the flooded street into the past, dissolving into the street.
 - **Street** (`js/street.js`): Amsterdam around 1900, drawn live on a canvas. Canal and bridge on the left, houses and the shop on the right. The sky follows the visitor's real local time (`js/sky.js`); windows and street lamps light up in the evening. When the player stands still, people ride past on bikes (`js/cyclist.js`).
 - **Shop** (`js/shop.js`): painted interior with hotspots: the sheet music cabinet, the piano, the portraits, Meneer Simone and the gramophone. Walk with ← → or click/tap an object.

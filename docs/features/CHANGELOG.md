@@ -2,6 +2,17 @@
 
 Newest first. Each entry links to the feature document it touches.
 
+## 2026-10-31 — Prologue: Amsterdam today, the sea rising, the year 2126
+
+Added:
+
+- [Prologue](prologue.md): the game now opens with a short film before the [future street](future-street.md): Amsterdam today, an old map of the Netherlands where the sea creeps in while the year counts from 2026 to 2126, and the flooded street in smoky air with the boy appearing on the quay. It tells kids where and when they are and why the city is flooded, calm and never scary.
+
+Changed:
+
+- [Story](story.md): the shared parts (timeline, dissolves, captions, rain, dust) moved to `js/film.js`, used by the story and the prologue. Captions are centred on the paper and wrap onto more lines when long.
+- [Game shell](game-shell.md): the first scene is `prologue`; `?autostart&scene=future` skips it.
+
 ## 2026-10-31 — Gramophone without floating notes
 
 Changed:

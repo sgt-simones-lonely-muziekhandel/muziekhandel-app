@@ -44,7 +44,7 @@ The parts that hold everything together: the page, the title screen, the game lo
 
 ### Test URL parameters
 
-`?autostart` (starts in the future), `&scene=story` / `&scene=street` / `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
+`?autostart` (plays the prologue), `&scene=future` / `&scene=story` / `&scene=street` / `&scene=shop` / `&scene=corner`, `&open=<view>`, `&piece=<id>`, `&composer=<id>`, `&greet`, `?uur=<hour>`. See the [root README](../../README.md).
 
 ## Known limits / next steps
 

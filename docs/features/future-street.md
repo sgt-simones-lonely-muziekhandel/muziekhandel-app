@@ -1,6 +1,6 @@
-# Future street (the start)
+# Future street
 
-The first scene of the game. The same canal quay as the [street](street.md), far in the future: the canal has flooded, the houses are ruins, it rains, and the music shop is boarded up behind the water. The boy wears his grey jacket and gas mask. On the quay stands an old crate with phonograph cylinders and sheet music: the only warm light in the street.
+The first playable scene, right after the [prologue](prologue.md). The same canal quay as the [street](street.md), far in the future: the canal has flooded, the houses are ruins, it rains, and the music shop is boarded up behind the water. The boy wears his grey jacket and gas mask. On the quay stands an old crate with phonograph cylinders and sheet music: the only warm light in the street.
 
 ## For the player
 
@@ -31,7 +31,7 @@ The first scene of the game. The same canal quay as the [street](street.md), far
 
 ## Testing
 
-`?autostart` starts here. `?autostart&scene=street` skips to the past.
+`?autostart&scene=future` starts here. `?autostart&scene=street` skips to the past.
 
 ## Known limits / next steps
 
