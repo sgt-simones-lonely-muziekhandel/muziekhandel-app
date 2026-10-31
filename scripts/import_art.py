@@ -136,6 +136,8 @@ ASSETS = [
     ("paintings/Gemini_Generated_Image_pal7k1pal7k1pal7.jpeg", "opaque", "portraits/team-2", {"max": 768}),
     ("paintings/Gemini_Generated_Image_vvc338vvc338vvc3.jpeg", "opaque", "portraits/team-3", {"max": 768}),
     ("paintings/Untitled.png", "opaque", "portraits/team-4", {"max": 768}),
+    # shown for a composer we have no picture of: a silhouette in a wig, no one in particular
+    ("details/Antique Composer Silhouette Portrait.png", "opaque", "portraits/unknown", {"max": 768}),
 ]
 
 
